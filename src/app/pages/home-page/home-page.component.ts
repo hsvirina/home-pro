@@ -10,16 +10,16 @@ import { PlacesService } from '../../services/places.service';
   standalone: true,
   imports: [SliderPlacesComponent, FilterBarComponent, WelcomeBlockComponent],
   template: `
-    <div class="flex flex-col">
+    <div class="flex flex-col lg:px-[40px] xxl:px-[0px]">
       <h1
-        class="mx-auto max-w-[1172px] px-[20px] text-center text-[36px] xxl:px-[0px] xxl:text-[80px]"
+        class="mx-auto max-w-[1172px] px-[20px] text-center text-[36px] lg:text-[64px] xxl:text-[80px]"
       >
         Your next favorite café is just a
         <span class="text-[var(--color-primary)]">click</span>
         away
       </h1>
 
-      <div class="xxl:flex xxl:justify-center">
+      <div class="lg:flex lg:justify-center">
         <app-filter-bar></app-filter-bar>
       </div>
 

@@ -1,49 +1,123 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-interface User {
-  fullName: string;
-  photoUrl: string;
-  location: string;
-}
+import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-profile-page',
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="max-w-md mx-auto mt-10 p-6 bg-white shadow-xl rounded-2xl">
-      <div class="flex items-center space-x-4">
-        <img
-          [src]="user.photoUrl"
-          alt="Profile"
-          class="w-20 h-20 rounded-full border-4 border-indigo-500 object-cover"
-        />
-        <div>
-          <h2 class="text-2xl font-bold text-gray-800">{{ user.fullName }}</h2>
-          <p class="text-gray-500 text-sm">{{ user.location }}</p>
+    <div class="px-[20px]">
+      <div
+        class="flex flex-col gap-[32px] rounded-[24px] border border-[var(--color-gray-20)] bg-[var(--color-white)] p-[16px]"
+      >
+        <div class="flex items-center gap-[20px]">
+          <img
+            [src]="user.avatar"
+            alt="Profile"
+            class="h-[100px] w-[100px] rounded-full object-cover"
+          />
+          <div class="flex flex-col gap-[8px] text-[var(--color-gray-100)]">
+            <h5>{{ user.fullName }}</h5>
+            <span class="body-font-1">{{ user.email }}</span>
+            <span class="body-font-1">Coffee enthusiast and digital nomad. Здесь должна быть локация Always on the hunt for the perfect espresso!</span>
+
+            <span class="body-font-1">{{ user.status }}</span>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-[20px]">
+          <div class="flex gap-3">
+            <div
+              class="flex h-[50px] w-[50px] items-center justify-center rounded-[25px] bg-[var(--color-bg-2)]"
+            >
+              <img
+                src="/icons/id-pass.png"
+                alt="ID card icon"
+                class="h-[26px] w-[20px]"
+              />
+            </div>
+            <div class="flex flex-col gap-1">
+              <p class="body-font-1">Full Name</p>
+              <p>{{ user.fullName }}</p>
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <div
+              class="flex h-[50px] w-[50px] items-center justify-center rounded-[25px] bg-[var(--color-bg-2)]"
+            >
+              <img
+                src="/icons/location.png"
+                alt="Location icon"
+                class="h-[26px] w-[20px]"
+              />
+            </div>
+            <div class="flex flex-col gap-1">
+              <p class="body-font-1">Location</p>
+              <p>{{ user.location }}</p>
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <div
+              class="flex h-[50px] w-[50px] items-center justify-center rounded-[25px] bg-[var(--color-bg-2)]"
+            >
+              <img
+                src="/icons/letter.png"
+                alt="Letter icon"
+                class="h-[26px] w-[20px]"
+              />
+            </div>
+            <div class="flex flex-col gap-1">
+              <p class="body-font-1">Email</p>
+              <p>{{ user.email }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex border border-[var(--color-primary)] h-[48px] text-[var(--color-primary)] rounded-[40px] ">
+          <button
+            class="flex-1 bg-transparent menu-text-font"
+            (click)="onEdit()"
+          >
+            Edit Profile
+          </button>
+
         </div>
       </div>
 
-      <div class="mt-6">
-        <h3 class="text-lg font-semibold text-gray-700">О себе</h3>
-        <p class="text-gray-600 mt-2 text-sm leading-relaxed">
-          Люблю разрабатывать интерфейсы и создавать понятный, красивый код. Постоянно учусь и развиваюсь в IT.
-        </p>
-      </div>
+      <button
+        class="flex-1 rounded bg-red-500 py-2 text-white hover:bg-red-600"
+        (click)="onLogout()"
+      >
+        Выйти
+      </button>
     </div>
   `,
-  styles: [],
 })
 export class ProfilePageComponent implements OnInit {
-  user!: User;
+  user = {
+    fullName: 'Sarah Johnson',
+    email: 'anna.@.comivanova',
+    location: 'Kyiv, Ukraine',
+    avatar: 'https://randomuser.me/api/portraits/women/65.jpg',
+    status:
+      'Coffee enthusiast and digital nomad. Always on the hunt for the perfect espresso!',
+  };
 
-  ngOnInit() {
-    // Заглушка данных пользователя (имитация получения с сервера)
-    this.user = {
-      fullName: 'Анна Иванова',
-      photoUrl: 'https://randomuser.me/api/portraits/women/65.jpg',
-      location: 'Швейцария, Цюрих',
-    };
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+  ) {}
+
+  ngOnInit() {}
+
+  onEdit() {
+    console.log('Редактировать профиль');
+  }
+
+  onLogout() {
+    this.authService.logout();
+    this.router.navigate(['/auth']);
   }
 }

@@ -5,13 +5,13 @@ import { Component } from '@angular/core';
   standalone: true,
   template: `
     <div
-      class="mb-[80px] mt-[36px] grid grid-cols-8 items-center gap-[48px] px-[20px] xxl:my-[150px] xxl:gap-[20px] xxl:px-[0px]"
+      class="mb-[80px] mt-[36px] grid grid-cols-8 items-center gap-[48px] px-[20px] lg:my-[100px] xxl:my-[150px] xxl:gap-[20px] xxl:px-[0px]"
     >
       <div
-        class="col-span-8 flex flex-col gap-[24px] xxl:col-span-4 xxl:max-w-[590px] xxl:gap-[32px]"
+        class="col-span-8 flex flex-col gap-[24px] lg:col-span-4 xxl:max-w-[590px] xxl:gap-[32px]"
       >
         <div class="flex flex-col gap-[16px]">
-          <h3 class="text-[var(--color-gray-100)] text-[24px] xxl:text-[40px]">
+          <h3 class="text-[24px] text-[var(--color-gray-100)] xxl:text-[40px]">
             Explore
             <span class="text-[var(--color-primary)]">the best</span> cafés in
             your area
@@ -35,7 +35,7 @@ import { Component } from '@angular/core';
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-[16px] xxl:hidden h-[48px]">
+        <div class="grid h-[48px] grid-cols-2 gap-[16px] lg:hidden">
           <button
             class="menu-text-font col-span-1 rounded-[40px] border border-[var(--color-primary)] text-[var(--color-primary)]"
           >
@@ -58,7 +58,7 @@ import { Component } from '@angular/core';
       </div>
 
       <div
-        class="col-span-8 max-h-[500px] overflow-hidden rounded-[40px] xxl:col-span-4"
+        class="col-span-8 max-h-[500px] overflow-hidden rounded-[40px] lg:col-span-4"
       >
         <img
           src="./placeholder-image.jpg"
