@@ -10,4 +10,5 @@ export class PlacesService {
   getPlaces(): Observable<Place[]> {
     return this.http.get<Place[]>('http://ec2-54-221-160-23.compute-1.amazonaws.com/api/cafes');
   }
+
 }

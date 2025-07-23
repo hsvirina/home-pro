@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
       (touchstart)="onTouchStart($event)"
       (touchend)="onTouchEnd($event)"
     >
+      <!-- Prev button -->
       <button
         (click)="handlePrev()"
         class="absolute left-[24px] top-1/2 z-10 flex h-[52px] w-[52px] -translate-y-1/2 items-center justify-center rounded-[40px] bg-[var(--color-bg)] p-[10px] transition hover:scale-110"
@@ -18,11 +19,34 @@ import { CommonModule } from '@angular/common';
         <img src="./icons/arrow-left.svg" alt="Prev" class="h-[32px] w-[32px]" />
       </button>
 
+      <!-- Image display -->
       <div class="relative h-full w-full">
+        <div class="absolute right-[24px] top-[24px] z-10 flex gap-[16px]">
+          <button
+            (click)="onToggleFavorite.emit()"
+            class="relative flex h-[44px] w-[44px] items-center justify-center rounded-full p-[10px] transition hover:scale-110"
+            [ngClass]="{
+              'bg-[var(--color-primary)]': isFavorite,
+              'bg-[var(--color-bg)]': !isFavorite
+            }"
+            title="Add to favorites"
+          >
+            <img src="./icons/heart.svg" alt="Favorite" class="h-[24px] w-[24px]" />
+          </button>
+
+          <button
+            (click)="onShare.emit()"
+            class="flex h-[44px] w-[44px] items-center justify-center rounded-full bg-[var(--color-bg)] p-[10px] transition hover:scale-110"
+            title="Share this place"
+          >
+            <img src="./icons/share.svg" alt="Share" class="h-[24px] w-[24px]" />
+          </button>
+        </div>
+
         <img
           *ngIf="prevImageUrl"
           [src]="prevImageUrl"
-          class="absolute inset-0 h-full w-full rounded-[40px] object-cover animate-fade-out"
+          class="animate-fade-out absolute inset-0 h-full w-full rounded-[40px] object-cover"
         />
         <img
           *ngIf="currentImageUrl"
@@ -32,6 +56,7 @@ import { CommonModule } from '@angular/common';
         />
       </div>
 
+      <!-- Next button -->
       <button
         (click)="handleNext()"
         class="absolute right-[24px] top-1/2 z-10 flex h-[52px] w-[52px] -translate-y-1/2 items-center justify-center rounded-[40px] bg-[var(--color-bg)] p-[10px] transition hover:scale-110"
@@ -39,7 +64,8 @@ import { CommonModule } from '@angular/common';
         <img src="./icons/arrow-right.svg" alt="Next" class="h-[32px] w-[32px]" />
       </button>
 
-      <div class="absolute bottom-5 right-5 bg-black/60 text-[var(--color-bg)] px-3 py-1 rounded-[40px] button-font">
+      <!-- Counter -->
+      <div class="button-font absolute bottom-5 right-5 rounded-[40px] bg-black/60 px-3 py-1 text-[var(--color-bg)]">
         {{ currentIndex + 1 }} / {{ photoUrls.length || 0 }}
       </div>
     </div>
@@ -55,16 +81,24 @@ import { CommonModule } from '@angular/common';
     }
     .animate-fade-in { animation: fade-in 0.6s forwards; }
     .animate-fade-out { animation: fade-out 0.6s forwards; }
-  `]
+  `],
 })
-export class CarouselSectionComponent {
+export class CarouselSectionComponent implements OnDestroy {
   @Input() photoUrls: string[] = [];
+  @Input() isFavorite = false;
+
+  @Output() onToggleFavorite = new EventEmitter<void>();
+  @Output() onShare = new EventEmitter<void>();
 
   currentIndex = 0;
   prevIndex: number | null = null;
   isAnimating = false;
-  animationDuration = 600;
   private touchStartX: number | null = null;
+  private animationDuration = 600;
+
+  ngOnDestroy() {
+    // ничего очищать не нужно
+  }
 
   get currentImageUrl(): string | null {
     return this.photoUrls?.[this.currentIndex] ?? null;
@@ -82,10 +116,7 @@ export class CarouselSectionComponent {
 
   handlePrev() {
     if (!this.photoUrls?.length) return;
-    const next =
-      this.currentIndex === 0
-        ? this.photoUrls.length - 1
-        : this.currentIndex - 1;
+    const next = this.currentIndex === 0 ? this.photoUrls.length - 1 : this.currentIndex - 1;
     this.triggerChange(next);
   }
 

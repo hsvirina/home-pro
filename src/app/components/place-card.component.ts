@@ -1,74 +1,187 @@
-import { Component, Input } from '@angular/core';
+import {
+  Component,
+  Input,
+  ElementRef,
+  ViewChild,
+  AfterViewInit,
+  ChangeDetectorRef,
+  NgZone,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { NgForOf } from '@angular/common';
+import { NgIf, NgForOf, NgClass } from '@angular/common';
 import { Place } from '../models/place.model';
+import { PlaceCardType } from '../models/place-card-type.enum';
 
 @Component({
   selector: 'app-place-card',
   standalone: true,
-  imports: [RouterLink, NgForOf],
+  imports: [RouterLink, NgIf, NgForOf, NgClass],
   template: `
-    <a
-      [routerLink]="['/catalog', place.id]"
-      class="block rounded-[40px] h-[552px] bg-[var(--color-white)] no-underline overflow-hidden"
+    <div
+      class="box-border w-full overflow-hidden rounded-[40px] bg-[var(--color-white)] transition-shadow duration-300 hover:shadow-lg"
+      [ngClass]="{
+        'h-[554px]': cardType === PlaceCardType.Full,
+        'h-[370px]': cardType === PlaceCardType.Favourites,
+      }"
     >
-      <img
-        [src]="place.photoUrls[0]"
-        alt="Place Image"
-        class="w-full h-[222px] object-cover rounded-t-[40px]"
-      />
+      <!-- Кликабельная часть карточки -->
+      <a
+        [routerLink]="['/catalog', place.id]"
+        class="block w-full no-underline"
+      >
+        <!-- Изображение -->
+        <img
+          [src]="place.photoUrls[0]"
+          alt="Place Image"
+          class="h-[222px] w-full rounded-t-[40px] object-cover"
+        />
 
-      <div class="flex flex-col gap-[16px] p-[16px]">
-        <!-- Header -->
-        <div class="flex items-center justify-between">
-          <h5 class="text-[var(--color-gray-100)]">{{ place.name }}</h5>
-          <div class="flex items-center gap-[4px] justify-between">
-            <span class="text-[var(--color-gray-75)] body-font-1">{{ place.rating }}</span>
-            <img
-              src="./icons/star.png"
-              alt="Star"
-              class="w-4 h-4 object-contain"
-            />
+        <!-- Контент -->
+        <div class="flex flex-col gap-[16px] p-[16px]">
+          <!-- Название и рейтинг -->
+          <div class="flex h-[52px] items-start justify-between">
+            <h5 class="text-[var(--color-gray-100)]">{{ place.name }}</h5>
+            <div class="flex items-center gap-1">
+              <span class="body-font-1 text-[var(--color-gray-75)]">{{
+                place.rating
+              }}</span>
+              <img
+                src="/icons/star.png"
+                alt="Star icon"
+                class="h-[17x] w-[15px]"
+              />
+            </div>
+          </div>
+
+          <!-- Описание -->
+          <p
+            *ngIf="cardType === PlaceCardType.Full"
+            class="body-font-1 line-clamp-3 h-[72px] overflow-hidden text-[var(--color-gray-100)]"
+          >
+            {{ place.shortDescription }}
+          </p>
+
+          <!-- Разделитель -->
+          <div class="h-px w-full bg-[var(--color-gray-20)]"></div>
+
+          <!-- Теги -->
+          <div
+            *ngIf="cardType === PlaceCardType.Full"
+            #tagsContainer
+            class="flex h-[80px] flex-wrap gap-2 overflow-hidden"
+          >
+            <ng-container *ngFor="let tag of displayTags">
+              <span
+                class="body-font-2 whitespace-nowrap rounded-[40px] bg-[var(--color-gray-10)] px-[12px] py-[8px] text-[var(--color-gray-100)]"
+              >
+                {{ tag }}
+              </span>
+            </ng-container>
           </div>
         </div>
+      </a>
 
-        <!-- Short Description -->
-        <p class="text-[var(--color-gray-100)] body-font-1">
-          {{ place.shortDescription }}
-        </p>
-
-        <div class="h-px bg-[var(--color-gray-20)] w-full"></div>
-
-        <!-- Tags -->
-        <div class="flex flex-wrap gap-2">
-          <span
-            *ngFor="let tag of place.tags"
-            class="whitespace-nowrap text-[var(--color-gray-100)] bg-[var(--color-gray-10)] py-[8px] px-[12px] rounded-[40px] body-font-2"
-          >
-            {{ tag }}
+      <!-- Футер: адрес и стрелка -->
+      <a
+        [href]="getGoogleMapsLink(place.address)"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex min-h-[48px] items-center justify-between rounded-b-[40px] px-[16px] pb-[16px] transition-colors duration-200 hover:bg-[var(--color-bg)]"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="flex items-center gap-[4px]">
+          <img
+            src="./icons/location.png"
+            alt="Location"
+            class="h-6 object-contain"
+          />
+          <span class="body-font-1 text-[var(--color-gray-100)]">
+            {{ place.address }}
           </span>
         </div>
 
-        <!-- Footer -->
-        <div class="flex items-center justify-between h-[32px]">
-          <div class="flex items-center gap-[4px]">
-            <img
-              src="./icons/location.png"
-              alt="Location"
-              class="h-6 object-contain"
-            />
-            <span class="text-[var(--color-gray-100)] body-font-1">{{ place.address }}</span>
-          </div>
-          <img
-            src="./icons/arrow_down_right.svg"
-            alt="Go"
-            class="w-8 h-8 object-contain"
-          />
-        </div>
-      </div>
-    </a>
-  `
+        <img
+          src="./icons/arrow_down_right.svg"
+          alt="Go"
+          class="h-6 w-6 object-contain"
+        />
+      </a>
+    </div>
+  `,
 })
-export class PlaceCardComponent {
+export class PlaceCardComponent implements AfterViewInit {
   @Input() place!: Place;
+  @Input() cardType: PlaceCardType = PlaceCardType.Full;
+
+  @ViewChild('tagsContainer', { static: false })
+  tagsContainer!: ElementRef<HTMLDivElement>;
+
+  displayTags: string[] = [];
+  protected readonly PlaceCardType = PlaceCardType;
+
+  constructor(
+    private cdr: ChangeDetectorRef,
+    private ngZone: NgZone,
+  ) {}
+
+  getGoogleMapsLink(address: string): string {
+    return (
+      'https://www.google.com/maps/search/?api=1&query=' +
+      encodeURIComponent(address)
+    );
+  }
+
+  ngAfterViewInit(): void {
+    if (this.cardType !== PlaceCardType.Full) return;
+
+    this.displayTags = [];
+
+    this.ngZone.runOutsideAngular(() => {
+      requestAnimationFrame(() => {
+        this.displayTags = [...this.place.tags];
+        this.cdr.detectChanges();
+
+        setTimeout(() => {
+          const container = this.tagsContainer.nativeElement;
+          const maxWidth = container.clientWidth;
+
+          const style = getComputedStyle(container);
+          const gap = parseFloat(style.gap) || parseFloat(style.columnGap) || 0;
+
+          const maxLines = 2;
+          const children = Array.from(
+            container.querySelectorAll('span'),
+          ) as HTMLElement[];
+
+          let currentLineWidth = 0;
+          let lineCount = 1;
+          const fitted: string[] = [];
+
+          for (let i = 0; i < children.length; i++) {
+            const childWidth = children[i].offsetWidth;
+
+            if (currentLineWidth + childWidth <= maxWidth) {
+              currentLineWidth += childWidth + gap;
+            } else {
+              lineCount++;
+              if (lineCount > maxLines) break;
+              currentLineWidth = childWidth;
+            }
+
+            fitted.push(this.place.tags[i]);
+          }
+
+          if (fitted.length < this.place.tags.length && fitted.length > 0) {
+            fitted.pop();
+            fitted.push('...');
+          }
+
+          this.ngZone.run(() => {
+            this.displayTags = fitted;
+            this.cdr.detectChanges();
+          });
+        }, 0);
+      });
+    });
+  }
 }

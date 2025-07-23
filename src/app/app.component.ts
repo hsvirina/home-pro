@@ -1,14 +1,20 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { HeaderComponent } from './components/header.component';
+import { HeaderComponent } from './components/Header/header.component';
 import { FooterComponent } from './components/footer.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent, FooterComponent],
+  imports: [
+    CommonModule, // ngIf, ngFor
+    RouterOutlet,
+    HeaderComponent,
+    FooterComponent,
+  ],
   template: `
-    <div class="bg-[var(--color-bg)]">
+    <div class="flex min-h-screen flex-col bg-[var(--color-bg)]">
       <!-- Header: full-width fixed -->
       <header
         class="fixed left-0 right-0 top-0 z-50 bg-[var(--color-bg)] shadow-md"
@@ -29,7 +35,7 @@ import { FooterComponent } from './components/footer.component';
       </main>
 
       <!-- Footer: sticks to bottom if content short -->
-      <footer class="mt-[150px] w-full bg-[var(--color-secondary)]">
+      <footer class="w-full bg-[var(--color-secondary)]">
         <div class="mx-auto max-w-[1320px]">
           <app-footer></app-footer>
         </div>

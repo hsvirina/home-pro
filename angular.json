@@ -35,7 +35,6 @@
               "src/styles.scss"
             ],
             "scripts": [],
-            "baseHref": "/home-pro/"
           },
           "configurations": {
             "production": {
