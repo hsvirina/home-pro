@@ -5,7 +5,7 @@ export interface User {
   photoUrl: string | null;
 
   defaultCity: string;
-  favoriteCafeIds: string[];
+  favoriteCafeIds: number[];
 
   theme: string;
   language?: string;

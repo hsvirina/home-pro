@@ -18,7 +18,6 @@ import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 import { AuthService } from '../../services/auth.service';
-import { PlacesService } from '../../services/places.service';
 import { FILTER_CATEGORIES } from '../../models/catalog-filter.config';
 import { User } from '../../models/user.model';
 
@@ -29,6 +28,7 @@ import { CityDropdownComponent } from './components/city-dropdown.component';
 import { LanguageDropdownComponent } from './components/language-dropdown.component';
 import { UserMenuComponent } from './components/user-menu.component';
 import { MobileMenuComponent } from './components/mobile-menu.component';
+import { UiStateService } from '../../services/ui-state.service';
 
 @Component({
   selector: 'app-header',
@@ -45,11 +45,9 @@ import { MobileMenuComponent } from './components/mobile-menu.component';
   ],
   animations: [slideDownAnimation],
   template: `
-    <!-- Шапка сайта -->
     <header
       class="relative z-50 flex h-[48px] items-center justify-between bg-[var(--color-bg)] px-[20px] lg:h-[72px] lg:px-[40px] xxl:h-[80px] xxl:px-0"
     >
-      <!-- Логотип и кнопка меню для мобильных -->
       <div class="flex items-center gap-[8px]">
         <button class="lg:hidden" (click)="toggleDropdown('menu')">
           <img src="/icons/menu.png" alt="menu" class="h-6 w-6" />
@@ -63,14 +61,11 @@ import { MobileMenuComponent } from './components/mobile-menu.component';
         </a>
       </div>
 
-      <!-- Поиск (только на больших экранах) -->
       <div class="hidden flex-1 justify-center lg:flex">
         <app-search-section></app-search-section>
       </div>
 
-      <!-- Навигация и пользователь -->
       <div class="flex items-center gap-[30px]">
-        <!-- Основное меню -->
         <div class="hidden items-center gap-[30px] lg:flex">
           <nav class="menu-text-font flex items-center gap-[30px]">
             <a
@@ -81,13 +76,13 @@ import { MobileMenuComponent } from './components/mobile-menu.component';
             <app-city-dropdown
               [selectedKey]="cityKey"
               [selectedLabel]="cityLabel"
-              [opened]="isCityDropdown"
+              [opened]="activeDropdown === 'city'"
               (toggle)="toggleDropdown('city')"
               (cityChange)="setCity($event)"
             ></app-city-dropdown>
             <app-language-dropdown
               [selectedLanguage]="language"
-              [opened]="isLangDropdown"
+              [opened]="activeDropdown === 'lang'"
               (toggle)="toggleDropdown('lang')"
               (close)="toggleDropdown('lang')"
               (languageChange)="setLanguage($event)"
@@ -95,20 +90,31 @@ import { MobileMenuComponent } from './components/mobile-menu.component';
           </nav>
         </div>
 
-        <!-- Иконка профиля в мобильной версии -->
-        <button
-          *ngIf="screenIsMobile && activeDropdown !== 'menu'"
-          (click)="navigateToAuth()"
-          class="flex items-center lg:hidden"
-        >
-          <img
-            src="/icons/user-profile.svg"
-            alt="user-profile"
-            class="h-6 w-6"
-          />
-        </button>
+        <!-- mobile user button -->
+<ng-container *ngIf="screenIsMobile && activeDropdown !== 'menu'">
+  <ng-container *ngIf="user; else mobileLogin">
+    <app-user-menu
+      [user]="user"
+      [opened]="activeDropdown === 'userMenu'"
+      (toggle)="toggleDropdown('userMenu')"
+      (logout)="handleLogout()"
+      (close)="toggleDropdown(null)"
+    ></app-user-menu>
+  </ng-container>
+  <ng-template #mobileLogin>
+    <button
+      (click)="navigateToAuth()"
+      class="flex items-center lg:hidden"
+    >
+      <img
+        src="/icons/user-profile.svg"
+        alt="user-profile"
+        class="h-6 w-6"
+      />
+    </button>
+  </ng-template>
+</ng-container>
 
-        <!-- Пользователь (на больших экранах) -->
         <div class="hidden items-center gap-[30px] lg:flex">
           <ng-container *ngIf="user; else showLogin">
             <app-user-menu
@@ -135,14 +141,14 @@ import { MobileMenuComponent } from './components/mobile-menu.component';
       </div>
     </header>
 
-    <!-- Мобильное меню -->
     <app-mobile-menu
-      *ngIf="screenIsMobile && activeDropdown === 'menu'"
+      *ngIf="(uiState.mobileMenuOpen$ | async) && screenIsMobile"
+      class="fixed inset-0 z-[999]"
+      (closeMenu)="uiState.closeMobileMenu()"
       [cityLabel]="cityLabel"
       [language]="language"
       [user]="user"
       (toggleDropdown)="toggleDropdown($event)"
-      (closeMenu)="toggleDropdown('menu')"
       (navigateToAuth)="navigateToAuth()"
       (logout)="handleLogout()"
       (cityChange)="setCity($event)"
@@ -150,7 +156,6 @@ import { MobileMenuComponent } from './components/mobile-menu.component';
   `,
 })
 export class HeaderComponent implements OnInit, OnDestroy {
-  // === Состояние ===
   cityKey: string | null = null;
   cityLabel = 'City';
   language: 'ENG' | 'UKR' = 'ENG';
@@ -162,6 +167,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private queryParamsSub?: Subscription;
   private routerEventsSub?: Subscription;
 
+  // Чтобы корректно удалять слушатель resize
+  private resizeListener = () => this.checkScreenWidth();
+
   locationOptions =
     FILTER_CATEGORIES.find((c) => c.key === 'location')?.options || [];
 
@@ -170,20 +178,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private elementRef: ElementRef,
     private authService: AuthService,
-    private placesService: PlacesService,
     private cdr: ChangeDetectorRef,
+    public uiState: UiStateService,
   ) {}
 
-  get isCityDropdown(): boolean {
-    return this.activeDropdown === 'city';
-  }
-
-  get isLangDropdown(): boolean {
-    return this.activeDropdown === 'lang';
-  }
-
   ngOnInit() {
-    // Получаем пользователя
     this.userSub = this.authService.user$.subscribe((user) => {
       this.user = user;
 
@@ -198,20 +197,17 @@ export class HeaderComponent implements OnInit, OnDestroy {
         }
       }
 
-      // Устанавливаем город из URL-параметра, если не найден в профиле
       this.setCityFromQueryParams();
     });
 
-    // Определяем, мобильный ли экран
     this.checkScreenWidth();
-    window.addEventListener('resize', this.checkScreenWidth);
+    window.addEventListener('resize', this.resizeListener);
 
-    // Закрытие дропдаунов при навигации
     this.routerEventsSub = this.router.events
       .pipe(filter((e) => e instanceof NavigationEnd))
       .subscribe(() => {
         this.activeDropdown = null;
-        document.body.classList.remove('overflow-hidden');
+        this.uiState.closeMobileMenu();
         this.cdr.detectChanges();
       });
   }
@@ -220,13 +216,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.userSub?.unsubscribe();
     this.queryParamsSub?.unsubscribe();
     this.routerEventsSub?.unsubscribe();
-    window.removeEventListener('resize', this.checkScreenWidth);
-    document.body.classList.remove('overflow-hidden');
+    window.removeEventListener('resize', this.resizeListener);
   }
 
-  /**
-   * Получает город из query параметров
-   */
   setCityFromQueryParams() {
     this.queryParamsSub?.unsubscribe();
     this.queryParamsSub = this.route.queryParams.subscribe((params) => {
@@ -242,21 +234,19 @@ export class HeaderComponent implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Переключает открытие выпадающих меню
-   */
   toggleDropdown(name: typeof this.activeDropdown) {
     const isOpening = this.activeDropdown !== name;
     this.activeDropdown = isOpening ? name : null;
 
     if (this.screenIsMobile && name === 'menu') {
-      document.body.classList.toggle('overflow-hidden', isOpening);
+      if (isOpening) {
+        this.uiState.openMobileMenu();
+      } else {
+        this.uiState.closeMobileMenu();
+      }
     }
   }
 
-  /**
-   * Устанавливает выбранный город и обновляет URL
-   */
   setCity(key: string) {
     const found = this.locationOptions.find((opt) => opt.key === key);
     if (!found) return;
@@ -272,9 +262,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
       .then(() => (this.activeDropdown = null));
   }
 
-  /**
-   * Устанавливает язык интерфейса
-   */
   setLanguage(lang: 'ENG' | 'UKR') {
     if (this.user) {
       this.authService.updateUserLanguage(lang).subscribe({
@@ -293,32 +280,20 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Проверяет, является ли экран мобильным
-   */
-  checkScreenWidth = () => {
+  checkScreenWidth() {
     this.screenIsMobile = window.innerWidth < 1024;
-  };
+  }
 
-  /**
-   * Навигация к странице логина
-   */
   navigateToAuth() {
     this.router.navigate(['/auth']);
   }
 
-  /**
-   * Выход из аккаунта
-   */
   handleLogout() {
     this.authService.logout();
     this.activeDropdown = null;
     this.router.navigate(['/']);
   }
 
-  /**
-   * Закрытие выпадающих меню при клике вне компонента
-   */
   @HostListener('document:click', ['$event'])
   onClickOutside(event: MouseEvent) {
     if (!this.elementRef.nativeElement.contains(event.target)) {

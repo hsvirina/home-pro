@@ -11,6 +11,19 @@ import { PlaceCardType } from '../../../models/place-card-type.enum';
   imports: [CommonModule, SliderPlacesComponent, PlaceCardComponent],
   template: `
     <div class="mb-[54px] mt-[72px]">
+      <!-- Заголовок и количество: показывать только на десктопе -->
+      <div class="mb-4 hidden lg:block">
+        <h4
+          class="mb-1 text-[24px] text-[var(--color-gray-100)] lg:text-[32px] xxl:text-[40px]"
+        >
+          Favorite Cafés
+        </h4>
+
+        <span class="body-font-1 block">
+          Your saved coffee spots ({{ places.length }})
+        </span>
+      </div>
+
       <!-- Мобильный: слайдер -->
       <div class="block lg:hidden">
         <app-slider-places
@@ -24,16 +37,6 @@ import { PlaceCardType } from '../../../models/place-card-type.enum';
       <div
         class="hidden w-full gap-x-[20px] gap-y-[12px] lg:grid lg:grid-cols-6 xxl:grid-cols-8"
       >
-        <h4
-          class="col-span-6 text-[24px] text-[var(--color-gray-100)] lg:text-[32px] xxl:col-span-8 xxl:text-[40px]"
-        >
-          Favorite Cafés
-        </h4>
-
-        <span class="body-font-1 col-span-6 xxl:col-span-8">
-          Your saved coffee spots ({{ places.length }})
-        </span>
-
         <app-place-card
           *ngFor="let place of places"
           [place]="place"

@@ -53,15 +53,17 @@ import { RouterModule } from '@angular/router';
 
         <div class="grid h-[48px] grid-cols-2 gap-[16px] lg:hidden">
           <button
-            class="menu-text-font col-span-1 rounded-[40px] border border-[var(--color-primary)] text-[var(--color-primary)]"
+            class="menu-text-font col-span-1 button-bg-blue"
+            [routerLink]="['/catalog']"
           >
             View
           </button>
 
           <button
-            class="col-span-1 flex h-[48px] items-center justify-center gap-[8px]"
+            class="col-span-1 flex h-[48px] shadow-hover button-bg-transparent gap-[8px]"
+            [routerLink]="['/catalog']"
           >
-            <span class="menu-text-font text-[var(--color-primary)]"
+            <span class="menu-text-font"
               >Details</span
             >
             <img

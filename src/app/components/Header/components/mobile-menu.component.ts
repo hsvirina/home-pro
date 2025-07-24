@@ -1,26 +1,30 @@
-import {
-  Component,
-  ElementRef,
-  EventEmitter,
-  HostListener,
-  Input,
-  Output,
-} from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 
 import { User } from '../../../models/user.model';
 import { FILTER_CATEGORIES } from '../../../models/catalog-filter.config';
-import { slideDownAnimation } from '../../../../styles/animations';
+import { slideDownAnimation, fadeInBackdrop, slideUpModal } from '../../../../styles/animations';  // Импортируем анимации
 import { SearchSectionComponent } from './search-section.component';
 
 @Component({
   selector: 'app-mobile-menu',
   standalone: true,
   imports: [CommonModule, RouterModule, SearchSectionComponent],
-  animations: [slideDownAnimation],
+  animations: [slideDownAnimation, fadeInBackdrop, slideUpModal],  // Добавляем анимации сюда
   template: `
-    <div class="fixed inset-0 z-50 flex flex-col bg-[var(--color-bg)]">
+    <!-- Затемнённый фон -->
+    <div
+      @fadeInBackdrop
+      class="fixed inset-0 z-40 bg-[var(--color-bg)]/70 backdrop-blur-3xl"
+      (click)="closeMenu.emit()"
+    ></div>
+
+    <!-- Модальное окно меню с анимацией появления -->
+    <div
+      @slideUpModal
+      class="fixed inset-0 z-50 flex flex-col bg-[var(--color-bg)]"
+    >
       <!-- Верхняя панель с логотипом и кнопкой закрытия меню -->
       <div
         class="fixed left-0 right-0 top-0 z-50 flex h-[48px] items-center justify-between bg-[var(--color-bg)] px-[20px]"

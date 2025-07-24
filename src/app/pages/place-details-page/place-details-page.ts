@@ -139,6 +139,8 @@ import { ActionsSectorComponent } from './components/actions-sector.component';
 export class PlaceDetailsPageComponent implements OnInit {
   place: Place | null = null;
   showLoginModal = false;
+  showShareModal = false;
+  copied = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -176,7 +178,8 @@ export class PlaceDetailsPageComponent implements OnInit {
       this.authService.loadUserInfo().subscribe({
         next: (user) => {
           if (user && user.favoriteCafeIds) {
-            user.favoriteCafeIds = user.favoriteCafeIds.map(String);
+            // Приводим все favoriteCafeIds к числам
+            user.favoriteCafeIds = user.favoriteCafeIds.map(id => Number(id));
           }
           loadPlace();
         },
@@ -204,9 +207,7 @@ export class PlaceDetailsPageComponent implements OnInit {
 
   get isFavorite(): boolean {
     if (!this.place || !this.currentUser) return false;
-    return this.currentUser.favoriteCafeIds
-      .map((id) => Number(id))
-      .includes(this.place.id);
+    return this.currentUser.favoriteCafeIds.includes(this.place.id);
   }
 
   navigateToAuth(): void {
@@ -221,10 +222,7 @@ export class PlaceDetailsPageComponent implements OnInit {
     }
 
     const cafeId = this.place!.id;
-    const cafeIdStr = String(cafeId);
-
-    const normalizedIds = this.currentUser.favoriteCafeIds.map(String);
-    const isFav = normalizedIds.includes(cafeIdStr);
+    const isFav = this.currentUser.favoriteCafeIds.includes(cafeId);
 
     const obs = isFav
       ? this.favoritesService.removeFavorite(cafeId)
@@ -233,35 +231,22 @@ export class PlaceDetailsPageComponent implements OnInit {
     obs.subscribe({
       next: () => {
         if (isFav) {
-          this.currentUser!.favoriteCafeIds = normalizedIds.filter(
-            (id) => id !== cafeIdStr,
-          );
+          this.currentUser!.favoriteCafeIds = this.currentUser!.favoriteCafeIds.filter(id => id !== cafeId);
         } else {
-          this.currentUser!.favoriteCafeIds = [...normalizedIds, cafeIdStr];
+          this.currentUser!.favoriteCafeIds = [...this.currentUser!.favoriteCafeIds, cafeId];
         }
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error(
-          `❌ Ошибка при ${isFav ? 'удалении' : 'добавлении'} в избранное:`,
-          err,
-        );
+        console.error(`❌ Ошибка при ${isFav ? 'удалении' : 'добавлении'} в избранное:`, err);
       },
     });
   }
 
-  showShareModal = false;
-  copied = false;
-
   handleShare(): void {
-    // Копируем ссылку
     navigator.clipboard.writeText(this.currentShareLink).then(() => {
       this.copied = true;
-
-      // Сброс текста кнопки через 5 секунд
-      setTimeout(() => {
-        this.copied = false;
-      }, 5000);
+      setTimeout(() => this.copied = false, 5000);
     });
   }
 
@@ -269,6 +254,7 @@ export class PlaceDetailsPageComponent implements OnInit {
     this.showShareModal = true;
     this.copied = false;
   }
+
   closeShareModal(): void {
     this.showShareModal = false;
     this.copied = false;

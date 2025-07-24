@@ -41,15 +41,27 @@ import { PaginationComponent } from './components/pagination.component';
         <span class="text-[var(--color-primary)]">Sip & Chill</span>
       </h2>
 
-      <div class="xxl:col-span-8">
-        <!-- Селектор справа -->
+      <!-- Кнопка открытия фильтров (только на мобилке) -->
+      <div
+        class="col-span-4 mb-[40px] h-[48px] rounded-[40px] border border-[var(--color-gray-20)] xxl:hidden"
+      >
+        <button
+          class="flex h-full w-full items-center justify-center"
+          (click)="toggleFilters()"
+        >
+          Filters
+        </button>
+      </div>
+
+      <!-- Селектор количества карточек -->
+      <div class="col-span-4 xxl:col-span-8">
         <div class="mb-4 flex justify-end">
           <div class="custom-dropdown relative flex items-center gap-2">
             <span>Show:</span>
 
-            <!-- Триггер -->
+            <!-- Триггер выпадающего меню -->
             <div
-              class="flex shadow-hover w-[80px] cursor-pointer items-center justify-between rounded bg-[var(--color-white)] px-3 py-1"
+              class="shadow-hover flex w-[80px] cursor-pointer items-center justify-between rounded bg-[var(--color-white)] px-3 py-1"
               (click)="toggleDropdown()"
             >
               {{ getSelectedLabel() }}
@@ -70,7 +82,7 @@ import { PaginationComponent } from './components/pagination.component';
               </svg>
             </div>
 
-            <!-- Дропдаун -->
+            <!-- Выпадающее меню -->
             <div
               *ngIf="dropdownOpen"
               [@slideDownAnimation]
@@ -89,19 +101,7 @@ import { PaginationComponent } from './components/pagination.component';
         </div>
       </div>
 
-      <!-- Кнопка фильтров (мобилка) -->
-      <div
-        class="col-span-4 mb-[40px] h-[48px] rounded-[40px] border border-[var(--color-gray-20)] xxl:hidden"
-      >
-        <button
-          class="flex h-full w-full items-center justify-center"
-          (click)="toggleFilters()"
-        >
-          Filters
-        </button>
-      </div>
-
-      <!-- Боковая панель фильтров -->
+      <!-- Боковая панель фильтров (только на десктопе) -->
       <div class="col-span-4 hidden xxl:col-span-2 xxl:block">
         <app-catalog-filters
           [filters]="filters"
@@ -109,7 +109,7 @@ import { PaginationComponent } from './components/pagination.component';
         ></app-catalog-filters>
       </div>
 
-      <!-- Фильтры на мобилке -->
+      <!-- Панель фильтров (только на мобилке, модальное окно) -->
       <div
         *ngIf="showFilters"
         class="fixed left-0 top-0 z-50 h-full w-full xxl:hidden"
@@ -129,6 +129,7 @@ import { PaginationComponent } from './components/pagination.component';
               (click)="toggleFilters()"
             />
           </div>
+
           <app-catalog-filters
             [filters]="filters"
             (filtersChange)="onFiltersChange($event)"
@@ -136,17 +137,17 @@ import { PaginationComponent } from './components/pagination.component';
         </div>
       </div>
 
+      <!-- Карточки -->
       <div class="col-span-6">
-        <!-- Карточки -->
-        <div class="grid grid-cols-1 gap-5 xxl:grid-cols-3">
-          <app-place-card
-            *ngFor="let place of paginatedPlaces"
-            [place]="place"
-          ></app-place-card>
-        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+  <app-place-card
+    *ngFor="let place of paginatedPlaces"
+    [place]="place"
+  ></app-place-card>
+</div>
       </div>
 
-      <!-- Дропдаун и пагинация -->
+      <!-- Пагинация -->
       <div
         class="col-span-6 mt-6 flex flex-col items-center gap-4 xxl:col-span-8 xxl:mb-[148px]"
       >
@@ -173,24 +174,6 @@ export class CatalogPageComponent implements OnInit {
 
   dropdownOpen = false;
 
-  toggleDropdown() {
-    this.dropdownOpen = !this.dropdownOpen;
-  }
-
-  selectOption(value: number) {
-    this.itemsPerPage = value;
-    this.currentPage = 1;
-    this.updatePaginatedPlaces();
-    this.dropdownOpen = false;
-  }
-
-  getSelectedLabel(): string {
-    const selected = this.sizeOptions.find(
-      (opt) => opt.value === this.itemsPerPage,
-    );
-    return selected ? selected.label : 'Select';
-  }
-
   sizeOptions = [
     { label: '6', value: 6 },
     { label: '12', value: 12 },
@@ -203,6 +186,8 @@ export class CatalogPageComponent implements OnInit {
     private route: ActivatedRoute,
   ) {}
 
+  // ---------- Жизненный цикл ----------
+
   ngOnInit() {
     this.placesService.getPlaces().subscribe({
       next: (data) => {
@@ -214,9 +199,36 @@ export class CatalogPageComponent implements OnInit {
     });
   }
 
-  toggleFilters() {
-    this.showFilters = !this.showFilters;
-    document.body.style.overflow = this.showFilters ? 'hidden' : '';
+  // ---------- Фильтрация ----------
+
+  initializeFilters() {
+    for (const category of FILTER_CATEGORIES) {
+      this.filters[category.key] = {};
+      for (const option of category.options) {
+        this.filters[category.key][option.key] = false;
+      }
+    }
+  }
+
+  applyFiltersFromQuery() {
+    this.route.queryParams.subscribe((params) => {
+      for (const key in params) {
+        if (!this.filters[key]) {
+          this.filters[key] = {};
+        }
+
+        const values = Array.isArray(params[key]) ? params[key] : [params[key]];
+        values.forEach((val: string) => {
+          this.filters[key][val] = true;
+        });
+      }
+
+      // Форсируем реактивное обновление
+      this.filters = JSON.parse(JSON.stringify(this.filters));
+
+      this.filteredPlaces = this.filterPlaces();
+      this.updatePaginatedPlaces();
+    });
   }
 
   onFiltersChange(updatedFilters: CatalogFilters) {
@@ -241,65 +253,6 @@ export class CatalogPageComponent implements OnInit {
     this.filteredPlaces = this.filterPlaces();
     this.currentPage = 1;
     this.updatePaginatedPlaces();
-  }
-
-  onPageSizeChange(value: number) {
-    this.itemsPerPage = value;
-    this.currentPage = 1;
-    this.updatePaginatedPlaces();
-  }
-
-onPageChange(page: number) {
-  this.currentPage = page;
-  this.updatePaginatedPlaces();
-
-  // Автоматический скролл вверх (в начало страницы)
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'  // плавный скролл, можно убрать если не нужно
-  });
-}
-
-  private updatePaginatedPlaces() {
-    if (this.itemsPerPage === -1) {
-      setTimeout(() => {
-        this.paginatedPlaces = [...this.filteredPlaces];
-      });
-    } else {
-      setTimeout(() => {
-        const start = (this.currentPage - 1) * this.itemsPerPage;
-        const end = start + this.itemsPerPage;
-        this.paginatedPlaces = this.filteredPlaces.slice(start, end);
-      });
-    }
-  }
-
-  private initializeFilters() {
-    for (const category of FILTER_CATEGORIES) {
-      this.filters[category.key] = {};
-      for (const option of category.options) {
-        this.filters[category.key][option.key] = false;
-      }
-    }
-  }
-
-  private applyFiltersFromQuery() {
-    this.route.queryParams.subscribe((params) => {
-      for (const key in params) {
-        if (!this.filters[key]) {
-          this.filters[key] = {};
-        }
-        const values = Array.isArray(params[key]) ? params[key] : [params[key]];
-        values.forEach((val: string) => {
-          this.filters[key][val] = true;
-        });
-      }
-
-      this.filters = JSON.parse(JSON.stringify(this.filters));
-
-      this.filteredPlaces = this.filterPlaces();
-      this.updatePaginatedPlaces();
-    });
   }
 
   private filterPlaces(): Place[] {
@@ -335,6 +288,65 @@ onPageChange(page: number) {
     const category = FILTER_CATEGORIES.find((cat) => cat.key === categoryKey);
     return category?.options.find((opt) => opt.key === optionKey)?.label || '';
   }
+
+  // ---------- Пагинация ----------
+
+  onPageChange(page: number) {
+    this.currentPage = page;
+    this.updatePaginatedPlaces();
+
+    // Автоскролл вверх при переходе по страницам
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  onPageSizeChange(value: number) {
+    this.itemsPerPage = value;
+    this.currentPage = 1;
+    this.updatePaginatedPlaces();
+  }
+
+  private updatePaginatedPlaces() {
+    if (this.itemsPerPage === -1) {
+      // "All" — показываем всё
+      setTimeout(() => {
+        this.paginatedPlaces = [...this.filteredPlaces];
+      });
+    } else {
+      setTimeout(() => {
+        const start = (this.currentPage - 1) * this.itemsPerPage;
+        const end = start + this.itemsPerPage;
+        this.paginatedPlaces = this.filteredPlaces.slice(start, end);
+      });
+    }
+  }
+
+  // ---------- UI взаимодействие ----------
+
+  toggleFilters() {
+    this.showFilters = !this.showFilters;
+    document.body.style.overflow = this.showFilters ? 'hidden' : '';
+  }
+
+  toggleDropdown() {
+    this.dropdownOpen = !this.dropdownOpen;
+  }
+
+  selectOption(value: number) {
+    this.itemsPerPage = value;
+    this.currentPage = 1;
+    this.updatePaginatedPlaces();
+    this.dropdownOpen = false;
+  }
+
+  getSelectedLabel(): string {
+    const selected = this.sizeOptions.find(
+      (opt) => opt.value === this.itemsPerPage,
+    );
+    return selected ? selected.label : 'Select';
+  }
+
+  // ---------- Обработка клика вне дропдауна ----------
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     const target = event.target as HTMLElement;

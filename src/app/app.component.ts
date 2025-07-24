@@ -17,7 +17,7 @@ import { CommonModule } from '@angular/common';
     <div class="flex min-h-screen flex-col bg-[var(--color-bg)]">
       <!-- Header: full-width fixed -->
       <header
-        class="fixed left-0 right-0 top-0 z-50 bg-[var(--color-bg)] shadow-md"
+        class="fixed left-0 right-0 top-0 z-20 bg-[var(--color-bg)] shadow-md"
       >
         <div class="mx-auto h-full max-w-[1320px]">
           <app-header></app-header>

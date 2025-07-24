@@ -7,41 +7,33 @@
     @apply transition-colors duration-300 cursor-pointer rounded-[40px]
            font-medium text-white bg-[var(--color-primary)]
            flex items-center justify-center;
-
-    &:hover {
-      @apply bg-[var(--color-hover-primary)];
-    }
-
-    &:active {
-      @apply bg-[var(--color-pressed-primary)];
-    }
+  }
+  .button-bg-blue:hover {
+    @apply bg-[var(--color-hover-primary)];
+  }
+  .button-bg-blue:active {
+    @apply bg-[var(--color-pressed-primary)];
   }
 
   .button-bg-transparent {
     @apply transition-colors duration-300 cursor-pointer rounded-[40px]
            font-medium text-[var(--color-primary)] border border-[var(--color-primary)]
            flex items-center justify-center;
-
-    &:hover {
-      @apply border-[var(--color-hover-primary)] text-[var(--color-hover-primary)];
-    }
-
-    &:active {
-      @apply border-[var(--color-pressed-primary)] text-[var(--color-hover-primary)];
-    }
+  }
+  .button-bg-transparent:hover {
+    @apply border-[var(--color-hover-primary)] text-[var(--color-hover-primary)];
+  }
+  .button-bg-transparent:active {
+    @apply border-[var(--color-pressed-primary)] text-[var(--color-hover-primary)];
   }
 }
 
 @layer utilities {
   .shadow-hover {
     @apply transition-shadow duration-300;
-
-    &:hover {
-      /* box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-                  0 4px 6px -4px rgba(0, 0, 0, 0.1); */
-
-      box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.15),
-            0 10px 15px -7px rgba(0, 0, 0, 0.1);
-    }
+  }
+  .shadow-hover:hover {
+    box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.15),
+                0 10px 15px -7px rgba(0, 0, 0, 0.1);
   }
 }
