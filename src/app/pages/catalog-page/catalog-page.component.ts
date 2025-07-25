@@ -5,7 +5,7 @@ import { PlacesService } from '../../core/services/places.service';
 import { CatalogFiltersComponent } from './components/catalog-filters.components';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CatalogFilters } from '../../core/models/catalog-filter.model';
-import { FILTER_CATEGORIES } from '../../core/models/catalog-filter.config';
+import { FILTER_CATEGORIES } from '../../core/constants/catalog-filter.config';
 import { BreadcrumbsComponent } from '../../shared/components/breadcrumbs.component';
 import { FormsModule } from '@angular/forms';
 import { slideDownAnimation } from '../../../styles/animations/animations';
@@ -31,12 +31,12 @@ import { ICONS } from '../../core/constants/icons.constant';
     <div
       class="grid grid-cols-4 gap-[16px] px-[20px] xxl:grid-cols-8 xxl:gap-[20px] xxl:px-[0px]"
     >
-      <!-- Хлебные крошки -->
+      <!-- Breadcrumbs -->
       <div class="col-span-4 xxl:col-span-8">
         <app-breadcrumbs></app-breadcrumbs>
       </div>
 
-      <!-- Заголовок -->
+      <!-- Title -->
       <h2
         class="col-span-4 mb-[60px] text-center text-[32px] xxl:col-span-8 xxl:text-[64px]"
       >
@@ -44,7 +44,7 @@ import { ICONS } from '../../core/constants/icons.constant';
         <span class="text-[var(--color-primary)]">Sip & Chill</span>
       </h2>
 
-      <!-- Кнопка открытия фильтров (только на мобилке) -->
+      <!-- Filters toggle button (mobile only) -->
       <div
         class="col-span-4 mb-[40px] h-[48px] rounded-[40px] border border-[var(--color-gray-20)] xxl:hidden"
       >
@@ -56,13 +56,13 @@ import { ICONS } from '../../core/constants/icons.constant';
         </button>
       </div>
 
-      <!-- Селектор количества карточек -->
+      <!-- Items per page selector -->
       <div class="col-span-4 xxl:col-span-8">
         <div class="mb-4 flex justify-end">
           <div class="custom-dropdown relative flex items-center gap-2">
             <span>Show:</span>
 
-            <!-- Триггер выпадающего меню -->
+            <!-- Dropdown trigger -->
             <div
               class="shadow-hover flex w-[80px] cursor-pointer items-center justify-between rounded bg-[var(--color-white)] px-3 py-1"
               (click)="toggleDropdown()"
@@ -85,7 +85,7 @@ import { ICONS } from '../../core/constants/icons.constant';
               </svg>
             </div>
 
-            <!-- Выпадающее меню -->
+            <!-- Dropdown menu -->
             <div
               *ngIf="dropdownOpen"
               [@slideDownAnimation]
@@ -104,7 +104,7 @@ import { ICONS } from '../../core/constants/icons.constant';
         </div>
       </div>
 
-      <!-- Боковая панель фильтров (только на десктопе) -->
+      <!-- Sidebar filters (desktop only) -->
       <div class="col-span-4 hidden xxl:col-span-2 xxl:block">
         <app-catalog-filters
           [filters]="filters"
@@ -112,7 +112,7 @@ import { ICONS } from '../../core/constants/icons.constant';
         ></app-catalog-filters>
       </div>
 
-      <!-- Панель фильтров (только на мобилке, модальное окно) -->
+      <!-- Filters modal (mobile only) -->
       <div
         *ngIf="showFilters"
         class="fixed left-0 top-0 z-50 h-full w-full xxl:hidden"
@@ -139,7 +139,7 @@ import { ICONS } from '../../core/constants/icons.constant';
         </div>
       </div>
 
-      <!-- Карточки -->
+      <!-- Places cards -->
       <div class="col-span-6">
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           <app-place-card
@@ -149,7 +149,7 @@ import { ICONS } from '../../core/constants/icons.constant';
         </div>
       </div>
 
-      <!-- Пагинация -->
+      <!-- Pagination -->
       <div
         class="col-span-6 mt-6 flex flex-col items-center gap-4 xxl:col-span-8 xxl:mb-[148px]"
       >
@@ -165,18 +165,22 @@ import { ICONS } from '../../core/constants/icons.constant';
 })
 export class CatalogPageComponent implements OnInit {
   ICONS = ICONS;
+
+  // Main data arrays
   places: Place[] = [];
   filteredPlaces: Place[] = [];
   paginatedPlaces: Place[] = [];
 
+  // Filters
   filters: CatalogFilters = {};
   showFilters = false;
 
-  itemsPerPage = -1;
+  // Pagination
+  itemsPerPage = -1; // -1 means show all
   currentPage = 1;
 
+  // Dropdown state for items per page selector
   dropdownOpen = false;
-
   sizeOptions = [
     { label: '6', value: 6 },
     { label: '12', value: 12 },
@@ -189,7 +193,7 @@ export class CatalogPageComponent implements OnInit {
     private route: ActivatedRoute,
   ) {}
 
-  // ---------- Жизненный цикл ----------
+  // ----------- Lifecycle hook -----------
 
   ngOnInit() {
     this.placesService.getPlaces().subscribe({
@@ -202,8 +206,11 @@ export class CatalogPageComponent implements OnInit {
     });
   }
 
-  // ---------- Фильтрация ----------
+  // ----------- Filtering logic -----------
 
+  /**
+   * Initialize filter structure with all options set to false
+   */
   initializeFilters() {
     for (const category of FILTER_CATEGORIES) {
       this.filters[category.key] = {};
@@ -213,6 +220,9 @@ export class CatalogPageComponent implements OnInit {
     }
   }
 
+  /**
+   * Apply filters from URL query parameters
+   */
   applyFiltersFromQuery() {
     this.route.queryParams.subscribe((params) => {
       for (const key in params) {
@@ -226,7 +236,7 @@ export class CatalogPageComponent implements OnInit {
         });
       }
 
-      // Форсируем реактивное обновление
+      // Force reactive update
       this.filters = JSON.parse(JSON.stringify(this.filters));
 
       this.filteredPlaces = this.filterPlaces();
@@ -234,6 +244,9 @@ export class CatalogPageComponent implements OnInit {
     });
   }
 
+  /**
+   * Handle filters change event from UI component
+   */
   onFiltersChange(updatedFilters: CatalogFilters) {
     this.filters = updatedFilters;
 
@@ -258,6 +271,9 @@ export class CatalogPageComponent implements OnInit {
     this.updatePaginatedPlaces();
   }
 
+  /**
+   * Filter places based on active filters
+   */
   private filterPlaces(): Place[] {
     return this.places.filter((place) => {
       const tags = place.tags || [];
@@ -287,18 +303,21 @@ export class CatalogPageComponent implements OnInit {
     });
   }
 
+  /**
+   * Get human-readable label for a filter option by keys
+   */
   private getLabelByKey(categoryKey: string, optionKey: string): string {
     const category = FILTER_CATEGORIES.find((cat) => cat.key === categoryKey);
     return category?.options.find((opt) => opt.key === optionKey)?.label || '';
   }
 
-  // ---------- Пагинация ----------
+  // ----------- Pagination logic -----------
 
   onPageChange(page: number) {
     this.currentPage = page;
     this.updatePaginatedPlaces();
 
-    // Автоскролл вверх при переходе по страницам
+    // Smooth scroll to top on page change
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -310,7 +329,7 @@ export class CatalogPageComponent implements OnInit {
 
   private updatePaginatedPlaces() {
     if (this.itemsPerPage === -1) {
-      // "All" — показываем всё
+      // Show all places
       setTimeout(() => {
         this.paginatedPlaces = [...this.filteredPlaces];
       });
@@ -323,10 +342,11 @@ export class CatalogPageComponent implements OnInit {
     }
   }
 
-  // ---------- UI взаимодействие ----------
+  // ----------- UI interactions -----------
 
   toggleFilters() {
     this.showFilters = !this.showFilters;
+    // Lock body scroll when filters modal is open
     document.body.style.overflow = this.showFilters ? 'hidden' : '';
   }
 
@@ -348,7 +368,7 @@ export class CatalogPageComponent implements OnInit {
     return selected ? selected.label : 'Select';
   }
 
-  // ---------- Обработка клика вне дропдауна ----------
+  // ----------- Close dropdown on outside click -----------
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {

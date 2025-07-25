@@ -10,7 +10,7 @@ import {
 import { RouterLink } from '@angular/router';
 import { NgIf, NgForOf, NgClass } from '@angular/common';
 import { Place } from '../../core/models/place.model';
-import { PlaceCardType } from '../../core/models/place-card-type.enum';
+import { PlaceCardType } from '../../core/constants/place-card-type.enum';
 import { IconComponent } from './icon.component';
 import { ICONS } from '../../core/constants/icons.constant';
 
@@ -26,21 +26,21 @@ import { ICONS } from '../../core/constants/icons.constant';
         'h-[370px]': cardType === PlaceCardType.Favourites,
       }"
     >
-      <!-- Кликабельная часть карточки -->
+      <!-- Card clickable area -->
       <a
         [routerLink]="['/catalog', place.id]"
         class="block w-full no-underline"
       >
-        <!-- Изображение -->
+        <!-- Place image -->
         <img
           [src]="place.photoUrls[0]"
           alt="Place Image"
           class="h-[222px] w-full rounded-t-[40px] object-cover"
         />
 
-        <!-- Контент -->
+        <!-- Content section -->
         <div class="flex flex-col gap-[16px] p-[16px]">
-          <!-- Название и рейтинг -->
+          <!-- Title and rating -->
           <div class="flex h-[52px] items-start justify-between">
             <h5 class="text-[var(--color-gray-100)]">{{ place.name }}</h5>
             <div class="flex items-center gap-1">
@@ -51,7 +51,7 @@ import { ICONS } from '../../core/constants/icons.constant';
             </div>
           </div>
 
-          <!-- Описание -->
+          <!-- Short description (only in Full card) -->
           <p
             *ngIf="cardType === PlaceCardType.Full"
             class="body-font-1 line-clamp-3 h-[72px] overflow-hidden text-[var(--color-gray-100)]"
@@ -59,10 +59,10 @@ import { ICONS } from '../../core/constants/icons.constant';
             {{ place.shortDescription }}
           </p>
 
-          <!-- Разделитель -->
+          <!-- Divider -->
           <div class="h-px w-full bg-[var(--color-gray-20)]"></div>
 
-          <!-- Теги -->
+          <!-- Tags (truncated dynamically) -->
           <div
             *ngIf="cardType === PlaceCardType.Full"
             #tagsContainer
@@ -79,7 +79,7 @@ import { ICONS } from '../../core/constants/icons.constant';
         </div>
       </a>
 
-      <!-- Футер: адрес и стрелка -->
+      <!-- Footer: address and external link -->
       <a
         [href]="getGoogleMapsLink(place.address)"
         target="_blank"
@@ -105,9 +105,9 @@ export class PlaceCardComponent implements AfterViewInit {
 
   @ViewChild('tagsContainer', { static: false })
   tagsContainer!: ElementRef<HTMLDivElement>;
-  ICONS = ICONS;
 
   displayTags: string[] = [];
+  ICONS = ICONS;
   protected readonly PlaceCardType = PlaceCardType;
 
   constructor(
@@ -115,6 +115,9 @@ export class PlaceCardComponent implements AfterViewInit {
     private ngZone: NgZone,
   ) {}
 
+  /**
+   * Build a Google Maps search link based on the address.
+   */
   getGoogleMapsLink(address: string): string {
     return (
       'https://www.google.com/maps/search/?api=1&query=' +
@@ -122,6 +125,9 @@ export class PlaceCardComponent implements AfterViewInit {
     );
   }
 
+  /**
+   * Truncate tags to fit into two lines inside the container.
+   */
   ngAfterViewInit(): void {
     if (this.cardType !== PlaceCardType.Full) return;
 

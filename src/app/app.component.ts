@@ -8,24 +8,20 @@ import { HeaderComponent } from './layout/Header/header.component';
   selector: 'app-root',
   standalone: true,
   imports: [
-    CommonModule, // ngIf, ngFor
-    RouterOutlet,
+    CommonModule,
+    RouterOutlet, 
     HeaderComponent,
     FooterComponent,
   ],
   template: `
     <div class="flex min-h-screen flex-col bg-[var(--color-bg)]">
-      <!-- Header: full-width fixed -->
-      <header
-        class="fixed left-0 right-0 top-0 z-20 bg-[var(--color-bg)] shadow-md"
-      >
+      <header class="fixed left-0 right-0 top-0 z-20 bg-[var(--color-bg)] shadow-md">
         <div class="mx-auto h-full max-w-[1320px]">
           <app-header></app-header>
         </div>
         <div class="absolute bottom-0 left-0 h-px w-full"></div>
       </header>
 
-      <!-- Main: grows to fill space between header and footer -->
       <main
         class="mt-[48px] flex-grow bg-[var(--color-bg)] pt-[40px] lg:mt-[72px] lg:pt-[64px] xxl:mt-[80px] xxl:pt-[72px]"
       >
@@ -34,7 +30,6 @@ import { HeaderComponent } from './layout/Header/header.component';
         </div>
       </main>
 
-      <!-- Footer: sticks to bottom if content short -->
       <footer class="w-full bg-[var(--color-secondary)]">
         <div class="mx-auto max-w-[1320px]">
           <app-footer></app-footer>

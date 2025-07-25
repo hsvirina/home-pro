@@ -6,6 +6,7 @@ import { RouterModule } from '@angular/router';
   standalone: true,
   imports: [RouterModule],
   template: `
+    <!-- Navigates to homepage on logo click -->
     <a routerLink="/">
       <img
         src="/assets/logo.svg"

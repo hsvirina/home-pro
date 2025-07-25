@@ -15,6 +15,7 @@ export class ClickOutsideDirective {
 
   constructor(private elementRef: ElementRef) {}
 
+  // Emit event when a click occurs outside the host element
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event): void {
     const target = event.target as HTMLElement;

@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Place } from '../../../core/models/place.model';
-import { PlaceCardType } from '../../../core/models/place-card-type.enum';
+import { PlaceCardType } from '../../../core/constants/place-card-type.enum';
 import { SliderPlacesComponent } from '../../../shared/components/slider-places.component';
 import { PlaceCardComponent } from '../../../shared/components/place-card.component';
 
@@ -11,7 +11,7 @@ import { PlaceCardComponent } from '../../../shared/components/place-card.compon
   imports: [CommonModule, SliderPlacesComponent, PlaceCardComponent],
   template: `
     <div class="mb-[54px] mt-[72px]">
-      <!-- Заголовок и количество: показывать только на десктопе -->
+      <!-- Desktop header with title and count -->
       <div class="mb-4 hidden lg:block">
         <h4
           class="mb-1 text-[24px] text-[var(--color-gray-100)] lg:text-[32px] xxl:text-[40px]"
@@ -24,7 +24,7 @@ import { PlaceCardComponent } from '../../../shared/components/place-card.compon
         </span>
       </div>
 
-      <!-- Мобильный: слайдер -->
+      <!-- Mobile view: carousel slider for favorite places -->
       <div class="block lg:hidden">
         <app-slider-places
           [title]="'Favorite Cafés'"
@@ -33,7 +33,7 @@ import { PlaceCardComponent } from '../../../shared/components/place-card.compon
         ></app-slider-places>
       </div>
 
-      <!-- Десктоп: сетка -->
+      <!-- Desktop view: grid layout for favorite places -->
       <div
         class="hidden w-full gap-x-[20px] gap-y-[12px] lg:grid lg:grid-cols-6 xxl:grid-cols-8"
       >
@@ -48,6 +48,9 @@ import { PlaceCardComponent } from '../../../shared/components/place-card.compon
   `,
 })
 export class FavoritesSliderComponent {
+  // Input list of places to display as favorites
   @Input() places: Place[] = [];
+
+  // Enum to specify card type for child components
   protected readonly PlaceCardType = PlaceCardType;
 }

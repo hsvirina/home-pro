@@ -5,6 +5,7 @@ import { IconData } from '../../core/constants/icons.constant';
   selector: 'app-icon',
   standalone: true,
   template: `
+    <!-- Display SVG or image icon -->
     <img
       [src]="icon.filename"
       [alt]="icon.alt"
@@ -14,5 +15,8 @@ import { IconData } from '../../core/constants/icons.constant';
   `,
 })
 export class IconComponent {
+  /**
+   * Icon object containing filename (URL) and alt text
+   */
   @Input() icon!: IconData;
 }

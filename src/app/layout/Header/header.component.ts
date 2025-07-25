@@ -1,22 +1,21 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import {
+  Router,
   ActivatedRoute,
   NavigationEnd,
-  Router,
   RouterModule,
 } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { Subscription, filter } from 'rxjs';
 
-import { FILTER_CATEGORIES } from '../../core/models/catalog-filter.config';
+import { FILTER_CATEGORIES } from '../../core/constants/catalog-filter.config';
 import { User } from '../../core/models/user.model';
-
 import { slideDownAnimation } from '../../../styles/animations/animations';
 
 import { UiStateService } from '../../state/ui/ui-state.service';
 import { AuthStateService } from '../../state/auth/auth-state.service';
+
 import { ClickOutsideDirective } from '../../shared/directives/click-outside.directive';
 import { SearchSectionComponent } from './components/search-section.component';
 import { CityDropdownComponent } from './components/city-dropdown.component';
@@ -25,7 +24,7 @@ import { UserMenuComponent } from './components/user-menu.component';
 import { MobileMenuComponent } from './components/mobile-menu.component';
 import { ICONS } from '../../core/constants/icons.constant';
 import { IconComponent } from '../../shared/components/icon.component';
-import { LogoComponent } from "../../shared/components/logo.component";
+import { LogoComponent } from '../../shared/components/logo.component';
 
 @Component({
   selector: 'app-header',
@@ -41,8 +40,8 @@ import { LogoComponent } from "../../shared/components/logo.component";
     MobileMenuComponent,
     ClickOutsideDirective,
     IconComponent,
-    LogoComponent
-],
+    LogoComponent,
+  ],
   animations: [slideDownAnimation],
   template: `
     <header
@@ -136,7 +135,7 @@ import { LogoComponent } from "../../shared/components/logo.component";
       [cityLabel]="cityLabel"
       [language]="language"
       [user]="user"
-      (toggleDropdown)="toggleDropdown($event)"
+      (dropdownToggle)="toggleDropdown($event)"
       (navigateToAuth)="navigateToAuth()"
       (logout)="handleLogout()"
       (cityChange)="setCity($event)"
@@ -144,7 +143,8 @@ import { LogoComponent } from "../../shared/components/logo.component";
   `,
 })
 export class HeaderComponent implements OnInit, OnDestroy {
-  ICONS = ICONS;
+  readonly ICONS = ICONS;
+
   cityKey: string | null = null;
   cityLabel = 'City';
   language: 'ENG' | 'UKR' = 'ENG';
@@ -152,14 +152,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
   user: User | null = null;
   screenIsMobile = false;
 
-  private userSub?: Subscription;
-  private queryParamsSub?: Subscription;
-  private routerEventsSub?: Subscription;
+  private subscriptions: Subscription[] = [];
+  private readonly resizeListener = () => this.checkScreenWidth();
 
-  // Чтобы корректно удалять слушатель resize
-  private resizeListener = () => this.checkScreenWidth();
-
-  locationOptions =
+  private readonly locationOptions =
     FILTER_CATEGORIES.find((c) => c.key === 'location')?.options || [];
 
   constructor(
@@ -170,72 +166,45 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private authService: AuthStateService,
   ) {}
 
-  ngOnInit() {
-    this.userSub = this.authService.user$.subscribe((user) => {
-      this.user = user;
+  ngOnInit(): void {
+    this.subscriptions.push(
+      this.authService.user$.subscribe((user) => {
+        this.user = user;
+        this.initializeCityFromUserOrQuery(user);
+      }),
+    );
 
-      if (user?.defaultCity) {
-        const found = this.locationOptions.find(
-          (opt) => opt.key.toLowerCase() === user.defaultCity.toLowerCase(),
-        );
-        if (found) {
-          this.cityKey = found.key;
-          this.cityLabel = found.label;
-          return;
-        }
-      }
-
-      this.setCityFromQueryParams();
-    });
+    this.subscriptions.push(
+      this.router.events
+        .pipe(filter((e) => e instanceof NavigationEnd))
+        .subscribe(() => {
+          this.activeDropdown = null;
+          this.uiState.closeMobileMenu();
+          this.cdr.detectChanges();
+        }),
+    );
 
     this.checkScreenWidth();
     window.addEventListener('resize', this.resizeListener);
-
-    this.routerEventsSub = this.router.events
-      .pipe(filter((e) => e instanceof NavigationEnd))
-      .subscribe(() => {
-        this.activeDropdown = null;
-        this.uiState.closeMobileMenu();
-        this.cdr.detectChanges();
-      });
   }
 
-  ngOnDestroy() {
-    this.userSub?.unsubscribe();
-    this.queryParamsSub?.unsubscribe();
-    this.routerEventsSub?.unsubscribe();
+  ngOnDestroy(): void {
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
     window.removeEventListener('resize', this.resizeListener);
   }
 
-  setCityFromQueryParams() {
-    this.queryParamsSub?.unsubscribe();
-    this.queryParamsSub = this.route.queryParams.subscribe((params) => {
-      const loc = params['location'];
-      const found = this.locationOptions.find((opt) => opt.key === loc);
-      if (found) {
-        this.cityKey = found.key;
-        this.cityLabel = found.label;
-      } else {
-        this.cityKey = null;
-        this.cityLabel = 'City';
-      }
-    });
-  }
-
-  toggleDropdown(name: typeof this.activeDropdown) {
+  toggleDropdown(name: typeof this.activeDropdown): void {
     const isOpening = this.activeDropdown !== name;
     this.activeDropdown = isOpening ? name : null;
 
     if (this.screenIsMobile && name === 'menu') {
-      if (isOpening) {
-        this.uiState.openMobileMenu();
-      } else {
-        this.uiState.closeMobileMenu();
-      }
+      isOpening
+        ? this.uiState.openMobileMenu()
+        : this.uiState.closeMobileMenu();
     }
   }
 
-  setCity(key: string) {
+  setCity(key: string): void {
     const found = this.locationOptions.find((opt) => opt.key === key);
     if (!found) return;
 
@@ -250,15 +219,15 @@ export class HeaderComponent implements OnInit, OnDestroy {
       .then(() => (this.activeDropdown = null));
   }
 
-  setLanguage(lang: 'ENG' | 'UKR') {
+  setLanguage(lang: 'ENG' | 'UKR'): void {
     if (this.user) {
       this.authService.updateUserLanguage(lang).subscribe({
         next: (updatedUser) => {
           this.user = updatedUser;
           this.language = lang;
         },
-        error: (err) => {
-          console.error('Ошибка при обновлении языка', err);
+        error: () => {
+          // TODO: handle error properly
           this.language = lang;
         },
       });
@@ -267,17 +236,39 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   }
 
-  checkScreenWidth() {
-    this.screenIsMobile = window.innerWidth < 1024;
-  }
-
-  navigateToAuth() {
+  navigateToAuth(): void {
     this.router.navigate(['/auth']);
   }
 
-  handleLogout() {
+  handleLogout(): void {
     this.authService.logout();
     this.activeDropdown = null;
     this.router.navigate(['/']);
+  }
+
+  private initializeCityFromUserOrQuery(user: User | null): void {
+    if (user?.defaultCity) {
+      const found = this.locationOptions.find(
+        (opt) => opt.key.toLowerCase() === user.defaultCity.toLowerCase(),
+      );
+      if (found) {
+        this.cityKey = found.key;
+        this.cityLabel = found.label;
+        return;
+      }
+    }
+
+    this.subscriptions.push(
+      this.route.queryParams.subscribe((params) => {
+        const loc = params['location'];
+        const found = this.locationOptions.find((opt) => opt.key === loc);
+        this.cityKey = found?.key ?? null;
+        this.cityLabel = found?.label ?? 'City';
+      }),
+    );
+  }
+
+  private checkScreenWidth(): void {
+    this.screenIsMobile = window.innerWidth < 1024;
   }
 }

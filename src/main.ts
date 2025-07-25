@@ -25,7 +25,6 @@ bootstrapApplication(AppComponent, {
     provideRouter(routes),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideAnimations(),
-
   ],
 }).then(appRef => {
   const router = appRef.injector.get(Router);

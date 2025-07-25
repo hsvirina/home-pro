@@ -1,4 +1,4 @@
-import { FilterCategory } from './catalog-filter.model';
+import { FilterCategory } from '../models/catalog-filter.model';
 
 export const FILTER_CATEGORIES: FilterCategory[] = [
   {

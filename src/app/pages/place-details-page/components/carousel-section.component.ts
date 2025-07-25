@@ -22,7 +22,7 @@ import { fadeInOutImage } from '../../../../styles/animations/animations';
       (touchstart)="onTouchStart($event)"
       (touchend)="onTouchEnd($event)"
     >
-      <!-- Previous image button -->
+      <!-- Previous slide button -->
       <button
         (click)="handlePrev()"
         class="absolute left-[24px] top-1/2 z-10 flex h-[52px] w-[52px] -translate-y-1/2 items-center justify-center rounded-[40px] bg-[var(--color-bg)] p-[10px] transition hover:scale-110"
@@ -30,9 +30,9 @@ import { fadeInOutImage } from '../../../../styles/animations/animations';
         <app-icon [icon]="ICONS.ArrowLeft" class="h-[32px] w-[32px]" />
       </button>
 
-      <!-- Image display -->
+      <!-- Image container -->
       <div class="relative h-full w-full">
-        <!-- Top right action buttons -->
+        <!-- Action buttons (favorite and share) -->
         <div class="absolute right-[24px] top-[24px] z-10 flex gap-[16px]">
           <button
             (click)="onToggleFavorite.emit()"
@@ -55,7 +55,7 @@ import { fadeInOutImage } from '../../../../styles/animations/animations';
           </button>
         </div>
 
-        <!-- Image container with animation -->
+        <!-- Display current and previous images with fade animation -->
         <ng-container *ngFor="let image of imagesToRender">
           <img
             *ngIf="image"
@@ -67,7 +67,7 @@ import { fadeInOutImage } from '../../../../styles/animations/animations';
         </ng-container>
       </div>
 
-      <!-- Next image button -->
+      <!-- Next slide button -->
       <button
         (click)="handleNext()"
         class="absolute right-[24px] top-1/2 z-10 flex h-[52px] w-[52px] -translate-y-1/2 items-center justify-center rounded-[40px] bg-[var(--color-bg)] p-[10px] transition hover:scale-110"
@@ -75,7 +75,7 @@ import { fadeInOutImage } from '../../../../styles/animations/animations';
         <app-icon [icon]="ICONS.ArrowRight" class="h-[32px] w-[32px]" />
       </button>
 
-      <!-- Slide counter -->
+      <!-- Slide position indicator -->
       <div
         class="button-font absolute bottom-5 right-5 rounded-[40px] bg-black/60 px-3 py-1 text-[var(--color-bg)]"
       >
@@ -100,19 +100,19 @@ export class CarouselSectionComponent implements OnDestroy {
   private touchStartX: number | null = null;
   private readonly animationDuration = 600;
 
-  // Returns the current image for display
+  // Returns current image URL
   get currentImageUrl(): string | null {
     return this.photoUrls?.[this.currentIndex] ?? null;
   }
 
-  // Returns the previously displayed image (used for fade-out)
+  // Returns previous image URL for fade-out animation
   get prevImageUrl(): string | null {
     return this.prevIndex !== null
       ? this.photoUrls?.[this.prevIndex] ?? null
       : null;
   }
 
-  // Returns the images to be rendered based on animation state
+  // Returns array of images to render (previous + current during animation)
   get imagesToRender(): string[] {
     if (this.isAnimating && this.prevImageUrl && this.currentImageUrl) {
       return [this.prevImageUrl, this.currentImageUrl];
@@ -120,12 +120,14 @@ export class CarouselSectionComponent implements OnDestroy {
     return this.currentImageUrl ? [this.currentImageUrl] : [];
   }
 
+  // Navigate to next image
   handleNext() {
     if (!this.photoUrls?.length) return;
     const next = (this.currentIndex + 1) % this.photoUrls.length;
     this.triggerChange(next);
   }
 
+  // Navigate to previous image
   handlePrev() {
     if (!this.photoUrls?.length) return;
     const next =
@@ -135,7 +137,7 @@ export class CarouselSectionComponent implements OnDestroy {
     this.triggerChange(next);
   }
 
-  // Changes the slide with animation
+  // Initiate slide change with animation
   triggerChange(index: number) {
     this.prevIndex = this.currentIndex;
     this.currentIndex = index;
@@ -147,11 +149,12 @@ export class CarouselSectionComponent implements OnDestroy {
     }, this.animationDuration);
   }
 
-  // Touch support for swipe navigation
+  // Capture initial touch position for swipe
   onTouchStart(e: TouchEvent) {
     this.touchStartX = e.changedTouches[0].clientX;
   }
 
+  // Detect swipe direction and navigate accordingly
   onTouchEnd(e: TouchEvent) {
     const endX = e.changedTouches[0].clientX;
     if (this.touchStartX !== null && Math.abs(this.touchStartX - endX) > 50) {
@@ -160,6 +163,6 @@ export class CarouselSectionComponent implements OnDestroy {
     this.touchStartX = null;
   }
 
-  // No cleanup needed for this component
+  // No additional cleanup needed
   ngOnDestroy() {}
 }

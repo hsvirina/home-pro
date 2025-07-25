@@ -1,8 +1,8 @@
-import { Component, HostListener } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { LogoComponent } from "../shared/components/logo.component";
+import { LogoComponent } from '../shared/components/logo.component';
 
 @Component({
   selector: 'app-footer',
@@ -17,48 +17,35 @@ import { LogoComponent } from "../shared/components/logo.component";
         <app-logo></app-logo>
       </div>
 
-      <!-- Links -->
+      <!-- Navigation links -->
       <div
         class="body-font-2 col-span-2 grid grid-cols-2 gap-x-[16px] xxl:mx-auto xxl:flex xxl:gap-[172px]"
       >
         <div class="flex flex-col gap-1">
           <a routerLink="/about" class="py-[8px] hover:underline">About Us</a>
           <a routerLink="/faqs" class="py-[8px] hover:underline">FAQs</a>
-          <a routerLink="/contact" class="py-[8px] hover:underline"
-            >Contact Us</a
-          >
-          <a routerLink="/social-media" class="py-[8px] hover:underline"
-            >Social Media</a
-          >
-          <a routerLink="/feedback" class="py-[8px] hover:underline"
-            >FeedBack</a
-          >
+          <a routerLink="/contact" class="py-[8px] hover:underline">Contact Us</a>
+          <a routerLink="/social-media" class="py-[8px] hover:underline">Social Media</a>
+          <a routerLink="/feedback" class="py-[8px] hover:underline">Feedback</a>
         </div>
         <div class="flex flex-col gap-1">
-          <a routerLink="/newsletter" class="py-[8px] hover:underline"
-            >Newsletter</a
-          >
+          <a routerLink="/newsletter" class="py-[8px] hover:underline">Newsletter</a>
           <a routerLink="/updates" class="py-[8px] hover:underline">Updates</a>
           <a routerLink="/events" class="py-[8px] hover:underline">Events</a>
-          <a routerLink="/blog-posts" class="py-[8px] hover:underline"
-            >Blog Posts</a
-          >
-          <a routerLink="/community" class="py-[8px] hover:underline"
-            >Community</a
-          >
+          <a routerLink="/blog-posts" class="py-[8px] hover:underline">Blog Posts</a>
+          <a routerLink="/community" class="py-[8px] hover:underline">Community</a>
         </div>
       </div>
 
-      <!-- Subscribe Section -->
-      <div
-        class="col-span-2 flex flex-col gap-[24px] lg:col-span-3 xxl:ml-auto"
-      >
+      <!-- Subscription form -->
+      <div class="col-span-2 flex flex-col gap-[24px] lg:col-span-3 xxl:ml-auto">
         <div class="flex flex-col gap-[16px]">
           <h5 class="text-[var(--color-gray-100)]">Subscribe</h5>
           <span class="body-font-2">
             Join our newsletter to stay updated on features and releases.
           </span>
         </div>
+
         <div class="flex flex-col gap-[12px]">
           <form
             #subscribeForm="ngForm"
@@ -85,21 +72,22 @@ import { LogoComponent } from "../shared/components/logo.component";
               Send
             </button>
           </form>
+
           <div
             *ngIf="showError"
             class="body-font-2 mt-1 text-[var(--color-primary)]"
           >
             Please enter a valid email address.
           </div>
+
           <span class="body-font-2">
-            By subscribing, you agree to our Privacy Policy and consent to
-            receive updates.
+            By subscribing, you agree to our Privacy Policy and consent to receive updates.
           </span>
         </div>
       </div>
     </footer>
 
-    <!-- Modal -->
+    <!-- Success modal -->
     <div
       *ngIf="showModal"
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
@@ -109,9 +97,8 @@ import { LogoComponent } from "../shared/components/logo.component";
       >
         <div class="flex flex-col gap-[20px]">
           <h4>Thank you for subscribing!</h4>
-          <p class="body-font-1 text-[var(--color-gray-100)]">
-            You have successfully joined our newsletter. Stay tuned for updates
-            and exciting features!
+          <p class="body-font-1">
+            You have successfully joined our newsletter. Stay tuned for updates and exciting features!
           </p>
         </div>
         <button
@@ -129,33 +116,29 @@ export class FooterComponent {
   showModal = false;
   showError = false;
 
-  onSubmit() {
+  /** Handles form submission */
+  onSubmit(): void {
     if (!this.validateEmail(this.email)) {
       this.showError = true;
       return;
     }
+
     this.showModal = true;
     this.email = '';
     this.showError = false;
   }
 
-  onBlur() {
-    if (this.email && !this.validateEmail(this.email)) {
-      this.showError = true;
-    } else {
-      this.showError = false;
-    }
-  }
+  /** Validates input on blur */
+  onBlur(): void {
+  this.showError = !!this.email && !this.validateEmail(this.email);
+}
 
-  clearEmail() {
-    this.email = '';
-    this.showError = false;
-  }
-
-  closeModal() {
+  /** Closes success modal */
+  closeModal(): void {
     this.showModal = false;
   }
 
+  /** Validates email using regex */
   validateEmail(email: string): boolean {
     const re = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
     return re.test(email.toLowerCase());

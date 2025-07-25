@@ -3,14 +3,13 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
 import { PlacesService } from '../../core/services/places.service';
-
 import { InfoSectorComponent } from './components/info-sector.component';
 import { FavoritesSliderComponent } from './components/favorites-sector.component';
 import { SettingsSectorComponent } from './components/settings-sector.component';
 
 import { User } from '../../core/models/user.model';
 import { Place } from '../../core/models/place.model';
-import { PlaceCardType } from '../../core/models/place-card-type.enum';
+import { PlaceCardType } from '../../core/constants/place-card-type.enum';
 import { AuthApiService } from '../../core/services/auth-api.service';
 import { AuthStateService } from '../../state/auth/auth-state.service';
 
@@ -26,7 +25,7 @@ import { AuthStateService } from '../../state/auth/auth-state.service';
   template: `
     <div *ngIf="user" class="px-[20px] lg:px-[40px] xxl:px-0">
       <div class="grid grid-cols-4 gap-[16px] lg:grid-cols-8 lg:gap-[20px]">
-        <!-- Info -->
+        <!-- Info Section -->
         <app-info-sector
           class="col-span-4 lg:col-span-8 xxl:col-span-6 xxl:col-start-2"
           [editableUser]="editedUser || user"
@@ -36,13 +35,13 @@ import { AuthStateService } from '../../state/auth/auth-state.service';
           [hasPendingChanges]="hasPendingChanges"
         ></app-info-sector>
 
-        <!-- Favorites -->
+        <!-- Favorites Section -->
         <app-favorites-sector
           class="col-span-4 lg:col-span-8"
           [places]="favorites"
         ></app-favorites-sector>
 
-        <!-- Settings -->
+        <!-- Settings Section -->
         <app-settings-sector
           *ngIf="editedUser"
           class="col-span-4 lg:col-span-8"
@@ -51,7 +50,7 @@ import { AuthStateService } from '../../state/auth/auth-state.service';
           (settingsChanged)="onSettingsChanged()"
         ></app-settings-sector>
 
-        <!-- Save button -->
+        <!-- Save Button -->
         <div
           class="col-span-4 mb-[144px] mt-[32px] flex justify-center lg:col-span-8"
         >
@@ -64,7 +63,7 @@ import { AuthStateService } from '../../state/auth/auth-state.service';
           </button>
         </div>
 
-        <!-- Modal -->
+        <!-- Success Modal -->
         <div
           *ngIf="showModal"
           class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
@@ -109,6 +108,7 @@ export class ProfilePageComponent implements OnInit {
     private placesService: PlacesService,
   ) {}
 
+  // Load user data and favorite places on component initialization
   ngOnInit(): void {
     this.authService.loadUserInfo().subscribe({
       next: (userFromService: User) => {
@@ -117,20 +117,21 @@ export class ProfilePageComponent implements OnInit {
         this.loadFavoriteCafes();
         this.loadAllPlaces();
       },
-      error: (err: any) =>
-        console.error('❌ Ошибка при загрузке пользователя:', err),
+      error: (err: any) => console.error('❌ Failed to load user data:', err),
     });
   }
 
+  // Fetch all places for mapping user favorites
   private loadAllPlaces() {
     this.placesService.getPlaces().subscribe({
       next: (places: Place[]) => {
         this.allPlaces = places;
       },
-      error: (err) => console.error('❌ Ошибка при загрузке всех мест:', err),
+      error: (err) => console.error('❌ Failed to load places:', err),
     });
   }
 
+  // Load user’s favorite cafes based on stored IDs
   private loadFavoriteCafes(): void {
     if (!this.user || !this.user.favoriteCafeIds?.length) {
       this.favorites = [];
@@ -145,25 +146,29 @@ export class ProfilePageComponent implements OnInit {
           favoriteIds.includes(place.id),
         );
       },
-      error: (err) => console.error('❌ Ошибка при загрузке кафе:', err),
+      error: (err) => console.error('❌ Failed to load favorite cafes:', err),
     });
   }
 
+  // Toggle editing mode
   handleToggleEdit() {
     this.isEditing = !this.isEditing;
   }
 
+  // Handle form field change from child component
   onFieldChange(field: keyof User, value: User[keyof User]) {
     if (!this.editedUser) return;
-    // @ts-ignore — отключаем проверку в этой строке
+    // @ts-ignore – suppress type-checking for dynamic assignment
     this.editedUser[field] = value;
     this.hasPendingChanges = true;
   }
 
+  // Mark form as dirty when any setting is changed
   onSettingsChanged() {
     this.hasPendingChanges = true;
   }
 
+  // Submit updated user profile to backend
   saveChanges() {
     if (!this.user || !this.editedUser) return;
 
@@ -180,14 +185,16 @@ export class ProfilePageComponent implements OnInit {
         this.hasPendingChanges = false;
         this.showModal = true;
       },
-      error: (err: any) => console.error('❌ Ошибка обновления профиля', err),
+      error: (err: any) => console.error('❌ Failed to update profile:', err),
     });
   }
 
+  // Close success modal
   closeModal() {
     this.showModal = false;
   }
 
+  // Logout and navigate to auth page
   onLogout(): void {
     this.authService.logout();
     this.router.navigate(['/auth']);

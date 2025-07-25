@@ -13,19 +13,19 @@ import { ICONS } from '../../../core/constants/icons.constant';
     <div
       class="flex flex-col gap-[32px] rounded-[24px] border border-[var(--color-gray-20)] bg-[var(--color-white)] p-[16px] lg:gap-[48px] lg:p-[32px] xxl:gap-[20px]"
     >
-      <!-- Верхний блок: аватар + имя + город -->
+      <!-- Top section: avatar, name and city -->
       <div class="lg:flex lg:justify-between xxl:col-span-8">
         <div class="flex items-start gap-[20px] lg:flex-row">
-          <!-- Фото -->
+          <!-- Profile picture -->
           <img
             [src]="editableUser.photoUrl"
             alt="Profile"
             class="h-[100px] min-w-[100px] rounded-full object-cover"
           />
 
-          <!-- Имя и город -->
+          <!-- Name and city -->
           <div class="flex flex-col gap-[8px]">
-            <!-- Имя -->
+            <!-- User name display or edit inputs -->
             <h5 class="flex gap-2">
               <ng-container *ngIf="!isEditing; else editName">
                 <span>{{ editableUser.firstName }}</span>
@@ -55,7 +55,7 @@ import { ICONS } from '../../../core/constants/icons.constant';
               </ng-template>
             </h5>
 
-            <!-- Город -->
+            <!-- City display or edit input -->
             <span class="body-font-1 flex gap-1">
               <ng-container *ngIf="!isEditing; else editCity">
                 <span>{{ editableUser.defaultCity }}, Ukraine</span>
@@ -77,7 +77,7 @@ import { ICONS } from '../../../core/constants/icons.constant';
           </div>
         </div>
 
-        <!-- Кнопка Edit/Save (десктоп) -->
+        <!-- Edit/Save button (desktop only) -->
         <div class="hidden h-12 lg:flex">
           <button
             (click)="handleEditToggle()"
@@ -88,11 +88,11 @@ import { ICONS } from '../../../core/constants/icons.constant';
         </div>
       </div>
 
-      <!-- Повтор имени, города и email -->
+      <!-- Repeated info: full name, location, email -->
       <div
         class="flex flex-col gap-[20px] lg:flex-row lg:justify-between xxl:col-span-8"
       >
-        <!-- Full Name -->
+        <!-- Full Name block -->
         <div class="flex gap-3">
           <div
             class="flex h-[50px] w-[50px] items-center justify-center rounded-[25px] bg-[var(--color-bg-2)]"
@@ -108,7 +108,7 @@ import { ICONS } from '../../../core/constants/icons.constant';
           </div>
         </div>
 
-        <!-- Location -->
+        <!-- Location block -->
         <div class="flex gap-3">
           <div
             class="flex h-[50px] w-[50px] items-center justify-center rounded-[25px] bg-[var(--color-bg-2)]"
@@ -124,7 +124,7 @@ import { ICONS } from '../../../core/constants/icons.constant';
           </div>
         </div>
 
-        <!-- Email -->
+        <!-- Email block -->
         <div class="flex gap-3">
           <div
             class="flex h-[50px] w-[50px] items-center justify-center rounded-[25px] bg-[var(--color-bg-2)]"
@@ -141,7 +141,7 @@ import { ICONS } from '../../../core/constants/icons.constant';
         </div>
       </div>
 
-      <!-- Кнопка Edit/Save (мобильная) -->
+      <!-- Edit/Save button (mobile only) -->
       <div class="shadow-hover button-bg-transparent flex lg:hidden">
         <button
           (click)="handleEditToggle()"
@@ -151,7 +151,7 @@ import { ICONS } from '../../../core/constants/icons.constant';
         </button>
       </div>
 
-      <!-- Модалка "сохраните изменения" -->
+      <!-- Modal for unsaved changes warning -->
       <div
         *ngIf="showInfoModal"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
@@ -178,6 +178,7 @@ import { ICONS } from '../../../core/constants/icons.constant';
   `,
   styles: [
     `
+      /* Input styling: base, readonly and editable states */
       .input-field {
         border: none;
         border-bottom: 1px solid transparent;
@@ -216,15 +217,26 @@ import { ICONS } from '../../../core/constants/icons.constant';
 })
 export class InfoSectorComponent {
   ICONS = ICONS;
+
+  // User data to display and edit
   @Input() editableUser!: User;
+
+  // Flag indicating if form is in edit mode
   @Input() isEditing = false;
+
+  // Flag for unsaved changes detection
   @Input() hasPendingChanges = false;
 
+  // Event emitted when edit mode toggled (edit/save button pressed)
   @Output() onToggleEdit = new EventEmitter<void>();
+
+  // Event emitted when a field value changes (two-way binding)
   @Output() fieldChange = new EventEmitter<{ field: keyof User; value: any }>();
 
+  // Controls display of unsaved changes modal
   showInfoModal = false;
 
+  // Shows modal warning about unsaved changes temporarily
   showTemporaryInfoModal() {
     this.showInfoModal = true;
     setTimeout(() => {
@@ -232,6 +244,7 @@ export class InfoSectorComponent {
     }, 5000);
   }
 
+  // Handles Edit/Save button click
   handleEditToggle() {
     if (this.isEditing && this.hasPendingChanges) {
       this.showTemporaryInfoModal();

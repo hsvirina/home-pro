@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Place } from '../../../core/models/place.model';
 import { IconComponent } from '../../../shared/components/icon.component';
@@ -12,6 +12,7 @@ import { ICONS } from '../../../core/constants/icons.constant';
     <div class="flex flex-col gap-[24px]">
       <h5>Information</h5>
 
+      <!-- Show working hours if available -->
       <div class="grid grid-cols-8 gap-[20px]" *ngIf="place?.workingHours">
         <div
           class="shadow-hover col-span-8 flex items-center justify-center gap-[24px] rounded-[40px] bg-[var(--color-bg-2)] px-6 py-3 lg:col-span-2"

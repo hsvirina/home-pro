@@ -9,6 +9,7 @@ import { IconComponent } from '../../../shared/components/icon.component';
   standalone: true,
   imports: [CommonModule, FormsModule, IconComponent],
   template: `
+    <!-- Header with back button and title -->
     <div
       class="flex cursor-pointer select-none items-center justify-center"
       (click)="goBack.emit()"
@@ -18,11 +19,13 @@ import { IconComponent } from '../../../shared/components/icon.component';
       <h4 class="text-center">Welcome back! Log in to your Beanly account</h4>
     </div>
 
+    <!-- Login form -->
     <form
       autocomplete="off"
       class="flex flex-col gap-[12px]"
       (ngSubmit)="submitLogin()"
     >
+      <!-- Email input with validation -->
       <div class="flex flex-col gap-[4px]">
         <span class="body-font-2 text-[var(--color-gray-75)]">Email</span>
         <input
@@ -34,7 +37,7 @@ import { IconComponent } from '../../../shared/components/icon.component';
           [class.border-red-600]="loginError && !email"
           [ngClass]="{
             'text-[var(--color-gray-55)]': !email,
-            'text-[var(--color-gray-100)]': email,
+            'text-[var(--color-gray-100)]': email
           }"
           class="body-font-1 rounded-[40px] border border-[var(--color-gray-20)] bg-[var(--color-bg)] px-6 py-3 focus:border-[var(--color-gray-20)] focus:outline-none"
           required
@@ -48,6 +51,7 @@ import { IconComponent } from '../../../shared/components/icon.component';
         </div>
       </div>
 
+      <!-- Password input with toggle visibility and validation -->
       <div class="relative flex flex-col gap-[4px]">
         <span class="body-font-2 text-[var(--color-gray-75)]">Password</span>
         <div class="relative">
@@ -60,7 +64,7 @@ import { IconComponent } from '../../../shared/components/icon.component';
             [class.border-red-600]="loginError && !password"
             [ngClass]="{
               'text-[var(--color-gray-55)]': !password,
-              'text-[var(--color-gray-100)]': password,
+              'text-[var(--color-gray-100)]': password
             }"
             class="body-font-1 w-full rounded-[40px] border border-[var(--color-gray-20)] bg-[var(--color-bg)] px-6 py-3 outline-none focus:border-[var(--color-gray-20)]"
             required
@@ -88,6 +92,7 @@ import { IconComponent } from '../../../shared/components/icon.component';
         </div>
       </div>
 
+      <!-- Submit button -->
       <button
         type="submit"
         class="button-font button-bg-blue px-[32px] py-[12px]"
@@ -99,17 +104,23 @@ import { IconComponent } from '../../../shared/components/icon.component';
 })
 export class AuthLoginStepComponent {
   ICONS = ICONS;
+
+  // Input properties for login form state and error flag
   @Input() email = '';
   @Input() password = '';
   @Input() showPassword = false;
   @Input() loginError = false;
 
+  // Output events to notify parent about changes and actions
   @Output() emailChange = new EventEmitter<string>();
   @Output() passwordChange = new EventEmitter<string>();
   @Output() togglePasswordVisibility = new EventEmitter<void>();
   @Output() loginSubmit = new EventEmitter<void>();
   @Output() goBack = new EventEmitter<void>();
 
+  /**
+   * Emits the login submit event when form is submitted
+   */
   submitLogin() {
     this.loginSubmit.emit();
   }

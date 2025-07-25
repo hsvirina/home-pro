@@ -5,17 +5,12 @@ import { filter } from 'rxjs/operators';
 import { IconComponent } from './icon.component';
 import { ICONS } from '../../core/constants/icons.constant';
 
-interface BreadCrumb {
-  label: string;
-  url: string;
-}
-
 @Component({
   selector: 'app-breadcrumbs',
   standalone: true,
   imports: [CommonModule, RouterLink, IconComponent],
   template: `
-    <nav aria-label="breadcrumb" class="">
+    <nav aria-label="breadcrumb">
       <ol class="flex flex-wrap items-center text-[var(--color-gray-75)]">
         <li
           *ngFor="let crumb of breadcrumbs; let last = last"
@@ -29,7 +24,7 @@ interface BreadCrumb {
             {{ crumb.label }}
           </span>
 
-          <!-- Стрелка между элементами -->
+          <!-- Arrow between breadcrumb items -->
           <app-icon
             *ngIf="!last"
             [icon]="ICONS.ArrowBack"
@@ -44,7 +39,7 @@ export class BreadcrumbsComponent implements OnChanges {
   @Input() lastLabel: string | null = null;
   ICONS = ICONS;
 
-  breadcrumbs: BreadCrumb[] = [];
+  breadcrumbs: { label: string; url: string }[] = [];
 
   constructor(private router: Router) {
     this.router.events
@@ -64,16 +59,18 @@ export class BreadcrumbsComponent implements OnChanges {
     const url = this.router.url.split('?')[0];
     const segments = url.split('/').filter(Boolean);
 
+    // Only generate breadcrumbs if we are inside the /catalog route
     if (segments.length === 0 || segments[0] !== 'catalog') {
       this.breadcrumbs = [];
       return;
     }
 
-    const crumbs: BreadCrumb[] = [
+    const crumbs = [
       { label: 'Home', url: '/' },
       { label: 'Catalog', url: '/catalog' },
     ];
 
+    // If there's a numeric ID segment, treat it as a detail page
     if (segments.length === 2 && /^\d+$/.test(segments[1])) {
       crumbs.push({
         label: this.lastLabel || 'Details',

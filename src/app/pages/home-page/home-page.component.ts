@@ -53,15 +53,18 @@ export class HomePageComponent implements OnInit {
 
   constructor(
     private placesStore: PlacesStoreService,
-    private reviewsService: ReviewsService, // добавляем в конструктор.
+    private reviewsService: ReviewsService, // Injected for future use if needed
   ) {}
 
   ngOnInit() {
-    // Загрузка кафе
+    // Load the list of places
     this.placesStore.loadPlaces();
+
+    // Subscribe to places observable and update component state
     this.placesStore.places$.subscribe((data) => {
       if (data) {
         this.places = [...data];
+        // Get top 10 places sorted by rating descending
         this.popularPlaces = [...data]
           .sort((a, b) => b.rating - a.rating)
           .slice(0, 10);

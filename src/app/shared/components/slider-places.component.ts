@@ -1,8 +1,8 @@
 import { NgClass, NgForOf, NgStyle } from '@angular/common';
 import { Component, Input, HostListener, OnInit } from '@angular/core';
 import { PlaceCardComponent } from './place-card.component';
-import { PlaceCardType } from '../../core/models/place-card-type.enum';
-import { IconComponent } from "./icon.component";
+import { PlaceCardType } from '../../core/constants/place-card-type.enum';
+import { IconComponent } from './icon.component';
 import { ICONS } from '../../core/constants/icons.constant';
 
 @Component({
@@ -17,7 +17,9 @@ import { ICONS } from '../../core/constants/icons.constant';
         'px-0': cardType === PlaceCardType.Favourites,
       }"
     >
+      <!-- Header with navigation arrows -->
       <div class="flex w-full items-center justify-between">
+        <!-- Left arrow -->
         <button
           (click)="prev()"
           [disabled]="startIndex === 0"
@@ -30,6 +32,7 @@ import { ICONS } from '../../core/constants/icons.constant';
           <app-icon [icon]="ICONS.ArrowLeft" class="h-8 w-8" />
         </button>
 
+        <!-- Title -->
         <h3
           [ngClass]="{
             'text-[24px] text-[var(--color-gray-100)] lg:text-[32px] xxl:text-[40px]': true,
@@ -40,6 +43,7 @@ import { ICONS } from '../../core/constants/icons.constant';
           {{ title }}
         </h3>
 
+        <!-- Right arrow -->
         <button
           (click)="next()"
           [disabled]="startIndex >= places.length - visibleCount"
@@ -54,6 +58,7 @@ import { ICONS } from '../../core/constants/icons.constant';
         </button>
       </div>
 
+      <!-- Card slider -->
       <div class="w-full overflow-hidden py-[22px] lg:py-0">
         <div
           class="duration-400 flex transition-transform ease-in-out"
@@ -76,6 +81,7 @@ import { ICONS } from '../../core/constants/icons.constant';
 })
 export class SliderPlacesComponent implements OnInit {
   ICONS = ICONS;
+
   @Input() places: any[] = [];
   @Input() title!: string;
   @Input() cardType: PlaceCardType = PlaceCardType.Full;
@@ -84,38 +90,43 @@ export class SliderPlacesComponent implements OnInit {
 
   startIndex = 0;
 
-  /** Текущее количество видимых карточек */
+  /** Number of visible cards at a time */
   visibleCount = 4;
-  /** Текущая ширина карточки */
+
+  /** Card width in pixels */
   cardWidth = 315;
-  /** Расстояние между карточками */
+
+  /** Gap between cards in pixels */
   gap = 20;
 
   ngOnInit() {
     this.updateLayout();
   }
 
-  /** Пересчитываем параметры на основании окна */
+  /**
+   * Update layout settings based on current viewport width.
+   */
   @HostListener('window:resize')
   updateLayout() {
     const w = window.innerWidth;
 
     if (w >= 1440) {
-      // xxl
+      // Extra large screens
       this.visibleCount = 4;
       this.cardWidth = 315;
       this.gap = 20;
     } else if (w >= 1320) {
+      // Large desktop
+      this.visibleCount = 3;
       this.cardWidth = 315;
       this.gap = Math.floor((1320 - 3 * this.cardWidth - 80) / 2);
-      this.visibleCount = 3;
     } else if (w >= 1024) {
-      // lg
+      // Medium desktop
       this.visibleCount = 3;
       this.cardWidth = 301;
       this.gap = Math.floor((w - 3 * this.cardWidth - 100) / 2);
     } else {
-      // ниже lg — динамически считаем
+      // Mobile and tablets
       this.cardWidth = 315;
       this.gap = 16;
       const containerWidth = window.innerWidth - 2 * 20;
@@ -125,21 +136,30 @@ export class SliderPlacesComponent implements OnInit {
       );
     }
 
-    // скорректировать startIndex, чтобы не уходил за пределы
+    // Ensure start index stays within valid range
     const maxStart = Math.max(0, this.places.length - this.visibleCount);
     if (this.startIndex > maxStart) {
       this.startIndex = maxStart;
     }
   }
-  /** Смещение контейнера */
+
+  /**
+   * Get the horizontal shift of the slider container in pixels.
+   */
   get shift(): number {
     return this.startIndex * (this.cardWidth + this.gap);
   }
 
+  /**
+   * Scroll to previous slide.
+   */
   prev(): void {
     this.startIndex = Math.max(this.startIndex - 1, 0);
   }
 
+  /**
+   * Scroll to next slide.
+   */
   next(): void {
     this.startIndex = Math.min(
       this.startIndex + 1,

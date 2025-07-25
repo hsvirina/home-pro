@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Theme } from '../../../core/models/theme.enum';
+import { Theme } from '../../../core/constants/theme.enum';
 import { User } from '../../../core/models/user.model';
 import jsPDF from 'jspdf';
 import { Place } from '../../../core/models/place.model';
@@ -261,24 +261,39 @@ import { ICONS } from '../../../core/constants/icons.constant';
   `,
 })
 export class SettingsSectorComponent {
+  // User object with current settings
   @Input() user!: User;
+
+  // List of places (cafes) to extract favorites for export
   @Input() places: Place[] = [];
+
+  // Emits when user changes any setting to notify parent component
   @Output() settingsChanged = new EventEmitter<void>();
 
+  // Controls the visibility of the theme dropdown
   isThemeDropdownOpen = false;
-  ICONS = ICONS;
+
+  // Controls the visibility of the language dropdown
   isLanguageDropdownOpen = false;
 
+  // Controls the visibility of the delete account modal
   showDeleteAccountModal = false;
 
+  ICONS = ICONS;
+
+  // Available theme options from enum
   readonly themeOptions = Object.values(Theme);
+
+  // Supported languages
   readonly languageOptions: Array<'en' | 'uk'> = ['en', 'uk'];
 
+  // Human-readable language labels
   readonly languageLabels: Record<'en' | 'uk', string> = {
     en: 'English',
     uk: 'Ukrainian',
   };
 
+  // Maps various language codes to supported keys
   readonly languageMap: Record<string, 'en' | 'uk'> = {
     ENG: 'en',
     UKR: 'uk',
@@ -286,48 +301,60 @@ export class SettingsSectorComponent {
     uk: 'uk',
   };
 
+  // Toggles theme dropdown and closes language dropdown
   toggleThemeDropdown(): void {
     this.isThemeDropdownOpen = !this.isThemeDropdownOpen;
     this.isLanguageDropdownOpen = false;
   }
 
+  // Toggles language dropdown and closes theme dropdown
   toggleLanguageDropdown(): void {
     this.isLanguageDropdownOpen = !this.isLanguageDropdownOpen;
     this.isThemeDropdownOpen = false;
   }
 
+  // Selects a theme and emits change event
   selectTheme(theme: Theme): void {
     this.user.theme = theme;
     this.isThemeDropdownOpen = false;
     this.settingsChanged.emit();
   }
 
+  // Selects a language and emits change event
   selectLanguage(lang: 'en' | 'uk'): void {
     this.user.language = lang;
     this.isLanguageDropdownOpen = false;
     this.settingsChanged.emit();
   }
 
+  // Toggles email notifications setting and emits change event
   toggleEmailNotifications(): void {
     this.user.emailNotifications = !this.user.emailNotifications;
     this.settingsChanged.emit();
   }
 
+  // Toggles push notifications setting and emits change event
   togglePushNotifications(): void {
     this.user.pushNotifications = !this.user.pushNotifications;
     this.settingsChanged.emit();
   }
 
+  // Toggles review notifications setting and emits change event
   toggleReviewNotifications(): void {
     this.user.reviewNotifications = !this.user.reviewNotifications;
     this.settingsChanged.emit();
   }
 
+  // Toggles location sharing setting and emits change event
   toggleLocationSharing(): void {
     this.user.locationSharing = !this.user.locationSharing;
     this.settingsChanged.emit();
   }
 
+  /**
+   * Generates and triggers download of a PDF
+   * containing user profile data and favorite cafes.
+   */
   exportData(): void {
     const doc = new jsPDF();
 
@@ -343,11 +370,10 @@ export class SettingsSectorComponent {
     const favoriteIds =
       this.user.favoriteCafeIds?.map((id) => Number(id)) || [];
 
-
+    // Filter user's favorite cafes from places list
     const favoriteCafes = this.places.filter((place) =>
       favoriteIds.includes(place.id),
     );
-
 
     let y = 80;
 
@@ -363,14 +389,16 @@ export class SettingsSectorComponent {
       y += 10;
     }
 
+    // Save the PDF and trigger download
     doc.save('user-profile.pdf');
   }
 
-  // Методы для управления модальным окном
+  // Opens the "Delete Account" modal
   openDeleteAccountModal(): void {
     this.showDeleteAccountModal = true;
   }
 
+  // Closes the "Delete Account" modal
   closeDeleteAccountModal(): void {
     this.showDeleteAccountModal = false;
   }

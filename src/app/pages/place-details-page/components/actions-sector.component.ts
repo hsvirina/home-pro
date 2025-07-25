@@ -15,6 +15,7 @@ import { ICONS } from '../../../core/constants/icons.constant';
       </span>
 
       <div class="flex flex-col gap-4 lg:flex-row">
+        <!-- Favorite toggle button -->
         <button
           (click)="onToggleFavorite.emit()"
           [ngClass]="{
@@ -32,6 +33,7 @@ import { ICONS } from '../../../core/constants/icons.constant';
           {{ isFavorite ? 'Remove from Favorites' : 'Save to Favorites' }}
         </button>
 
+        <!-- Share button -->
         <button
           (click)="onShare.emit()"
           class="button-font button-bg-transparent shadow-hover flex gap-2 px-6 py-3"
@@ -40,6 +42,7 @@ import { ICONS } from '../../../core/constants/icons.constant';
           Share this Place
         </button>
 
+        <!-- Mobile-only review button -->
         <button
           *ngIf="isMobile && !showAddReviewForm"
           (click)="leaveReviewClick.emit()"
@@ -53,12 +56,12 @@ import { ICONS } from '../../../core/constants/icons.constant';
 })
 export class ActionsSectorComponent {
   ICONS = ICONS;
-  @Input() isFavorite = false;
-  @Input() showAddReviewForm = false;
 
-  @Input() isMobile = false;
-  @Output() leaveReviewClick = new EventEmitter<void>();
+  @Input() isFavorite = false; // Whether place is favorited
+  @Input() showAddReviewForm = false; // Controls visibility of review form
+  @Input() isMobile = false; // Flag for mobile view
 
-  @Output() onToggleFavorite = new EventEmitter<void>();
-  @Output() onShare = new EventEmitter<void>();
+  @Output() leaveReviewClick = new EventEmitter<void>(); // Emits when review button clicked
+  @Output() onToggleFavorite = new EventEmitter<void>(); // Emits favorite toggle action
+  @Output() onShare = new EventEmitter<void>(); // Emits share action
 }

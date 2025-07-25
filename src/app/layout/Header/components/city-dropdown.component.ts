@@ -1,13 +1,14 @@
 import {
   Component,
-  EventEmitter,
   Input,
   Output,
+  EventEmitter,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+
 import { slideDownAnimation } from '../../../../styles/animations/animations';
-import { FILTER_CATEGORIES } from '../../../core/models/catalog-filter.config';
+import { FILTER_CATEGORIES } from '../../../core/constants/catalog-filter.config';
 import { IconComponent } from '../../../shared/components/icon.component';
 import { ICONS } from '../../../core/constants/icons.constant';
 
@@ -16,6 +17,8 @@ interface LocationOption {
   label: string;
 }
 
+const DEFAULT_LABEL = 'City';
+
 @Component({
   selector: 'app-city-dropdown',
   standalone: true,
@@ -23,7 +26,7 @@ interface LocationOption {
   animations: [slideDownAnimation],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="relative" (click)="toggleDropdown($event)">
+    <div class="relative" (click)="onToggle($event)">
       <div
         class="shadow-hover flex cursor-pointer items-center gap-1 rounded-[8px] bg-[var(--color-white)] p-[8px]"
       >
@@ -41,7 +44,7 @@ interface LocationOption {
       >
         <div
           *ngFor="let loc of locationOptions"
-          (click)="selectCity(loc.key, $event)"
+          (click)="onSelect(loc.key, $event)"
           class="cursor-pointer rounded-[8px] hover:bg-[var(--color-bg)]"
         >
           {{ loc.label }}
@@ -51,23 +54,23 @@ interface LocationOption {
   `,
 })
 export class CityDropdownComponent {
-  ICONS = ICONS;
+  readonly ICONS = ICONS;
+  readonly locationOptions: LocationOption[] =
+    FILTER_CATEGORIES.find((c) => c.key === 'location')?.options || [];
+
   @Input() selectedKey: string | null = null;
-  @Input() selectedLabel: string = 'City';
+  @Input() selectedLabel: string = DEFAULT_LABEL;
   @Input() opened = false;
 
   @Output() toggle = new EventEmitter<void>();
   @Output() cityChange = new EventEmitter<string>();
 
-  locationOptions: LocationOption[] =
-    FILTER_CATEGORIES.find((c) => c.key === 'location')?.options || [];
-
-  toggleDropdown(event: MouseEvent) {
+  onToggle(event: MouseEvent): void {
     event.stopPropagation();
     this.toggle.emit();
   }
 
-  selectCity(key: string, event: MouseEvent) {
+  onSelect(key: string, event: MouseEvent): void {
     event.stopPropagation();
     this.cityChange.emit(key);
   }

@@ -6,9 +6,12 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+
 import { slideDownAnimation } from '../../../../styles/animations/animations';
 import { ICONS } from '../../../core/constants/icons.constant';
 import { IconComponent } from '../../../shared/components/icon.component';
+
+type Lang = 'ENG' | 'UKR';
 
 @Component({
   selector: 'app-language-dropdown',
@@ -17,12 +20,11 @@ import { IconComponent } from '../../../shared/components/icon.component';
   animations: [slideDownAnimation],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="relative" (click)="toggleDropdown($event)">
+    <div class="relative" (click)="onToggle($event)">
       <div
         class="shadow-hover flex cursor-pointer items-center gap-1 rounded-[8px] bg-[var(--color-white)] p-[8px]"
       >
         {{ selectedLanguage }}
-
         <app-icon
           [icon]="ICONS.ChevronDown"
           [ngClass]="{ 'rotate-180': opened }"
@@ -35,38 +37,35 @@ import { IconComponent } from '../../../shared/components/icon.component';
         class="absolute left-0 top-full z-50 mt-2 flex w-full origin-top flex-col gap-[12px] rounded-[8px] bg-[var(--color-white)] p-2 shadow-lg"
       >
         <div
-          (click)="selectLanguage('ENG', $event)"
+          *ngFor="let lang of languages"
+          (click)="onSelect(lang, $event)"
           class="cursor-pointer rounded-[8px] hover:bg-[var(--color-bg)]"
         >
-          ENG
-        </div>
-        <div
-          (click)="selectLanguage('UKR', $event)"
-          class="cursor-pointer rounded-[8px] hover:bg-[var(--color-bg)]"
-        >
-          UKR
+          {{ lang }}
         </div>
       </div>
     </div>
   `,
 })
 export class LanguageDropdownComponent {
-  ICONS = ICONS;
-  @Input() selectedLanguage: 'ENG' | 'UKR' = 'ENG';
+  readonly ICONS = ICONS;
+  readonly languages: Lang[] = ['ENG', 'UKR'];
+
+  @Input() selectedLanguage: Lang = 'ENG';
   @Input() opened = false;
 
-  @Output() languageChange = new EventEmitter<'ENG' | 'UKR'>();
+  @Output() languageChange = new EventEmitter<Lang>();
   @Output() toggle = new EventEmitter<void>();
-  @Output() close = new EventEmitter<void>(); // 👈 новый output
+  @Output() close = new EventEmitter<void>();
 
-  toggleDropdown(event: MouseEvent) {
+  onToggle(event: MouseEvent): void {
     event.stopPropagation();
     this.toggle.emit();
   }
 
-  selectLanguage(lang: 'ENG' | 'UKR', event: MouseEvent) {
+  onSelect(lang: Lang, event: MouseEvent): void {
     event.stopPropagation();
     this.languageChange.emit(lang);
-    this.close.emit(); // 👈 закрыть дропдаун после выбора
+    this.close.emit();
   }
 }

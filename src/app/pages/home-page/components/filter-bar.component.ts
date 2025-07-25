@@ -8,14 +8,14 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { FILTER_CATEGORIES } from '../../../core/models/catalog-filter.config';
+import { FILTER_CATEGORIES } from '../../../core/constants/catalog-filter.config';
 import {
   fadeInBackdrop,
   slideDownAnimation,
   slideUpModal,
 } from '../../../../styles/animations/animations';
 import { UiStateService } from '../../../state/ui/ui-state.service';
-import { IconComponent } from "../../../shared/components/icon.component";
+import { IconComponent } from '../../../shared/components/icon.component';
 import { ICONS } from '../../../core/constants/icons.constant';
 
 @Component({
@@ -27,7 +27,7 @@ import { ICONS } from '../../../core/constants/icons.constant';
     <div
       class="mb-[80px] mt-[64px] grid grid-cols-4 gap-[16px] px-[20px] lg:flex lg:h-[72px] lg:gap-[20px] lg:px-0 xxl:mb-[150px] xxl:h-[84px] xxl:max-w-[896px] xxl:grid-cols-none xxl:gap-[24px]"
     >
-      <!-- Кнопка фильтров (только мобильная версия) -->
+      <!-- Mobile filter toggle button -->
       <button
         class="shadow-hover button-bg-transparent col-span-2 flex h-[48px] w-full lg:hidden"
         type="button"
@@ -36,7 +36,7 @@ import { ICONS } from '../../../core/constants/icons.constant';
         Filters
       </button>
 
-      <!-- Фильтры (десктоп / мобилка открыта) -->
+      <!-- Filters (desktop or mobile open) -->
       <div
         class="gap-[24px]"
         [ngClass]="{
@@ -64,7 +64,7 @@ import { ICONS } from '../../../core/constants/icons.constant';
               {{ selectedOptions[category.key] || category.description }}
             </span>
 
-            <!-- Dropdown (десктоп) -->
+            <!-- Desktop dropdown -->
             <ul
               *ngIf="openedDropdownIndex === i"
               @slideDownAnimation
@@ -91,7 +91,7 @@ import { ICONS } from '../../../core/constants/icons.constant';
         </div>
       </div>
 
-      <!-- Кнопка поиска -->
+      <!-- Search button -->
       <button
         class="button-bg-blue col-span-2 flex h-[48px] w-full gap-3 lg:h-[72px] lg:w-[168px] xxl:h-[84px] xxl:w-[184px]"
         type="button"
@@ -101,21 +101,21 @@ import { ICONS } from '../../../core/constants/icons.constant';
         <span class="button-font">Search</span>
       </button>
 
-      <!-- Фон с размытием -->
+      <!-- Backdrop for mobile filter -->
       <div
         *ngIf="isMobileFilterOpen"
         @fadeInBackdrop
         class="bg-[var(--color-bg)]/70 fixed inset-0 z-40 backdrop-blur-3xl lg:hidden"
       ></div>
 
-      <!-- Модальное окно фильтров (мобилка) -->
+      <!-- Mobile filter modal -->
       <div
         *ngIf="isMobileFilterOpen"
         @slideUpModal
         class="fixed inset-0 z-40 flex flex-col justify-between overflow-y-auto px-5 pt-3 lg:hidden"
         #mobileFilterModal
       >
-        <!-- Верхняя панель с крестиком -->
+        <!-- Top bar with close button -->
         <div class="flex justify-end">
           <button
             (click)="toggleMobileFilter()"
@@ -126,17 +126,17 @@ import { ICONS } from '../../../core/constants/icons.constant';
           </button>
         </div>
 
-        <!-- Контейнер фильтров -->
+        <!-- Filter categories container -->
         <div class="flex-grow" (click)="onMobileModalClick($event)">
           <div class="flex-grow">
             <div class="relative flex h-full flex-col">
-              <!-- Фильтры по категориям -->
+              <!-- Filter categories -->
               <div class="flex flex-col gap-[16px] px-[20px]">
                 <div
                   *ngFor="let category of filterCategories; let i = index"
                   class="category-filter-block col-span-4"
                 >
-                  <!-- Заголовок и описание -->
+                  <!-- Header and description -->
                   <div
                     class="flex cursor-pointer rounded-[24px] bg-[var(--color-white)] px-6 py-4 transition-all duration-300 hover:rounded-[24px] hover:bg-[var(--color-bg)]"
                     (click)="toggleMobileFilterCategory(i)"
@@ -155,7 +155,7 @@ import { ICONS } from '../../../core/constants/icons.constant';
                     </div>
                   </div>
 
-                  <!-- Скрываемый блок опций -->
+                  <!-- Collapsible options block -->
                   <div
                     class="mt-1 flex flex-col gap-1 rounded-[24px] bg-[var(--color-white)] p-4 transition-all duration-300 ease-in-out"
                     [ngStyle]="{
@@ -189,8 +189,8 @@ import { ICONS } from '../../../core/constants/icons.constant';
           </div>
         </div>
 
+        <!-- Action buttons -->
         <div class="flex w-full gap-4">
-          <!-- Кнопка применения -->
           <button
             class="button-bg-blue mb-4 mt-4 h-12 flex-1"
             (click)="applyFilters(); toggleMobileFilter()"
@@ -198,7 +198,6 @@ import { ICONS } from '../../../core/constants/icons.constant';
             Apply Filters
           </button>
 
-          <!-- Кнопка сброса -->
           <button
             class="button-bg-transparent shadow-hover mb-4 mt-4 h-12 flex-1 text-[var(--color-primary)]"
             (click)="clearAllFilters()"
@@ -213,15 +212,14 @@ import { ICONS } from '../../../core/constants/icons.constant';
 export class FilterBarComponent implements OnDestroy {
   @ViewChild('mobileFilterModal', { static: false })
   mobileFilterModal?: ElementRef;
-  ICONS = ICONS;
 
+  ICONS = ICONS;
   filterCategories = FILTER_CATEGORIES;
   selectedOptions: Record<string, string> = {};
 
   isMobileFilterOpen = false;
   mobileOpenedIndex: number | null = null;
   mobileMouseControlEnabled = false;
-
   openedDropdownIndex: number | null = null;
 
   private globalClickUnlistener: () => void;
@@ -233,7 +231,7 @@ export class FilterBarComponent implements OnDestroy {
     private uiState: UiStateService,
     private cdr: ChangeDetectorRef,
   ) {
-    // Подписка на глобальный клик по документу для закрытия фильтров при клике вне компонента
+    // Listen for clicks on document to close dropdowns and mobile filter when clicking outside
     this.globalClickUnlistener = this.renderer.listen(
       'document',
       'click',
@@ -278,12 +276,11 @@ export class FilterBarComponent implements OnDestroy {
 
   onSearchClick(): void {
     if (window.innerWidth < 1024) {
-      // Прячем фильтры
+      // On mobile, close filters and open mobile menu
       this.isMobileFilterOpen = false;
       this.enableBodyScroll();
       this.cdr.detectChanges();
 
-      // Открываем мобильное меню
       this.uiState.openMobileMenu();
     } else {
       this.applyFilters();
@@ -292,8 +289,6 @@ export class FilterBarComponent implements OnDestroy {
 
   onMobileModalClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
-
-    // Проверка: был ли клик внутри блока фильтра
     const clickedInsideCategory = target.closest('.category-filter-block');
 
     if (!clickedInsideCategory && this.mobileOpenedIndex !== null) {
@@ -347,7 +342,7 @@ export class FilterBarComponent implements OnDestroy {
 
     const clickedInsideComponent = path.includes(this.elementRef.nativeElement);
 
-    // Закрыть мобильный фильтр
+    // Close mobile filter if clicked outside
     if (
       !clickedInsideModal &&
       !clickedInsideComponent &&
@@ -360,14 +355,14 @@ export class FilterBarComponent implements OnDestroy {
       this.openedDropdownIndex = null;
     }
 
-    // Закрыть десктопный дропдаун
+    // Close desktop dropdown if clicked outside
     if (
       !clickedInsideComponent &&
       this.openedDropdownIndex !== null &&
       !this.isMobileFilterOpen
     ) {
       this.openedDropdownIndex = null;
-      this.cdr.detectChanges(); // обновить отображение
+      this.cdr.detectChanges();
     }
   }
 

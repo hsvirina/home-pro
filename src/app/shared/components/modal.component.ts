@@ -31,11 +31,19 @@ import { CommonModule } from '@angular/common';
   `],
 })
 export class ModalComponent {
+  /** Controls modal visibility */
   @Input() isOpen = false;
+
+  /** Optional modal width (default: 600px) */
   @Input() width = '600px';
+
+  /** Emits when modal should be closed */
   @Output() close = new EventEmitter<void>();
 
-  onBackdropClick(event: MouseEvent) {
+  /**
+   * Closes modal if user clicks outside the modal content
+   */
+  onBackdropClick(event: MouseEvent): void {
     if ((event.target as HTMLElement).classList.contains('modal-backdrop')) {
       this.close.emit();
     }

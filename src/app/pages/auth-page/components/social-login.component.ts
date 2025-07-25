@@ -9,26 +9,27 @@ import { ICONS } from '../../../core/constants/icons.constant';
   imports: [CommonModule, IconComponent],
   template: `
     <div class="flex flex-col gap-[20px] text-center">
+      <!-- Section title -->
       <span class="body-font-1">Or log in with</span>
+
+      <!-- Social login buttons -->
       <div class="flex gap-[10px]">
         <button
           (click)="showTemporaryMessage()"
           class="flex flex-1 items-center justify-center gap-[8px] rounded-[40px] border border-[var(--color-button-green)] px-[24px] py-[12px]"
         >
           <app-icon [icon]="ICONS.Google" />
-          <span class="button-font text-[var(--color-button-green)]"
-            >Google</span
-          >
+          <span class="button-font text-[var(--color-button-green)]">Google</span>
         </button>
+
         <button
           (click)="showTemporaryMessage()"
           class="flex flex-1 items-center justify-center gap-[8px] rounded-[40px] border border-[var(--color-button-blue)] px-[24px] py-[12px]"
         >
           <app-icon [icon]="ICONS.Facebook" />
-          <span class="button-font text-[var(--color-button-blue)]"
-            >Facebook</span
-          >
+          <span class="button-font text-[var(--color-button-blue)]">Facebook</span>
         </button>
+
         <button
           (click)="showTemporaryMessage()"
           class="flex flex-1 items-center justify-center gap-[8px] rounded-[40px] border border-[var(--color-gray-100)] px-[24px] py-[12px]"
@@ -38,6 +39,7 @@ import { ICONS } from '../../../core/constants/icons.constant';
         </button>
       </div>
 
+      <!-- Terms and privacy links -->
       <span class="body-font-1">
         By registering, you accept our
         <a
@@ -53,6 +55,7 @@ import { ICONS } from '../../../core/constants/icons.constant';
         >
       </span>
 
+      <!-- Temporary message shown when social login is clicked -->
       <div *ngIf="showMessage" class="mt-4 text-[var(--color-primary)]">
         Please use your email
       </div>
@@ -60,9 +63,15 @@ import { ICONS } from '../../../core/constants/icons.constant';
   `,
 })
 export class SocialLoginPlaceholderComponent {
+  // Icons constant import for easy icon usage in template
   ICONS = ICONS;
+
+  // Input flag to control display of temporary message
   @Input() showMessage = false;
 
+  /**
+   * Show a temporary message for 3 seconds
+   */
   showTemporaryMessage() {
     this.showMessage = true;
     setTimeout(() => {
@@ -70,9 +79,12 @@ export class SocialLoginPlaceholderComponent {
     }, 3000);
   }
 
+  /**
+   * Placeholder for navigation to home page.
+   * Replace with router navigation if needed.
+   */
   goHome() {
-    // Здесь реализуй переход на домашнюю страницу,
-    // например через Router, если нужен навигатор:
+    // Example navigation via Router could be implemented here:
     // this.router.navigate(['/']);
     console.log('Navigate to home');
   }

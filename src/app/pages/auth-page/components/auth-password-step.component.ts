@@ -10,6 +10,7 @@ import { IconComponent } from "../../../shared/components/icon.component";
   imports: [CommonModule, FormsModule, IconComponent],
   template: `
     <div class="flex flex-col gap-8">
+      <!-- Header with back button and title -->
       <div class="flex flex-col gap-5">
         <div
           class="flex cursor-pointer select-none items-center"
@@ -25,11 +26,13 @@ import { IconComponent } from "../../../shared/components/icon.component";
         </span>
       </div>
 
+      <!-- Password form -->
       <form
         autocomplete="off"
         class="flex flex-col gap-[12px]"
         (ngSubmit)="submitPassword()"
       >
+        <!-- Password input with toggle visibility -->
         <div class="relative flex flex-col gap-[4px]">
           <span class="body-font-2 text-[var(--color-gray-75)]">Password</span>
           <div class="relative">
@@ -42,7 +45,7 @@ import { IconComponent } from "../../../shared/components/icon.component";
               [class.border-red-600]="passwordTooWeak"
               [ngClass]="{
                 'text-[var(--color-gray-55)]': !password,
-                'text-[var(--color-gray-100)]': password,
+                'text-[var(--color-gray-100)]': password
               }"
               class="body-font-1 w-full rounded-[40px] border border-[var(--color-gray-20)] bg-[var(--color-bg)] px-6 py-3 outline-none focus:border-[var(--color-gray-20)]"
               required
@@ -56,11 +59,13 @@ import { IconComponent } from "../../../shared/components/icon.component";
               class="absolute right-0 top-0 flex h-full w-[60px] items-center justify-center"
             >
               <app-icon
-  [icon]="showPassword ? ICONS.EyeSlash : ICONS.Eye"
-  class="h-[20px] w-[20px]"
-/>
+                [icon]="showPassword ? ICONS.EyeSlash : ICONS.Eye"
+                class="h-[20px] w-[20px]"
+              />
             </button>
           </div>
+
+          <!-- Password strength validation message -->
           <div
             *ngIf="passwordTooWeak"
             class="body-font-2 mt-1 flex select-none items-center gap-[4px] text-[var(--color-button-error)]"
@@ -70,10 +75,9 @@ import { IconComponent } from "../../../shared/components/icon.component";
           </div>
         </div>
 
+        <!-- Confirm password input with toggle visibility -->
         <div class="relative flex flex-col gap-[4px]">
-          <span class="body-font-2 text-[var(--color-gray-75)]"
-            >Confirm Password</span
-          >
+          <span class="body-font-2 text-[var(--color-gray-75)]">Confirm Password</span>
           <div class="relative">
             <input
               autocomplete="new-password"
@@ -85,7 +89,7 @@ import { IconComponent } from "../../../shared/components/icon.component";
               [class.border-red-600]="passwordMismatch"
               [ngClass]="{
                 'text-[var(--color-gray-55)]': !repeatPassword,
-                'text-[var(--color-gray-100)]': repeatPassword,
+                'text-[var(--color-gray-100)]': repeatPassword
               }"
               class="body-font-1 w-full rounded-[40px] border border-[var(--color-gray-20)] bg-[var(--color-bg)] px-6 py-3 outline-none focus:border-[var(--color-gray-20)]"
               required
@@ -99,11 +103,13 @@ import { IconComponent } from "../../../shared/components/icon.component";
               class="absolute right-0 top-0 flex h-full w-[60px] items-center justify-center"
             >
               <app-icon
-  [icon]="showRepeatPassword ? ICONS.EyeSlash : ICONS.Eye"
-  class="h-[20px] w-[20px]"
-/>
+                [icon]="showRepeatPassword ? ICONS.EyeSlash : ICONS.Eye"
+                class="h-[20px] w-[20px]"
+              />
             </button>
           </div>
+
+          <!-- Password mismatch validation message -->
           <div
             *ngIf="passwordMismatch"
             class="body-font-2 flex select-none items-center gap-[4px] text-[var(--color-button-error)]"
@@ -113,6 +119,7 @@ import { IconComponent } from "../../../shared/components/icon.component";
           </div>
         </div>
 
+        <!-- Submit button -->
         <button
           type="submit"
           class="button-font button-bg-blue px-[32px] py-[12px]"
@@ -124,7 +131,9 @@ import { IconComponent } from "../../../shared/components/icon.component";
   `,
 })
 export class AuthPasswordStepComponent {
-  ICONS = ICONS
+  ICONS = ICONS;
+
+  // Input properties for form data and validation flags
   @Input() email = '';
   @Input() password = '';
   @Input() repeatPassword = '';
@@ -133,19 +142,29 @@ export class AuthPasswordStepComponent {
   @Input() passwordTooWeak = false;
   @Input() passwordMismatch = false;
 
+  // Output events to notify parent component about changes and actions
   @Output() passwordChange = new EventEmitter<string>();
   @Output() repeatPasswordChange = new EventEmitter<string>();
   @Output() passwordSubmit = new EventEmitter<void>();
   @Output() goBack = new EventEmitter<void>();
 
+  /**
+   * Toggle visibility of password input field
+   */
   toggleShowPassword() {
     this.showPassword = !this.showPassword;
   }
 
+  /**
+   * Toggle visibility of repeat password input field
+   */
   toggleShowRepeatPassword() {
     this.showRepeatPassword = !this.showRepeatPassword;
   }
 
+  /**
+   * Emit event to submit the password form
+   */
   submitPassword() {
     this.passwordSubmit.emit();
   }
