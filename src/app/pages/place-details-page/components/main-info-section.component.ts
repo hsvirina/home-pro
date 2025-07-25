@@ -1,11 +1,13 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Place } from '../../../models/place.model';
+import { Place } from '../../../core/models/place.model';
+import { IconComponent } from "../../../shared/components/icon.component";
+import { ICONS } from '../../../core/constants/icons.constant';
 
 @Component({
   selector: 'app-main-info-section',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, IconComponent],
   template: `
     <div class="flex flex-col gap-5">
       <h3>{{ place.name }}</h3>
@@ -15,14 +17,14 @@ import { Place } from '../../../models/place.model';
       >
         <div class="flex items-center gap-2">
           <div class="flex items-center gap-2">
-            <img src="/icons/star.png" alt="Star icon" class="h-6 w-6" />
+            <app-icon [icon]="ICONS.Star" />
             <span>{{ place.rating }}</span>
           </div>
           <span>({{ place.reviewCount }})</span>
         </div>
 
         <div class="flex items-center gap-2">
-          <img src="/icons/location.png" alt="Location icon" class="h-9" />
+           <app-icon [icon]="ICONS.Location" class="h-9" />
           <a
             [href]="googleMapsUrl"
             target="_blank"
@@ -40,6 +42,7 @@ import { Place } from '../../../models/place.model';
 export class MainInfoSectionComponent {
   @Input() place!: Place;
   floor = Math.floor;
+  ICONS = ICONS;
 
   get googleMapsUrl(): string {
     const query = encodeURIComponent(

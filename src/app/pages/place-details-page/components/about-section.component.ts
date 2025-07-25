@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Place } from '../../../models/place.model';
-import { FILTER_CATEGORIES } from '../../../models/catalog-filter.config';
+import { Place } from '../../../core/models/place.model';
+import { FILTER_CATEGORIES } from '../../../core/models/catalog-filter.config';
 
 @Component({
   selector: 'app-about-section',
@@ -16,7 +16,7 @@ import { FILTER_CATEGORIES } from '../../../models/catalog-filter.config';
       <div class="flex flex-wrap gap-2">
         <div
           *ngFor="let tag of allTags"
-          class="rounded-[40px] bg-[var(--color-white)] px-3 py-2 text-center shadow-hover"
+          class="shadow-hover rounded-[40px] bg-[var(--color-white)] px-3 py-2 text-center"
         >
           <span class="body-font-1 whitespace-nowrap">{{ tag }}</span>
         </div>

@@ -8,18 +8,20 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { FILTER_CATEGORIES } from '../../../models/catalog-filter.config';
+import { FILTER_CATEGORIES } from '../../../core/models/catalog-filter.config';
 import {
   fadeInBackdrop,
   slideDownAnimation,
   slideUpModal,
-} from '../../../../styles/animations';
-import { UiStateService } from '../../../services/ui-state.service';
+} from '../../../../styles/animations/animations';
+import { UiStateService } from '../../../state/ui/ui-state.service';
+import { IconComponent } from "../../../shared/components/icon.component";
+import { ICONS } from '../../../core/constants/icons.constant';
 
 @Component({
   selector: 'app-filter-bar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, IconComponent],
   animations: [slideDownAnimation, fadeInBackdrop, slideUpModal],
   template: `
     <div
@@ -95,11 +97,7 @@ import { UiStateService } from '../../../services/ui-state.service';
         type="button"
         (click)="onSearchClick()"
       >
-        <img
-          src="./icons/search-white.svg"
-          alt="search-button"
-          class="h-[24px] w-[24px]"
-        />
+        <app-icon [icon]="ICONS.SearchWhite" />
         <span class="button-font">Search</span>
       </button>
 
@@ -124,58 +122,65 @@ import { UiStateService } from '../../../services/ui-state.service';
             class="mb-[25px] flex h-10 w-10 items-center justify-center rounded-[40px] bg-[var(--color-white)]"
             aria-label="Close"
           >
-            <img src="/icons/close.svg" alt="close" class="h-5 w-5" />
+            <app-icon [icon]="ICONS.Close" class="h-5 w-5" />
           </button>
         </div>
 
         <!-- Контейнер фильтров -->
-        <div class="flex-grow">
-          <div class="relative flex h-full flex-col">
-            <!-- Фильтры по категориям -->
-            <div class="flex flex-col gap-[16px] px-[20px]">
-              <div
-                *ngFor="let category of filterCategories; let i = index"
-                class="col-span-4"
-              >
-                <!-- Заголовок и описание -->
+        <div class="flex-grow" (click)="onMobileModalClick($event)">
+          <div class="flex-grow">
+            <div class="relative flex h-full flex-col">
+              <!-- Фильтры по категориям -->
+              <div class="flex flex-col gap-[16px] px-[20px]">
                 <div
-                  class="flex cursor-pointer rounded-[24px] bg-[var(--color-white)] px-6 py-4 transition-all duration-300 hover:rounded-[24px] hover:bg-[var(--color-bg)]"
-                  (click)="toggleMobileFilterCategory(i)"
-                  [ngClass]="{
-                    'flex-row items-center justify-between gap-2':
-                      mobileOpenedIndex !== i,
-                    'flex-col': mobileOpenedIndex === i,
-                  }"
+                  *ngFor="let category of filterCategories; let i = index"
+                  class="category-filter-block col-span-4"
                 >
-                  <div class="menu-text-font">{{ category.title }}</div>
-                  <div class="body-font-1 text-[var(--color-gray-75)]">
-                    {{ selectedOptions[category.key] || category.description }}
-                  </div>
-                </div>
-
-                <!-- Скрываемый блок опций -->
-                <div
-                  class="mt-1 flex flex-col gap-1 rounded-[24px] bg-[var(--color-white)] p-4 transition-all duration-300 ease-in-out"
-                  [ngStyle]="{
-                    maxHeight: mobileOpenedIndex === i ? '1000px' : '0',
-                    opacity: mobileOpenedIndex === i ? '1' : '0',
-                    paddingTop: mobileOpenedIndex === i ? '12px' : '0',
-                    overflow: mobileOpenedIndex === i ? 'visible' : 'hidden',
-                  }"
-                >
+                  <!-- Заголовок и описание -->
                   <div
-                    *ngFor="let option of category.options"
-                    (click)="selectOption(category.key, option.label)"
-                    class="flex cursor-pointer items-center gap-2 p-2 transition-colors duration-300 hover:rounded-[24px] hover:bg-[var(--color-bg)]"
+                    class="flex cursor-pointer rounded-[24px] bg-[var(--color-white)] px-6 py-4 transition-all duration-300 hover:rounded-[24px] hover:bg-[var(--color-bg)]"
+                    (click)="toggleMobileFilterCategory(i)"
+                    (mouseenter)="onMobileCategoryHover(i)"
+                    [ngClass]="{
+                      'flex-row items-center justify-between gap-2':
+                        mobileOpenedIndex !== i,
+                      'flex-col': mobileOpenedIndex === i,
+                    }"
                   >
-                    <img
-                      [src]="option.imageURL"
-                      alt="icon"
-                      class="h-[40px] w-[40px] rounded-full"
-                    />
-                    <div class="flex flex-col">
-                      <span class="menu-text-font">{{ option.label }}</span>
-                      <span class="body-font-2">{{ option.description }}</span>
+                    <div class="menu-text-font">{{ category.title }}</div>
+                    <div class="body-font-1 text-[var(--color-gray-75)]">
+                      {{
+                        selectedOptions[category.key] || category.description
+                      }}
+                    </div>
+                  </div>
+
+                  <!-- Скрываемый блок опций -->
+                  <div
+                    class="mt-1 flex flex-col gap-1 rounded-[24px] bg-[var(--color-white)] p-4 transition-all duration-300 ease-in-out"
+                    [ngStyle]="{
+                      maxHeight: mobileOpenedIndex === i ? '1000px' : '0',
+                      opacity: mobileOpenedIndex === i ? '1' : '0',
+                      paddingTop: mobileOpenedIndex === i ? '12px' : '0',
+                      overflow: mobileOpenedIndex === i ? 'visible' : 'hidden',
+                    }"
+                  >
+                    <div
+                      *ngFor="let option of category.options"
+                      (click)="selectOption(category.key, option.label)"
+                      class="flex cursor-pointer items-center gap-2 p-2 transition-colors duration-300 hover:rounded-[24px] hover:bg-[var(--color-bg)]"
+                    >
+                      <img
+                        [src]="option.imageURL"
+                        alt="icon"
+                        class="h-[40px] w-[40px] rounded-full"
+                      />
+                      <div class="flex flex-col">
+                        <span class="menu-text-font">{{ option.label }}</span>
+                        <span class="body-font-2">{{
+                          option.description
+                        }}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -184,23 +189,23 @@ import { UiStateService } from '../../../services/ui-state.service';
           </div>
         </div>
 
-        <div class="flex gap-4 w-full">
-  <!-- Кнопка применения -->
-  <button
-    class="flex-1 button-bg-blue mb-4 mt-4 h-12"
-    (click)="applyFilters(); toggleMobileFilter()"
-  >
-    Apply Filters
-  </button>
+        <div class="flex w-full gap-4">
+          <!-- Кнопка применения -->
+          <button
+            class="button-bg-blue mb-4 mt-4 h-12 flex-1"
+            (click)="applyFilters(); toggleMobileFilter()"
+          >
+            Apply Filters
+          </button>
 
-  <!-- Кнопка сброса -->
-  <button
-    class="flex-1 button-bg-transparent mb-4 mt-4 h-12 text-[var(--color-primary)] shadow-hover"
-    (click)="clearAllFilters()"
-  >
-    Clear All
-  </button>
-</div>
+          <!-- Кнопка сброса -->
+          <button
+            class="button-bg-transparent shadow-hover mb-4 mt-4 h-12 flex-1 text-[var(--color-primary)]"
+            (click)="clearAllFilters()"
+          >
+            Clear All
+          </button>
+        </div>
       </div>
     </div>
   `,
@@ -208,6 +213,7 @@ import { UiStateService } from '../../../services/ui-state.service';
 export class FilterBarComponent implements OnDestroy {
   @ViewChild('mobileFilterModal', { static: false })
   mobileFilterModal?: ElementRef;
+  ICONS = ICONS;
 
   filterCategories = FILTER_CATEGORIES;
   selectedOptions: Record<string, string> = {};
@@ -284,6 +290,19 @@ export class FilterBarComponent implements OnDestroy {
     }
   }
 
+  onMobileModalClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+
+    // Проверка: был ли клик внутри блока фильтра
+    const clickedInsideCategory = target.closest('.category-filter-block');
+
+    if (!clickedInsideCategory && this.mobileOpenedIndex !== null) {
+      this.mobileOpenedIndex = null;
+      this.mobileMouseControlEnabled = false;
+      this.cdr.detectChanges();
+    }
+  }
+
   toggleDropdown(index: number): void {
     this.openedDropdownIndex =
       this.openedDropdownIndex === index ? null : index;
@@ -328,6 +347,7 @@ export class FilterBarComponent implements OnDestroy {
 
     const clickedInsideComponent = path.includes(this.elementRef.nativeElement);
 
+    // Закрыть мобильный фильтр
     if (
       !clickedInsideModal &&
       !clickedInsideComponent &&
@@ -338,6 +358,23 @@ export class FilterBarComponent implements OnDestroy {
       this.mobileOpenedIndex = null;
       this.mobileMouseControlEnabled = false;
       this.openedDropdownIndex = null;
+    }
+
+    // Закрыть десктопный дропдаун
+    if (
+      !clickedInsideComponent &&
+      this.openedDropdownIndex !== null &&
+      !this.isMobileFilterOpen
+    ) {
+      this.openedDropdownIndex = null;
+      this.cdr.detectChanges(); // обновить отображение
+    }
+  }
+
+  onMobileCategoryHover(index: number): void {
+    if (this.mobileMouseControlEnabled && this.mobileOpenedIndex !== index) {
+      this.mobileOpenedIndex = index;
+      this.cdr.detectChanges();
     }
   }
 

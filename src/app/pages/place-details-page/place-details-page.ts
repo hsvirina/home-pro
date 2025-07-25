@@ -1,18 +1,27 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  HostListener,
+  ChangeDetectorRef,
+  ViewChild,
+  ElementRef,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, NgIf } from '@angular/common';
-import { Place } from '../../models/place.model';
-import { PlacesService } from '../../services/places.service';
+
+import { Place } from '../../core/models/place.model';
+import { PlacesService } from '../../core/services/places.service';
+import { FavoritesService } from '../../core/services/favorites.service';
+import { AuthStateService } from '../../state/auth/auth-state.service';
+
 import { CarouselSectionComponent } from './components/carousel-section.component';
 import { InfoSectionComponent } from './components/info-section.component';
 import { MainInfoSectionComponent } from './components/main-info-section.component';
 import { AboutSectionComponent } from './components/about-section.component';
-import { BreadcrumbsComponent } from '../../components/breadcrumbs.component';
-import { User } from '../../models/user.model';
-import { AuthService } from '../../services/auth.service';
-import { FavoritesService } from '../../services/favorites.service';
+import { BreadcrumbsComponent } from '../../shared/components/breadcrumbs.component';
 import { ReviewsSectionComponent } from './components/reviews-section.component';
 import { ActionsSectorComponent } from './components/actions-sector.component';
+import { ModalComponent } from '../../shared/components/modal.component';
 
 @Component({
   selector: 'app-place-details-page',
@@ -20,16 +29,20 @@ import { ActionsSectorComponent } from './components/actions-sector.component';
   imports: [
     CommonModule,
     NgIf,
-    InfoSectionComponent,
     CarouselSectionComponent,
+    InfoSectionComponent,
     MainInfoSectionComponent,
     AboutSectionComponent,
     BreadcrumbsComponent,
     ReviewsSectionComponent,
     ActionsSectorComponent,
+    ModalComponent,
   ],
   template: `
-    <div *ngIf="place" class="mx-auto flex max-w-[1320px] flex-col gap-12">
+    <div
+      *ngIf="place"
+      class="flex max-w-[1320px] flex-col gap-20 px-5 lg:gap-12 lg:px-10 xxl:mx-auto"
+    >
       <app-breadcrumbs [lastLabel]="place.name"></app-breadcrumbs>
 
       <app-carousel-section
@@ -37,230 +50,193 @@ import { ActionsSectorComponent } from './components/actions-sector.component';
         [isFavorite]="isFavorite"
         (onToggleFavorite)="handleFavorite()"
         (onShare)="openShareModal()"
-      />
+      ></app-carousel-section>
 
-      <app-main-info-section [place]="place" />
-
-      <app-info-section [place]="place" />
-
-      <app-about-section [place]="place" />
+      <app-main-info-section [place]="place"></app-main-info-section>
+      <app-info-section [place]="place"></app-info-section>
+      <app-about-section [place]="place"></app-about-section>
 
       <app-reviews-section
         [cafeId]="place.id"
         [place]="place"
         [currentUser]="currentUser"
-      />
+        [isMobile]="isMobile"
+        [showAddReviewForm]="showAddReviewForm"
+        [alwaysShowFormOnDesktop]="!isMobile"
+        (closeAddReviewForm)="showAddReviewForm = false"
+      ></app-reviews-section>
 
       <app-actions-sector
         [isFavorite]="isFavorite"
+        [isMobile]="isMobile"
+        [showAddReviewForm]="showAddReviewForm"
+        (leaveReviewClick)="handleLeaveReviewClick()"
         (onToggleFavorite)="handleFavorite()"
         (onShare)="openShareModal()"
       />
     </div>
 
-    <!-- Модальное окно авторизации -->
-    <div
-      *ngIf="showLoginModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-    >
-      <div
-        class="flex w-full max-w-[650px] flex-col items-center justify-between gap-[32px] rounded-[40px] bg-[var(--color-bg-2)] p-[24px] text-center text-[var(--color-gray-100)] shadow-xl"
-      >
-        <div class="flex flex-col gap-[20px]">
-          <h4>Please log in to use favorites</h4>
-          <p class="body-font-1 text-[var(--color-gray-100)]">
-            This feature is available for registered users only.
-            <br />
-            Please sign in or create an account to add cafés to favorites.
-          </p>
-        </div>
-        <div class="flex w-full flex-col gap-4 sm:flex-row">
-          <button
-            (click)="navigateToAuth()"
-            class="button-font h-[48px] w-full rounded-[40px] bg-[var(--color-primary)] px-[32px] py-[12px] text-[var(--color-white)] transition-colors duration-200 hover:bg-[var(--color-hover-primary)] active:bg-[var(--color-pressed-primary)]"
-          >
-            Log in
-          </button>
-          <button
-            (click)="closeModal()"
-            class="button-font h-[48px] w-full rounded-[40px] border border-[var(--color-gray-40)] bg-transparent px-[32px] py-[12px] text-[var(--color-gray-100)] transition-colors duration-200 hover:bg-[var(--color-gray-10)] active:bg-[var(--color-gray-20)]"
-          >
-            Close
-          </button>
-        </div>
+    <!-- Login Modal -->
+    <app-modal [isOpen]="showLoginModal" (close)="showLoginModal = false">
+      <h4 class="mb-4 text-xl font-semibold">Please log in</h4>
+      <p class="mb-4 text-gray-600">
+        You must be logged in to add cafés to your favorites.
+      </p>
+      <div class="flex justify-center gap-4">
+        <button (click)="navigateToAuth()" class="button-bg-blue px-6 py-2">
+          Log In
+        </button>
+        <button
+          (click)="showLoginModal = false"
+          class="button-bg-transparent px-6 py-2"
+        >
+          Close
+        </button>
       </div>
-    </div>
+    </app-modal>
 
-    <!-- Модальное окно шейра -->
-    <div
-      *ngIf="showShareModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-    >
-      <div
-        class="flex w-full max-w-[650px] flex-col items-center justify-between gap-[32px] rounded-[40px] bg-[var(--color-bg-2)] p-[24px] text-center text-[var(--color-gray-100)] shadow-xl"
-      >
-        <div class="flex w-full flex-col gap-[20px]">
-          <h4>Share this café</h4>
-          <div
-            class="flex items-center gap-2 rounded-[40px] border border-[var(--color-gray-40)] bg-white px-4 py-3"
-          >
-            <input
-              type="text"
-              [value]="currentShareLink"
-              readonly
-              class="w-full truncate border-none bg-transparent outline-none"
-            />
-          </div>
-        </div>
-
-        <div class="flex w-full flex-col gap-4 sm:flex-row">
-          <button
-            (click)="handleShare()"
-            [ngClass]="[
-              'button-font bg-[var(--color-primary)] h-[48px] w-full rounded-[40px] px-[32px] py-[12px] text-[var(--color-white)] transition-colors duration-200',
-              copied
-                ? 'cursor-default bg-[var(--color-hover-primary)]'
-                : 'cursor-pointer hover:bg-[var(--color-hover-primary)] active:bg-[var(--color-pressed-primary)]',
-            ]"
-          >
-            {{ copied ? 'Copied!' : 'Copy' }}
-          </button>
-          <button
-            (click)="closeShareModal()"
-            class="button-font h-[48px] w-full rounded-[40px] border border-[var(--color-gray-40)] bg-transparent px-[32px] py-[12px] text-[var(--color-gray-100)] transition-colors duration-200 hover:bg-[var(--color-gray-10)] active:bg-[var(--color-gray-20)]"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
+    <!-- Share Modal -->
+    <app-modal [isOpen]="showShareModal" (close)="showShareModal = false">
+      <h4 class="mb-4 text-xl font-semibold">Share this café</h4>
+      <input
+        [value]="currentShareLink"
+        readonly
+        class="mb-4 w-full truncate rounded-lg border p-3"
+      />
+      <button (click)="handleShare()" class="button-bg-blue h-12 w-full">
+        {{ copied ? 'Copied!' : 'Copy Link' }}
+      </button>
+    </app-modal>
   `,
 })
 export class PlaceDetailsPageComponent implements OnInit {
   place: Place | null = null;
+  isMobile = false;
+  showAddReviewForm = false;
   showLoginModal = false;
   showShareModal = false;
   copied = false;
+  @ViewChild(ReviewsSectionComponent, { read: ElementRef })
+  reviewsSectionRef!: ElementRef;
+
+  private scrollToReviewForm = false;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private placesService: PlacesService,
     private favoritesService: FavoritesService,
-    public authService: AuthService,
+    private authService: AuthStateService,
     private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
+    this.updateScreenMode();
+    this.loadPlace();
+  }
 
-    const loadPlace = () => {
-      this.placesService.getPlaces().subscribe({
-        next: (places: Place[]) => {
-          const found = places.find((p) => p.id.toString() === id);
-          if (found) {
-            this.place = found;
-            this.cdr.detectChanges();
-          } else {
-            this.router.navigate(['/not-found']);
-          }
-        },
-        error: (err) => {
-          console.error('Error loading places:', err);
-          this.router.navigate(['/not-found']);
-        },
-      });
-    };
+  @HostListener('window:resize')
+  onResize() {
+    this.updateScreenMode();
+  }
 
-    if (this.authService.getCurrentUser()) {
-      loadPlace();
-    } else if (this.authService.getToken()) {
-      this.authService.loadUserInfo().subscribe({
-        next: (user) => {
-          if (user && user.favoriteCafeIds) {
-            // Приводим все favoriteCafeIds к числам
-            user.favoriteCafeIds = user.favoriteCafeIds.map(id => Number(id));
-          }
-          loadPlace();
-        },
-        error: (err) => {
-          console.error('Error loading user info:', err);
-          loadPlace();
-        },
-      });
-    } else {
-      loadPlace();
+  handleLeaveReviewClick() {
+    this.showAddReviewForm = true;
+    if (this.isMobile) {
+      this.scrollToReviewForm = true;
     }
+  }
+
+  ngAfterViewChecked() {
+    if (this.scrollToReviewForm) {
+      this.scrollToReviewForm = false;
+      if (this.reviewsSectionRef) {
+        this.reviewsSectionRef.nativeElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }
+    }
+  }
+
+  private updateScreenMode() {
+    this.isMobile = window.innerWidth < 1024;
+    this.cdr.detectChanges();
+  }
+
+  private loadPlace() {
+    const id = this.route.snapshot.paramMap.get('id');
+    this.placesService.getPlaces().subscribe({
+      next: (places) => {
+        this.place = places.find((p) => p.id.toString() === id) || null;
+        if (!this.place) this.router.navigate(['/not-found']);
+      },
+      error: () => this.router.navigate(['/not-found']),
+    });
+  }
+
+  get currentUser() {
+    return this.authService.getCurrentUser();
+  }
+
+  get isFavorite(): boolean {
+    return !!(
+      this.place &&
+      this.currentUser &&
+      this.currentUser.favoriteCafeIds.includes(this.place.id)
+    );
+  }
+
+  navigateToAuth() {
+    this.showLoginModal = false;
+    this.router.navigate(['/auth']);
+  }
+
+  handleFavorite() {
+    if (!this.currentUser) {
+      this.showLoginModal = true;
+      return;
+    }
+
+    const cafeId = this.place!.id;
+    const obs = this.isFavorite
+      ? this.favoritesService.removeFavorite(cafeId)
+      : this.favoritesService.addFavorite(cafeId);
+
+    obs.subscribe({
+      next: () => {
+        const user = this.authService.getCurrentUser();
+        if (!user) return;
+
+        if (this.isFavorite) {
+          // удаляем
+          user.favoriteCafeIds = user.favoriteCafeIds.filter(
+            (id) => id !== cafeId,
+          );
+        } else {
+          // добавляем
+          user.favoriteCafeIds.push(cafeId);
+        }
+
+        this.cdr.detectChanges(); // обязательно для обновления UI
+      },
+      error: () => {},
+    });
   }
 
   get currentShareLink(): string {
     return `${window.location.origin}/places/${this.place?.id}`;
   }
 
-  get isAuthenticated(): boolean {
-    return !!this.authService.getToken();
-  }
-
-  get currentUser(): User | null {
-    return this.authService.getCurrentUser();
-  }
-
-  get isFavorite(): boolean {
-    if (!this.place || !this.currentUser) return false;
-    return this.currentUser.favoriteCafeIds.includes(this.place.id);
-  }
-
-  navigateToAuth(): void {
-    this.showLoginModal = false;
-    this.router.navigate(['/auth']);
-  }
-
-  handleFavorite(): void {
-    if (!this.isAuthenticated || !this.currentUser) {
-      this.showLoginModal = true;
-      return;
-    }
-
-    const cafeId = this.place!.id;
-    const isFav = this.currentUser.favoriteCafeIds.includes(cafeId);
-
-    const obs = isFav
-      ? this.favoritesService.removeFavorite(cafeId)
-      : this.favoritesService.addFavorite(cafeId);
-
-    obs.subscribe({
-      next: () => {
-        if (isFav) {
-          this.currentUser!.favoriteCafeIds = this.currentUser!.favoriteCafeIds.filter(id => id !== cafeId);
-        } else {
-          this.currentUser!.favoriteCafeIds = [...this.currentUser!.favoriteCafeIds, cafeId];
-        }
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error(`❌ Ошибка при ${isFav ? 'удалении' : 'добавлении'} в избранное:`, err);
-      },
-    });
-  }
-
-  handleShare(): void {
-    navigator.clipboard.writeText(this.currentShareLink).then(() => {
-      this.copied = true;
-      setTimeout(() => this.copied = false, 5000);
-    });
-  }
-
-  openShareModal(): void {
+  openShareModal() {
     this.showShareModal = true;
     this.copied = false;
   }
 
-  closeShareModal(): void {
-    this.showShareModal = false;
-    this.copied = false;
-  }
-
-  closeModal(): void {
-    this.showLoginModal = false;
+  handleShare() {
+    navigator.clipboard.writeText(this.currentShareLink).then(() => {
+      this.copied = true;
+      setTimeout(() => (this.copied = false), 3000);
+    });
   }
 }

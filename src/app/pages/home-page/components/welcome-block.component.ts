@@ -1,10 +1,12 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { IconComponent } from "../../../shared/components/icon.component";
+import { ICONS } from '../../../core/constants/icons.constant';
 
 @Component({
   selector: 'app-welcome-block',
   standalone: true,
-  imports: [RouterModule],
+  imports: [RouterModule, IconComponent],
   template: `
     <div
       class="mb-[80px] mt-[36px] grid grid-cols-8 items-center gap-[48px] px-[20px] lg:my-[100px] xxl:my-[150px] xxl:gap-[20px] xxl:px-[0px]"
@@ -53,24 +55,18 @@ import { RouterModule } from '@angular/router';
 
         <div class="grid h-[48px] grid-cols-2 gap-[16px] lg:hidden">
           <button
-            class="menu-text-font col-span-1 button-bg-blue"
+            class="menu-text-font button-bg-blue col-span-1"
             [routerLink]="['/catalog']"
           >
             View
           </button>
 
           <button
-            class="col-span-1 flex h-[48px] shadow-hover button-bg-transparent gap-[8px]"
+            class="shadow-hover button-bg-transparent col-span-1 flex h-[48px] gap-[8px]"
             [routerLink]="['/catalog']"
           >
-            <span class="menu-text-font"
-              >Details</span
-            >
-            <img
-              src="/icons/arrow_down_right_primary.svg"
-              alt="Icon arrow down right"
-              class="h-[32px] w-[32px]"
-            />
+            <span class="menu-text-font">Details</span>
+            <app-icon [icon]="ICONS.ArrowDownRightPrimary" class="h-[32px] w-[32px]" />
           </button>
         </div>
       </div>
@@ -79,7 +75,7 @@ import { RouterModule } from '@angular/router';
         class="col-span-8 max-h-[500px] overflow-hidden rounded-[40px] lg:col-span-4"
       >
         <img
-          src="./placeholder-image.jpg"
+          src="./assets/placeholder-image.jpg"
           alt="Placeholder Image"
           class="h-auto w-full object-cover"
         />
@@ -87,4 +83,6 @@ import { RouterModule } from '@angular/router';
     </div>
   `,
 })
-export class WelcomeBlockComponent {}
+export class WelcomeBlockComponent {
+  ICONS = ICONS;
+}

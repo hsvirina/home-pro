@@ -1,12 +1,14 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { User } from '../../../models/user.model';
+import { User } from '../../../core/models/user.model';
+import { IconComponent } from '../../../shared/components/icon.component';
+import { ICONS } from '../../../core/constants/icons.constant';
 
 @Component({
   selector: 'app-info-sector',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, IconComponent],
   template: `
     <div
       class="flex flex-col gap-[32px] rounded-[24px] border border-[var(--color-gray-20)] bg-[var(--color-white)] p-[16px] lg:gap-[48px] lg:p-[32px] xxl:gap-[20px]"
@@ -33,7 +35,9 @@ import { User } from '../../../models/user.model';
                 <input
                   type="text"
                   [(ngModel)]="editableUser.firstName"
-                  (ngModelChange)="fieldChange.emit({ field: 'firstName', value: $event })"
+                  (ngModelChange)="
+                    fieldChange.emit({ field: 'firstName', value: $event })
+                  "
                   [readonly]="!isEditing"
                   class="input-field"
                   [ngClass]="{ editable: isEditing }"
@@ -41,7 +45,9 @@ import { User } from '../../../models/user.model';
                 <input
                   type="text"
                   [(ngModel)]="editableUser.lastName"
-                  (ngModelChange)="fieldChange.emit({ field: 'lastName', value: $event })"
+                  (ngModelChange)="
+                    fieldChange.emit({ field: 'lastName', value: $event })
+                  "
                   [readonly]="!isEditing"
                   class="input-field"
                   [ngClass]="{ editable: isEditing }"
@@ -58,7 +64,9 @@ import { User } from '../../../models/user.model';
                 <input
                   type="text"
                   [(ngModel)]="editableUser.defaultCity"
-                  (ngModelChange)="fieldChange.emit({ field: 'defaultCity', value: $event })"
+                  (ngModelChange)="
+                    fieldChange.emit({ field: 'defaultCity', value: $event })
+                  "
                   [readonly]="!isEditing"
                   class="input-field city-input"
                   [ngClass]="{ editable: isEditing }"
@@ -81,13 +89,18 @@ import { User } from '../../../models/user.model';
       </div>
 
       <!-- Повтор имени, города и email -->
-      <div class="flex flex-col gap-[20px] lg:flex-row lg:justify-between xxl:col-span-8">
+      <div
+        class="flex flex-col gap-[20px] lg:flex-row lg:justify-between xxl:col-span-8"
+      >
         <!-- Full Name -->
         <div class="flex gap-3">
           <div
             class="flex h-[50px] w-[50px] items-center justify-center rounded-[25px] bg-[var(--color-bg-2)]"
           >
-            <img src="/icons/id-pass.png" alt="" class="h-[26px] w-[20px]" />
+            <app-icon
+              [icon]="ICONS.IdPass"
+              class="h-[26px] w-[20px]"
+            ></app-icon>
           </div>
           <div class="flex flex-col gap-1">
             <p class="body-font-1">Full Name</p>
@@ -100,7 +113,10 @@ import { User } from '../../../models/user.model';
           <div
             class="flex h-[50px] w-[50px] items-center justify-center rounded-[25px] bg-[var(--color-bg-2)]"
           >
-            <img src="/icons/location.png" alt="" class="h-[26px] w-[20px]" />
+            <app-icon
+              [icon]="ICONS.Location"
+              class="h-[26px] w-[20px]"
+            ></app-icon>
           </div>
           <div class="flex flex-col gap-1">
             <p class="body-font-1">Location</p>
@@ -113,7 +129,10 @@ import { User } from '../../../models/user.model';
           <div
             class="flex h-[50px] w-[50px] items-center justify-center rounded-[25px] bg-[var(--color-bg-2)]"
           >
-            <img src="/icons/letter.png" alt="" class="h-[26px] w-[20px]" />
+            <app-icon
+              [icon]="ICONS.Letter"
+              class="h-[26px] w-[20px]"
+            ></app-icon>
           </div>
           <div class="flex flex-col gap-1">
             <p class="body-font-1">Email</p>
@@ -143,7 +162,8 @@ import { User } from '../../../models/user.model';
           <div class="flex flex-col gap-[20px]">
             <h4>Unsaved Changes</h4>
             <p class="body-font-1 text-[var(--color-gray-100)]">
-              You have updated your profile. To save changes, please click "Save All Changes" below.
+              You have updated your profile. To save changes, please click "Save
+              All Changes" below.
             </p>
           </div>
           <button
@@ -166,7 +186,9 @@ import { User } from '../../../models/user.model';
         font-size: 1rem;
         width: auto;
         max-width: 140px;
-        transition: border-color 0.2s, background-color 0.2s;
+        transition:
+          border-color 0.2s,
+          background-color 0.2s;
         color: var(--color-gray-100);
         cursor: default;
       }
@@ -193,6 +215,7 @@ import { User } from '../../../models/user.model';
   ],
 })
 export class InfoSectorComponent {
+  ICONS = ICONS;
   @Input() editableUser!: User;
   @Input() isEditing = false;
   @Input() hasPendingChanges = false;

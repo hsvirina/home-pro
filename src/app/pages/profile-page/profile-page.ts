@@ -2,16 +2,17 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
-import { AuthService } from '../../services/auth.service';
-import { PlacesService } from '../../services/places.service';
+import { PlacesService } from '../../core/services/places.service';
 
 import { InfoSectorComponent } from './components/info-sector.component';
 import { FavoritesSliderComponent } from './components/favorites-sector.component';
 import { SettingsSectorComponent } from './components/settings-sector.component';
 
-import { User } from '../../models/user.model';
-import { Place } from '../../models/place.model';
-import { PlaceCardType } from '../../models/place-card-type.enum';
+import { User } from '../../core/models/user.model';
+import { Place } from '../../core/models/place.model';
+import { PlaceCardType } from '../../core/models/place-card-type.enum';
+import { AuthApiService } from '../../core/services/auth-api.service';
+import { AuthStateService } from '../../state/auth/auth-state.service';
 
 @Component({
   selector: 'app-profile-page',
@@ -42,13 +43,13 @@ import { PlaceCardType } from '../../models/place-card-type.enum';
         ></app-favorites-sector>
 
         <!-- Settings -->
-<app-settings-sector
-  *ngIf="editedUser"
-  class="col-span-4 lg:col-span-8"
-  [user]="editedUser"
-  [places]="allPlaces"
-  (settingsChanged)="onSettingsChanged()"
-></app-settings-sector>
+        <app-settings-sector
+          *ngIf="editedUser"
+          class="col-span-4 lg:col-span-8"
+          [user]="editedUser"
+          [places]="allPlaces"
+          (settingsChanged)="onSettingsChanged()"
+        ></app-settings-sector>
 
         <!-- Save button -->
         <div
@@ -99,35 +100,37 @@ export class ProfilePageComponent implements OnInit {
   isEditing = false;
   hasPendingChanges = false;
 
-  showModal = false; // 👈 новое состояние
+  showModal = false;
   allPlaces: Place[] = [];
 
   constructor(
-    private authService: AuthService,
     private router: Router,
+    private authService: AuthStateService,
     private placesService: PlacesService,
   ) {}
+
   ngOnInit(): void {
     this.authService.loadUserInfo().subscribe({
-      next: (userFromService) => {
+      next: (userFromService: User) => {
         this.user = userFromService;
         this.editedUser = { ...userFromService };
         this.loadFavoriteCafes();
-        this.loadAllPlaces(); // загружаем все места
+        this.loadAllPlaces();
       },
-      error: (err) =>
+      error: (err: any) =>
         console.error('❌ Ошибка при загрузке пользователя:', err),
     });
   }
 
   private loadAllPlaces() {
     this.placesService.getPlaces().subscribe({
-      next: (places) => {
+      next: (places: Place[]) => {
         this.allPlaces = places;
       },
       error: (err) => console.error('❌ Ошибка при загрузке всех мест:', err),
     });
   }
+
   private loadFavoriteCafes(): void {
     if (!this.user || !this.user.favoriteCafeIds?.length) {
       this.favorites = [];
@@ -137,7 +140,7 @@ export class ProfilePageComponent implements OnInit {
     const favoriteIds = this.user.favoriteCafeIds.map((id) => Number(id));
 
     this.placesService.getPlaces().subscribe({
-      next: (allPlaces) => {
+      next: (allPlaces: Place[]) => {
         this.favorites = allPlaces.filter((place) =>
           favoriteIds.includes(place.id),
         );
@@ -147,7 +150,6 @@ export class ProfilePageComponent implements OnInit {
   }
 
   handleToggleEdit() {
-    // просто переключаем режим, без сохранения на сервер
     this.isEditing = !this.isEditing;
   }
 
@@ -171,14 +173,14 @@ export class ProfilePageComponent implements OnInit {
     };
 
     this.authService.updateUserProfile(payload).subscribe({
-      next: (updated) => {
+      next: (updated: User) => {
         this.user = updated;
         this.editedUser = { ...updated };
         this.isEditing = false;
         this.hasPendingChanges = false;
-        this.showModal = true; // 👈 показываем модалку
+        this.showModal = true;
       },
-      error: (err) => console.error('❌ Ошибка обновления профиля', err),
+      error: (err: any) => console.error('❌ Ошибка обновления профиля', err),
     });
   }
 

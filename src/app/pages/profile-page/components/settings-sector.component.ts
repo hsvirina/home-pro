@@ -1,14 +1,16 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Theme } from '../../../models/theme.enum';
-import { User } from '../../../models/user.model';
+import { Theme } from '../../../core/models/theme.enum';
+import { User } from '../../../core/models/user.model';
 import jsPDF from 'jspdf';
-import { Place } from '../../../models/place.model';
+import { Place } from '../../../core/models/place.model';
+import { IconComponent } from '../../../shared/components/icon.component';
+import { ICONS } from '../../../core/constants/icons.constant';
 
 @Component({
   selector: 'app-settings-sector',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, IconComponent],
   template: `
     <div class="flex flex-col gap-4 lg:gap-3">
       <h4>Settings</h4>
@@ -33,10 +35,9 @@ import { Place } from '../../../models/place.model';
               (click)="toggleThemeDropdown()"
             >
               <span class="capitalize">{{ user.theme }}</span>
-              <img
-                src="/icons/chevron-down.svg"
-                alt="Expand"
-                class="h-6 w-6 transition-transform"
+              <app-icon
+                [icon]="ICONS.ChevronDown"
+                class="transition-transform"
                 [ngClass]="{ 'rotate-180': isThemeDropdownOpen }"
               />
             </div>
@@ -76,10 +77,9 @@ import { Place } from '../../../models/place.model';
                     : 'English'
                 }}
               </span>
-              <img
-                src="/icons/chevron-down.svg"
-                alt="Expand"
-                class="h-6 w-6 transition-transform"
+              <app-icon
+                [icon]="ICONS.ChevronDown"
+                class="transition-transform"
                 [ngClass]="{ 'rotate-180': isLanguageDropdownOpen }"
               />
             </div>
@@ -266,6 +266,7 @@ export class SettingsSectorComponent {
   @Output() settingsChanged = new EventEmitter<void>();
 
   isThemeDropdownOpen = false;
+  ICONS = ICONS;
   isLanguageDropdownOpen = false;
 
   showDeleteAccountModal = false;
@@ -328,10 +329,6 @@ export class SettingsSectorComponent {
   }
 
   exportData(): void {
-    console.log('--- exportData started ---');
-    console.log('User favoriteCafeIds:', this.user.favoriteCafeIds);
-    console.log('Places list length:', this.places.length);
-
     const doc = new jsPDF();
 
     doc.setFontSize(16);
@@ -345,12 +342,12 @@ export class SettingsSectorComponent {
 
     const favoriteIds =
       this.user.favoriteCafeIds?.map((id) => Number(id)) || [];
-    console.log('Converted favorite IDs to numbers:', favoriteIds);
+
 
     const favoriteCafes = this.places.filter((place) =>
       favoriteIds.includes(place.id),
     );
-    console.log('Filtered favorite cafes:', favoriteCafes);
+
 
     let y = 80;
 
@@ -366,7 +363,6 @@ export class SettingsSectorComponent {
       y += 10;
     }
 
-    console.log('--- exportData finished ---');
     doc.save('user-profile.pdf');
   }
 

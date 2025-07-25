@@ -1,12 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { SliderPlacesComponent } from '../../components/slider-places.component';
 import { FilterBarComponent } from './components/filter-bar.component';
 import { WelcomeBlockComponent } from './components/welcome-block.component';
-import { Place } from '../../models/place.model';
-import { PlacesStoreService } from '../../services/places-store.service';
+import { Place } from '../../core/models/place.model';
+import { PlacesStoreService } from '../../core/services/places-store.service';
 import { CommonModule } from '@angular/common';
-import { ReviewsService } from '../../services/reviews.service';
-import { AuthService } from '../../services/auth.service';
+import { ReviewsService } from '../../core/services/reviews.service';
+import { SliderPlacesComponent } from '../../shared/components/slider-places.component';
 
 @Component({
   selector: 'app-home-page',
@@ -55,7 +54,6 @@ export class HomePageComponent implements OnInit {
   constructor(
     private placesStore: PlacesStoreService,
     private reviewsService: ReviewsService, // добавляем в конструктор.
-    private authService: AuthService,
   ) {}
 
   ngOnInit() {

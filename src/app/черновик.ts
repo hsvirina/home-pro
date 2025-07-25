@@ -88,7 +88,7 @@
 //         (click)="applyFilters()"
 //       >
 //         <img
-//           src="./icons/search-white.svg"
+//           src="./assets/icons/search-white.svg"
 //           alt="search-button"
 //           class="h-[24px] w-[24px]"
 //         />
@@ -113,7 +113,7 @@
 //             class="mb-[25px] flex h-10 w-10 items-center justify-center rounded-[40px] bg-[var(--color-white)]"
 //             aria-label="Close"
 //           >
-//             <img src="/icons/close.svg" alt="close" class="h-5 w-5" />
+//             <img src="/assets/icons/close.svg" alt="close" class="h-5 w-5" />
 //           </button>
 //         </div>
 
@@ -304,4 +304,4 @@
 //     this.enableBodyScroll();
 //   }
 // }
-// // 
+// //

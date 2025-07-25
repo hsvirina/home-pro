@@ -1,9 +1,9 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SliderPlacesComponent } from '../../../components/slider-places.component';
-import { PlaceCardComponent } from '../../../components/place-card.component';
-import { Place } from '../../../models/place.model';
-import { PlaceCardType } from '../../../models/place-card-type.enum';
+import { Place } from '../../../core/models/place.model';
+import { PlaceCardType } from '../../../core/models/place-card-type.enum';
+import { SliderPlacesComponent } from '../../../shared/components/slider-places.component';
+import { PlaceCardComponent } from '../../../shared/components/place-card.component';
 
 @Component({
   selector: 'app-favorites-sector',

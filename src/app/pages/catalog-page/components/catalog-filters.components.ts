@@ -4,8 +4,8 @@ import { FormsModule } from '@angular/forms';
 import {
   CatalogFilters,
   FilterCategory,
-} from '../../../models/catalog-filter.model';
-import { FILTER_CATEGORIES } from '../../../models/catalog-filter.config';
+} from '../../../core/models/catalog-filter.model';
+import { FILTER_CATEGORIES } from '../../../core/models/catalog-filter.config';
 
 @Component({
   selector: 'app-catalog-filters',
@@ -32,7 +32,7 @@ import { FILTER_CATEGORIES } from '../../../models/catalog-filter.config';
           <!-- Опции с чекбоксами -->
           <div class="flex flex-col gap-2">
             <label
-              class="body-font-1 flex items-center gap-3 shadow-hover"
+              class="body-font-1 shadow-hover flex items-center gap-3"
               *ngFor="let option of category.options"
             >
               <input
@@ -54,7 +54,7 @@ import { FILTER_CATEGORIES } from '../../../models/catalog-filter.config';
       <!-- Кнопка применения фильтров -->
       <button
         (click)="applyFilters()"
-        class="button-font h-12 button-bg-blue px-6 py-3"
+        class="button-font button-bg-blue h-12 px-6 py-3"
       >
         Apply Filters
       </button>

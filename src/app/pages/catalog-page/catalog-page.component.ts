@@ -1,16 +1,18 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Place } from '../../models/place.model';
-import { PlacesService } from '../../services/places.service';
+import { Place } from '../../core/models/place.model';
+import { PlacesService } from '../../core/services/places.service';
 import { CatalogFiltersComponent } from './components/catalog-filters.components';
-import { PlaceCardComponent } from '../../components/place-card.component';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CatalogFilters } from '../../models/catalog-filter.model';
-import { FILTER_CATEGORIES } from '../../models/catalog-filter.config';
-import { BreadcrumbsComponent } from '../../components/breadcrumbs.component';
+import { CatalogFilters } from '../../core/models/catalog-filter.model';
+import { FILTER_CATEGORIES } from '../../core/models/catalog-filter.config';
+import { BreadcrumbsComponent } from '../../shared/components/breadcrumbs.component';
 import { FormsModule } from '@angular/forms';
-import { slideDownAnimation } from '../../../styles/animations';
+import { slideDownAnimation } from '../../../styles/animations/animations';
 import { PaginationComponent } from './components/pagination.component';
+import { PlaceCardComponent } from '../../shared/components/place-card.component';
+import { IconComponent } from '../../shared/components/icon.component';
+import { ICONS } from '../../core/constants/icons.constant';
 
 @Component({
   selector: 'app-catalog-page',
@@ -22,6 +24,7 @@ import { PaginationComponent } from './components/pagination.component';
     BreadcrumbsComponent,
     PaginationComponent,
     FormsModule,
+    IconComponent,
   ],
   animations: [slideDownAnimation],
   template: `
@@ -122,10 +125,9 @@ import { PaginationComponent } from './components/pagination.component';
           <div
             class="mb-[25px] ml-auto flex h-[40px] w-[40px] items-center justify-center rounded-[40px] bg-white"
           >
-            <img
-              src="/icons/close.svg"
-              alt="Close icon"
-              class="h-6 w-6 cursor-pointer"
+            <app-icon
+              [icon]="ICONS.Close"
+              class="cursor-pointer"
               (click)="toggleFilters()"
             />
           </div>
@@ -139,12 +141,12 @@ import { PaginationComponent } from './components/pagination.component';
 
       <!-- Карточки -->
       <div class="col-span-6">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-  <app-place-card
-    *ngFor="let place of paginatedPlaces"
-    [place]="place"
-  ></app-place-card>
-</div>
+        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <app-place-card
+            *ngFor="let place of paginatedPlaces"
+            [place]="place"
+          ></app-place-card>
+        </div>
       </div>
 
       <!-- Пагинация -->
@@ -162,6 +164,7 @@ import { PaginationComponent } from './components/pagination.component';
   `,
 })
 export class CatalogPageComponent implements OnInit {
+  ICONS = ICONS;
   places: Place[] = [];
   filteredPlaces: Place[] = [];
   paginatedPlaces: Place[] = [];

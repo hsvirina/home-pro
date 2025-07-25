@@ -2,12 +2,28 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../services/auth.service';
+import { AuthStateService } from '../../state/auth/auth-state.service';
+import { SocialLoginPlaceholderComponent } from './components/social-login.component';
+import { AuthEmailStepComponent } from './components/auth-email-step.component';
+import { AuthPasswordStepComponent } from './components/auth-password-step.component';
+import { AuthLoginStepComponent } from './components/auth-login-step.component';
+import { WelcomeModalComponent } from './components/welcome-modal.component';
+import { ICONS } from '../../core/constants/icons.constant';
+import { IconComponent } from '../../shared/components/icon.component';
 
 @Component({
   selector: 'app-auth-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    SocialLoginPlaceholderComponent,
+    AuthEmailStepComponent,
+    AuthPasswordStepComponent,
+    AuthLoginStepComponent,
+    WelcomeModalComponent,
+    IconComponent,
+  ],
   template: `
     <ng-template #splash>
       <div
@@ -16,32 +32,32 @@ import { AuthService } from '../../services/auth.service';
       >
         <!-- Абсолютные декоративные изображения -->
         <img
-          src="/splash/coffee-beans.png"
+          src="/assets/splash/coffee-beans.png"
           alt="coffee beans"
           class="absolute left-0 top-[8%] z-0 max-w-[184px] object-contain"
         />
         <img
-          src="/splash/croissant.png"
+          src="/assets/splash/croissant.png"
           alt="croissant"
           class="absolute left-[32%] top-[13%] z-0 max-w-[152px] object-contain"
         />
         <img
-          src="/splash/cake.png"
+          src="/assets/splash/cake.png"
           alt="cake"
-          class="absolute right-[37%] top-[7%] z-0 max-w-[152px] object-contain"
+          class="absolute right-[28%] top-[7%] z-0 max-w-[152px] object-contain"
         />
         <img
-          src="/splash/turkish-coffee.png"
+          src="/assets/splash/turkish-coffee.png"
           alt="turka"
           class="absolute right-0 top-[18%] z-0 max-w-[118px] object-contain"
         />
         <img
-          src="/splash/donut.png"
+          src="/assets/splash/donut.png"
           alt="donut"
-          class="absolute right-[17%] top-[64%] z-0 max-w-[142px] object-contain"
+          class="absolute right-[17%] top-[68%] z-0 max-w-[142px] object-contain"
         />
         <img
-          src="/splash/coffee-cup.png"
+          src="/assets/splash/coffee-cup.png"
           alt="coffee cup"
           class="absolute bottom-[13%] left-[22%] z-0 max-w-[176px] object-contain"
         />
@@ -51,7 +67,7 @@ import { AuthService } from '../../services/auth.service';
           class="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center"
         >
           <h1
-            class="max-w-[1068px] font-bold uppercase leading-tight text-[var(--color-gray-100)] lg:text-[80px] xxl:text-[96px]"
+            class="max-w-[1068px] text-[56px] font-bold uppercase leading-tight text-[var(--color-gray-100)] lg:text-[80px] xxl:text-[96px]"
           >
             <span class="text-[var(--color-primary)]">Coffee</span> places
             you’ll <span class="text-[var(--color-primary)]">love</span>, picked
@@ -63,549 +79,210 @@ import { AuthService } from '../../services/auth.service';
             class="button-font button-bg-blue mt-[60px] flex h-[84px] w-[315px] gap-[12px] px-[32px] py-[12px]"
           >
             Explore now
-            <img src="/icons/arrow-down-right-white.svg" alt="Icon arrow" />
+
+            <app-icon [icon]="ICONS.ArrowDownRightWhite" />
           </button>
         </div>
       </div>
     </ng-template>
     <ng-container *ngIf="!showSplash; else splash">
       <div
-        class="grid grid-cols-8 gap-[32px] px-[20px] py-[40px] text-[var(--color-gray-100)]"
+        class="flex flex-col gap-[32px] px-[30px] py-[40px] text-[var(--color-gray-100)]"
       >
-        <!-- === Заголовок (шаги регистрации/логина) === -->
-        <div class="col-span-4 col-start-3 flex flex-col gap-[20px]">
-          <!-- STEP 1 - Ввод email для регистрации -->
-          <ng-container *ngIf="step === 1">
-            <h4 class="text-center">Create your Beanly account</h4>
-            <span class="body-font-1 text-center">
-              Already have an account?
-              <button class="shadow-hover underline" (click)="toggleForm()">
-                <h6>Log In</h6>
-              </button>
-            </span>
-          </ng-container>
-
-          <!-- STEP 2 - Ввод пароля после ввода email -->
-          <ng-container *ngIf="step === 2">
-            <div
-              class="flex cursor-pointer select-none items-center"
-              (click)="goBackToEmail()"
-              style="user-select: none;"
-            >
-              <img
-                src="/icons/arrow-left.svg"
-                alt="Arrow back"
-                class="mr-[32px]"
-              />
-              <h4 class="m-0">Create your Beanly account</h4>
-            </div>
-            <span class="body-font-1 text-center">
-              Come up with a password for the email
-              <span class="font-semibold">{{ email }}</span>
-            </span>
-          </ng-container>
-
-          <!-- STEP 3 - Форма входа (логина) -->
-          <ng-container *ngIf="step === 3">
-            <div
-              class="flex cursor-pointer select-none items-center justify-center"
-              (click)="goBackToEmail()"
-              style="user-select: none;"
-            >
-              <img
-                src="/icons/arrow-left.svg"
-                alt="Arrow back"
-                class="mr-[32px]"
-              />
-              <h4 class="text-center">
-                Welcome back! Log in to your Beanly account
-              </h4>
-            </div>
-          </ng-container>
-        </div>
-
-        <!-- === STEP 1: Форма ввода email === -->
-        <div *ngIf="step === 1" class="col-span-4 col-start-3">
-          <form class="flex flex-col gap-[12px]" (ngSubmit)="onSubmitEmail()">
-            <div class="flex flex-col gap-[4px]">
-              <span class="body-font-2 text-[var(--color-gray-75)]">
-                First, enter your email address
-              </span>
-              <input
-                type="email"
-                placeholder="email@gmail.com"
-                [(ngModel)]="email"
-                name="email"
-                [ngClass]="{
-                  'text-[var(--color-gray-55)]': !email,
-                  'text-[var(--color-gray-100)]': email,
-                }"
-                class="body-font-1 rounded-[40px] border border-[var(--color-gray-20)] bg-[var(--color-bg)] px-6 py-3 focus:border-[var(--color-gray-20)] focus:outline-none"
-              />
-            </div>
-            <button
-              type="submit"
-              [disabled]="!isValidEmail"
-              [ngClass]="{
-                'button-bg-blue': isValidEmail,
-                'bg-[var(--color-gray-20)] text-[var(--color-gray-55)]':
-                  !isValidEmail,
-              }"
-              class="button-font rounded-[40px] px-[32px] py-[12px]"
-            >
-              Next
-            </button>
-          </form>
-        </div>
-
-        <!-- === STEP 2: Форма ввода пароля и подтверждения пароля === -->
-        <div *ngIf="step === 2" class="col-span-4 col-start-3">
-          <form
-            autocomplete="off"
-            class="flex flex-col gap-[12px]"
-            (ngSubmit)="onSubmitPassword()"
-          >
-            <!-- Поле Password -->
-            <div class="relative flex flex-col gap-[4px]">
-              <span class="body-font-2 text-[var(--color-gray-75)]"
-                >Password</span
-              >
-              <div class="relative">
-                <input
-                  [type]="showPassword ? 'text' : 'password'"
-                  placeholder="Enter password"
-                  [(ngModel)]="password"
-                  name="password"
-                  (ngModelChange)="onPasswordChange()"
-                  [class.border-red-600]="passwordTooWeak"
-                  [ngClass]="{
-                    'text-[var(--color-gray-55)]': !password,
-                    'text-[var(--color-gray-100)]': password,
-                  }"
-                  class="body-font-1 w-full rounded-[40px] border border-[var(--color-gray-20)] bg-[var(--color-bg)] px-6 py-3 outline-none focus:border-[var(--color-gray-20)]"
-                />
-                <button
-                  *ngIf="password"
-                  type="button"
-                  (click)="showPassword = !showPassword"
-                  tabindex="-1"
-                  aria-label="Toggle password visibility"
-                  class="absolute right-0 top-0 flex h-full w-[60px] items-center justify-center"
-                >
-                  <img
-                    [src]="
-                      showPassword ? '/icons/eye-slash.svg' : '/icons/eye.svg'
-                    "
-                    alt="Toggle visibility"
-                    class="h-[20px] w-[20px]"
-                  />
-                </button>
-              </div>
-              <!-- Ошибка слабого пароля -->
-              <div
-                *ngIf="passwordTooWeak"
-                class="body-font-2 mt-1 flex select-none items-center gap-[4px] text-[var(--color-button-error)]"
-              >
-                <img src="/icons/red-close.svg" alt="Error icon" />
-                Password too weak
-              </div>
-            </div>
-
-            <!-- Поле Confirm Password -->
-            <div class="relative flex flex-col gap-[4px]">
-              <span class="body-font-2 text-[var(--color-gray-75)]"
-                >Confirm Password</span
-              >
-              <div class="relative">
-                <input
-                  autocomplete="new-password"
-                  [type]="showRepeatPassword ? 'text' : 'password'"
-                  placeholder="Enter the password again"
-                  [(ngModel)]="repeatPassword"
-                  (ngModelChange)="onRepeatPasswordChange()"
-                  name="confirmPass"
-                  [class.border-red-600]="passwordMismatch"
-                  [ngClass]="{
-                    'text-[var(--color-gray-55)]': !repeatPassword,
-                    'text-[var(--color-gray-100)]': repeatPassword,
-                  }"
-                  class="body-font-1 w-full rounded-[40px] border border-[var(--color-gray-20)] bg-[var(--color-bg)] px-6 py-3 outline-none focus:border-[var(--color-gray-20)]"
-                />
-                <button
-                  *ngIf="repeatPassword"
-                  type="button"
-                  (click)="showRepeatPassword = !showRepeatPassword"
-                  tabindex="-1"
-                  aria-label="Toggle repeat password visibility"
-                  class="absolute right-0 top-0 flex h-full w-[60px] items-center justify-center"
-                >
-                  <img
-                    [src]="
-                      showRepeatPassword
-                        ? '/icons/eye-slash.svg'
-                        : '/icons/eye.svg'
-                    "
-                    alt="Toggle visibility"
-                    class="h-[20px] w-[20px]"
-                  />
-                </button>
-              </div>
-              <!-- Ошибка несовпадения паролей -->
-              <div
-                *ngIf="passwordMismatch"
-                class="body-font-2 flex select-none items-center gap-[4px] text-[var(--color-button-error)]"
-              >
-                <img src="/icons/red-close.svg" alt="Error icon" />
-                Confirm password mismatch
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              class="button-font button-bg-blue px-[32px] py-[12px]"
-            >
-              Create account
-            </button>
-          </form>
-        </div>
-
-        <!-- === STEP 3: Форма входа (логина) === -->
-        <div *ngIf="step === 3" class="col-span-4 col-start-3">
-          <form
-            autocomplete="off"
-            class="flex flex-col gap-[12px]"
-            (ngSubmit)="onSubmitLogin()"
-          >
-            <!-- Email -->
-            <div class="flex flex-col gap-[4px]">
-              <span class="body-font-2 text-[var(--color-gray-75)]">Email</span>
-              <input
-                type="email"
-                placeholder="email@gmail.com"
-                [(ngModel)]="email"
-                name="loginEmail"
-                [class.border-red-600]="loginError && !email"
-                [ngClass]="{
-                  'text-[var(--color-gray-55)]': !email,
-                  'text-[var(--color-gray-100)]': email,
-                }"
-                class="body-font-1 rounded-[40px] border border-[var(--color-gray-20)] bg-[var(--color-bg)] px-6 py-3 focus:border-[var(--color-gray-20)] focus:outline-none"
-              />
-              <div
-                *ngIf="loginError && !email"
-                class="body-font-2 mt-1 flex select-none items-center gap-[4px] text-[var(--color-button-error)]"
-              >
-                <img src="/icons/red-close.svg" alt="Error icon" />
-                Email is required
-              </div>
-            </div>
-
-            <!-- Password -->
-            <div class="relative flex flex-col gap-[4px]">
-              <span class="body-font-2 text-[var(--color-gray-75)]"
-                >Password</span
-              >
-              <div class="relative">
-                <input
-                  [type]="showPassword ? 'text' : 'password'"
-                  placeholder="Enter password"
-                  [(ngModel)]="password"
-                  name="loginPassword"
-                  [class.border-red-600]="loginError && !password"
-                  [ngClass]="{
-                    'text-[var(--color-gray-55)]': !password,
-                    'text-[var(--color-gray-100)]': password,
-                  }"
-                  class="body-font-1 w-full rounded-[40px] border border-[var(--color-gray-20)] bg-[var(--color-bg)] px-6 py-3 outline-none focus:border-[var(--color-gray-20)]"
-                />
-                <button
-                  *ngIf="password"
-                  type="button"
-                  (click)="showPassword = !showPassword"
-                  tabindex="-1"
-                  aria-label="Toggle password visibility"
-                  class="absolute right-0 top-0 flex h-full w-[60px] items-center justify-center"
-                >
-                  <img
-                    [src]="
-                      showPassword ? '/icons/eye-slash.svg' : '/icons/eye.svg'
-                    "
-                    alt="Toggle visibility"
-                    class="h-[20px] w-[20px]"
-                  />
-                </button>
-              </div>
-              <div
-                *ngIf="loginError && !password"
-                class="body-font-2 mt-1 flex select-none items-center gap-[4px] text-[var(--color-button-error)]"
-              >
-                <img src="/icons/red-close.svg" alt="Error icon" />
-                Password is required
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              class="button-font button-bg-blue px-[32px] py-[12px]"
-            >
-              Log In
-            </button>
-          </form>
-        </div>
-
-        <!-- === Социальный вход (заглушка, выводит сообщение) === -->
-        <div
-          class="col-span-4 col-start-3 flex flex-col gap-[20px] text-center"
-        >
-          <span class="body-font-1">Or log in with</span>
-          <div class="flex gap-[10px]">
-            <button
-              (click)="showTemporaryMessage()"
-              class="flex flex-1 items-center justify-center gap-[8px] rounded-[40px] border border-[var(--color-button-green)] px-[24px] py-[12px]"
-            >
-              <img
-                src="/icons/google.svg"
-                alt="Google"
-                class="h-[24px] w-[24px]"
-              />
-              <span class="button-font text-[var(--color-button-green)]"
-                >Google</span
-              >
-            </button>
-            <button
-              (click)="showTemporaryMessage()"
-              class="flex flex-1 items-center justify-center gap-[8px] rounded-[40px] border border-[var(--color-button-blue)] px-[24px] py-[12px]"
-            >
-              <img
-                src="/icons/facebook.svg"
-                alt="Facebook"
-                class="h-[24px] w-[24px]"
-              />
-              <span class="button-font text-[var(--color-button-blue)]"
-                >Facebook</span
-              >
-            </button>
-            <button
-              (click)="showTemporaryMessage()"
-              class="flex flex-1 items-center justify-center gap-[8px] rounded-[40px] border border-[var(--color-gray-100)] px-[24px] py-[12px]"
-            >
-              <img
-                src="/icons/apple.svg"
-                alt="Apple"
-                class="h-[24px] w-[24px]"
-              />
-              <span class="button-font text-[var(--color-gray-100)]"
-                >Apple</span
-              >
-            </button>
-          </div>
-
-          <span class="body-font-1">
-            By registering, you accept our
-            <a
-              (click)="goHome()"
-              class="cursor-pointer text-[var(--color-primary)] underline"
-              >Terms of use</a
-            >
-            and
-            <a
-              (click)="goHome()"
-              class="cursor-pointer text-[var(--color-primary)] underline"
-              >Privacy Policy</a
-            >
-          </span>
-
-          <div *ngIf="showMessage" class="mt-4 text-[var(--color-primary)]">
-            Please use your email
-          </div>
-        </div>
-
-        <!-- === Модальное окно после успешной регистрации/входа === -->
-        <div
-          *ngIf="showWelcomeModal"
-          class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-        >
+        <!-- Обертка для шага аутентификации -->
+        <div class="grid grid-cols-8">
           <div
-            class="flex w-full max-w-[650px] flex-col items-center justify-between gap-[32px] rounded-[40px] bg-[var(--color-bg-2)] p-[24px] text-center text-[var(--color-gray-100)] shadow-xl"
+            class="col-span-8 lg:col-span-6 lg:col-start-2 xxl:col-span-4 xxl:col-start-3"
           >
-            <div class="flex flex-col gap-[20px]">
-              <h4>Welcome to Beanly!</h4>
+            <ng-container [ngSwitch]="step">
+              <app-auth-email-step
+                *ngSwitchCase="1"
+                [email]="email"
+                (emailSubmit)="onEmailSubmit($event)"
+                (toggleForm)="toggleForm()"
+                class="w-full"
+              ></app-auth-email-step>
 
-              <!-- Текст только для новых пользователей (при регистрации) -->
-              <p
-                *ngIf="isNewUser"
-                class="body-font-1 text-[var(--color-gray-100)]"
-              >
-                From cozy corners perfect for reading to stylish spots for your
-                next coffee date — explore places that feel just right for you.
-              </p>
-            </div>
-            <button
-              (click)="goHome()"
-              class="button-font button-bg-blue h-[48px] w-full px-[32px] py-[12px]"
-            >
-              Explore Catalog
-            </button>
+              <app-auth-password-step
+                *ngSwitchCase="2"
+                [email]="email"
+                [password]="password"
+                [repeatPassword]="repeatPassword"
+                [showPassword]="showPassword"
+                [showRepeatPassword]="showRepeatPassword"
+                [passwordTooWeak]="passwordTooWeak"
+                [passwordMismatch]="passwordMismatch"
+                (passwordChange)="onPasswordChange($event)"
+                (repeatPasswordChange)="onRepeatPasswordChange($event)"
+                (passwordSubmit)="onSubmitPassword()"
+                (goBack)="goBackToEmail()"
+                class="w-full"
+              ></app-auth-password-step>
+
+              <app-auth-login-step
+                *ngSwitchCase="3"
+                [email]="email"
+                [password]="password"
+                [showPassword]="showPassword"
+                [loginError]="loginError"
+                (loginSubmit)="onSubmitLogin()"
+                (goBack)="goBackToEmail()"
+                (emailChange)="email = $event"
+                (passwordChange)="password = $event"
+                (togglePasswordVisibility)="showPassword = !showPassword"
+                class="w-full"
+              ></app-auth-login-step>
+            </ng-container>
           </div>
+        </div>
+
+        <!-- Социальный логин -->
+        <div class="grid grid-cols-8">
+          <app-social-login
+            (showTemporaryMessage)="showTemporaryMessage()"
+            [showMessage]="showMessage"
+            class="col-span-8 lg:col-span-6 lg:col-start-2 xxl:col-span-4 xxl:col-start-3"
+          ></app-social-login>
+        </div>
+
+        <!-- Модальное окно приветствия -->
+        <div class="grid grid-cols-8">
+          <app-welcome-modal
+            *ngIf="showWelcomeModal"
+            [isNewUser]="isNewUser"
+            (close)="showWelcomeModal = false; goHome()"
+            class="col-span-8 lg:col-span-6 lg:col-start-2 xxl:col-span-4 xxl:col-start-3"
+          ></app-welcome-modal>
         </div>
       </div>
     </ng-container>
   `,
 })
-export class AuthPageComponent implements OnInit {
-  showSplash = true; // Показывать ли сплэш-экран
-  step = 1; // Текущий шаг: 1 - email, 2 - регистрация (пароль), 3 - вход
+export class AuthPageComponent {
+  ICONS = ICONS;
+  showSplash = true;
+  step = 1;
   email = '';
   password = '';
   repeatPassword = '';
-  showPassword = false; // Показать/скрыть пароль
-  showRepeatPassword = false; // Показать/скрыть подтверждение пароля
-  showMessage = false; // Временное сообщение при клике на соц. кнопки
-
-  showWelcomeModal = false; // Показывать ли модальное окно приветствия после успеха
-  isNewUser = false; // Новый пользователь (регистрация) или старый (вход)
-
-  passwordMismatch = false; // Ошибка несовпадения паролей
-  passwordTooWeak = false; // Ошибка слабого пароля
-
+  showPassword = false;
+  showRepeatPassword = false;
+  passwordTooWeak = false;
+  passwordMismatch = false;
   loginError = false;
+  showMessage = false;
+  showWelcomeModal = false;
+  isNewUser = false;
 
   constructor(
     private router: Router,
-    private authService: AuthService,
+    private authService: AuthStateService,
   ) {}
 
-  ngOnInit(): void {
-    // Если нужно, сюда можно добавить логику при инициализации компонента
-  }
-
   onContinueFromSplash() {
-    // Пользователь нажал кнопку "Продолжить" — скрываем сплэш, показываем форму регистрации (шаг 1)
     this.showSplash = false;
   }
 
-  get isValidEmail(): boolean {
-    // Валидация email по регулярному выражению
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email);
+  onEmailSubmit(email: string) {
+    this.email = email;
+    this.step = 2;
+    this.password = '';
+    this.repeatPassword = '';
+    this.passwordTooWeak = false;
+    this.passwordMismatch = false;
+    this.showPassword = false;
+    this.showRepeatPassword = false;
   }
 
-  onSubmitEmail() {
-    // При отправке email - переходим к шагу 2 (пароль)
-    if (this.isValidEmail) {
-      this.step = 2;
-
-      // Сброс состояния полей и ошибок пароля
-      this.password = '';
-      this.repeatPassword = '';
-      this.passwordTooWeak = false;
-      this.passwordMismatch = false;
-      this.showPassword = false;
-      this.showRepeatPassword = false;
+  onSubmitPassword() {
+    // Аналогичная логика из твоего компонента
+    if (this.password.length < 6) {
+      this.passwordTooWeak = true;
+      return;
     }
+    if (this.password !== this.repeatPassword) {
+      this.passwordMismatch = true;
+      return;
+    }
+    // Регистрация и логин
+    const fullNameParts = this.email.split('@')[0].split('.');
+    const firstName = fullNameParts[0] || 'User';
+    const lastName = fullNameParts[1] || '';
+    this.authService
+      .register(this.email, this.password, firstName, lastName)
+      .subscribe({
+        next: () => {
+          this.authService.login(this.email, this.password).subscribe({
+            next: () => {
+              this.isNewUser = true;
+              this.showWelcomeModal = true;
+            },
+            error: (err) =>
+              alert(
+                'Ошибка входа после регистрации: ' +
+                  (err.message || err.statusText),
+              ),
+          });
+        },
+        error: (err) => {
+          if (
+            err.status === 400 &&
+            err.error?.message?.includes('Email is already taken')
+          ) {
+            alert(
+              'Этот email уже зарегистрирован. Пожалуйста, используйте другой или войдите в систему.',
+            );
+            // Можно сразу переключить на форму логина
+            this.step = 3;
+          } else {
+            alert('Ошибка регистрации: ' + (err.message || err.statusText));
+          }
+        },
+      });
   }
 
   onSubmitLogin() {
-    // Сброс ошибки
     this.loginError = false;
-
     if (!this.email || !this.password) {
       this.loginError = true;
       return;
     }
-
     this.authService.login(this.email, this.password).subscribe({
       next: () => {
         this.isNewUser = false;
         this.showWelcomeModal = true;
       },
-      error: (err) => {
-        alert('Ошибка входа: ' + err.message);
-      },
+      error: (err) => alert('Ошибка входа: ' + err.message),
     });
   }
 
-  onPasswordChange() {
-    // При изменении пароля убираем ошибки, если они были
-    if (this.passwordTooWeak) this.passwordTooWeak = false;
-    if (this.passwordMismatch) this.passwordMismatch = false;
-  }
-
-  onRepeatPasswordChange() {
-    // При изменении подтверждения пароля убираем ошибку несовпадения
-    if (this.passwordMismatch) this.passwordMismatch = false;
-  }
-
-  onSubmitPassword() {
-    // Проверяем пароль при регистрации
-
-    this.passwordMismatch = false;
-    this.passwordTooWeak = false;
-
-    if (this.password.length < 6) {
-      // Слишком слабый пароль
-      this.passwordTooWeak = true;
-      return;
-    }
-
-    if (this.password !== this.repeatPassword) {
-      // Несовпадение паролей
-      this.passwordMismatch = true;
-      return;
-    }
-
-    // Формируем имя пользователя из email (до @)
-    const fullNameParts = this.email.split('@')[0].split('.');
-    const firstName = fullNameParts[0] || 'User';
-    const lastName = fullNameParts[1] || '';
-
-    // Регистрируем пользователя
-    this.authService
-      .register(this.email, this.password, firstName, lastName)
-      .subscribe({
-        next: (res) => {
-          // После успешной регистрации — сразу логиним пользователя
-          this.authService.login(this.email, this.password).subscribe({
-            next: () => {
-              this.isNewUser = true; // Новый пользователь
-              this.showWelcomeModal = true; // Показать модальное окно
-            },
-            error: (err) => {
-              alert('Ошибка входа после регистрации: ' + err.message);
-            },
-          });
-        },
-        error: (err) => {
-          alert('Ошибка регистрации: ' + err.message);
-        },
-      });
-  }
-
   toggleForm() {
-    // Переключение между регистрацией и логином
-    if (this.step === 1) {
-      this.step = 3; // Переходим к логину
-    } else {
-      this.step = 1; // Переходим к регистрации (ввод email)
-    }
+    this.step = this.step === 1 ? 3 : 1;
   }
 
   goBackToEmail() {
-    // Вернуться к шагу ввода email (шаг 1)
     this.step = 1;
     this.password = '';
     this.repeatPassword = '';
   }
 
+  onPasswordChange(password: string) {
+    this.password = password;
+    this.passwordTooWeak = false;
+    this.passwordMismatch = false;
+  }
+
+  onRepeatPasswordChange(repeatPassword: string) {
+    this.repeatPassword = repeatPassword;
+    this.passwordMismatch = false;
+  }
+
   showTemporaryMessage() {
-    // Показать временное сообщение при клике на соц. кнопки
     this.showMessage = true;
-    setTimeout(() => {
-      this.showMessage = false;
-    }, 3000);
+    setTimeout(() => (this.showMessage = false), 3000);
   }
 
   goHome() {
-    // Переход на домашнюю страницу (например, после успешного входа/регистрации)
     this.router.navigate(['/']);
   }
 }

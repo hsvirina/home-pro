@@ -1,0 +1,56 @@
+@use '../base/fonts' as *;
+
+body {
+  font-family: $font-family-unbounded;
+  font-weight: $font-weight-medium;
+  color: var(--color-gray-100);
+}
+
+
+h1, h2, h3, h4, h5,
+.menu-text-font,
+.button-font {
+  font-family: $font-family-unbounded;
+}
+
+.body-font-1,
+.body-font-2 {
+  font-family: $font-family-redhat;
+  font-weight: $font-weight-regular;
+}
+
+
+
+h1 { font-size: 80px; line-height: 110%; }
+h2 { font-size: 64px; line-height: 110%; }
+h3 { font-size: 40px; line-height: 120%; }
+h4 { font-size: 32px; line-height: 120%; }
+h5 { font-size: 20px; line-height: 130%; }
+h6 {
+  font-size: 17px;
+  line-height: 130%;
+  font-family: $font-family-redhat;
+  font-weight: $font-weight-medium;
+}
+
+.menu-text-font {
+  font-size: 17px;
+  font-weight: $font-weight-regular;
+  line-height: 130%;
+}
+
+.button-font {
+  font-size: 16px;
+  font-weight: $font-weight-regular;
+  line-height: 150%;
+}
+
+.body-font-1 {
+  font-size: 16px;
+  line-height: 150%;
+}
+
+.body-font-2 {
+  font-size: 14px;
+  line-height: 140%;
+}

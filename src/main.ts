@@ -10,7 +10,7 @@ import { CatalogPageComponent } from './app/pages/catalog-page/catalog-page.comp
 import { PlaceDetailsPageComponent } from './app/pages/place-details-page/place-details-page';
 import { AuthPageComponent } from './app/pages/auth-page/auth-page.component';
 import { ProfilePageComponent } from './app/pages/profile-page/profile-page';
-import { authInterceptor } from './app/services/auth.interceptor';
+import { authInterceptor } from './app/core/interceptors/auth.interceptor';
 
 const routes = [
   { path: '', component: HomePageComponent },
