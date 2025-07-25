@@ -1,6 +1,7 @@
 {
   "name": "home-pro",
   "version": "0.0.0",
+  "homepage": "/home-pro/",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
