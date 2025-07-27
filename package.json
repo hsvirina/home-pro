@@ -8,7 +8,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "deploy": "ng build --base-href https://hsvirina.github.io/home-pro/ && angular-cli-ghpages --dir=dist/home-pro"
+    "deploy": "ng build --base-href /home-pro/ && angular-cli-ghpages --dir=dist/home-pro"
   },
   "private": true,
   "dependencies": {

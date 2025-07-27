@@ -12,6 +12,7 @@ import { Place } from '../../core/models/place.model';
 import { PlaceCardType } from '../../core/constants/place-card-type.enum';
 import { AuthApiService } from '../../core/services/auth-api.service';
 import { AuthStateService } from '../../state/auth/auth-state.service';
+import { LoaderService } from '../../core/services/loader.service';
 
 @Component({
   selector: 'app-profile-page',
@@ -106,18 +107,40 @@ export class ProfilePageComponent implements OnInit {
     private router: Router,
     private authService: AuthStateService,
     private placesService: PlacesService,
+    private loaderService: LoaderService,
   ) {}
 
   // Load user data and favorite places on component initialization
   ngOnInit(): void {
+    this.loaderService.show();
+
     this.authService.loadUserInfo().subscribe({
       next: (userFromService: User) => {
         this.user = userFromService;
         this.editedUser = { ...userFromService };
-        this.loadFavoriteCafes();
-        this.loadAllPlaces();
+
+        this.placesService.getPlaces().subscribe({
+          next: (places: Place[]) => {
+            this.allPlaces = places;
+
+            const favoriteIds =
+              userFromService.favoriteCafeIds?.map(Number) || [];
+            this.favorites = places.filter((place) =>
+              favoriteIds.includes(place.id),
+            );
+
+            this.loaderService.hide();
+          },
+          error: (err) => {
+            console.error('❌ Failed to load places:', err);
+            this.loaderService.hide();
+          },
+        });
       },
-      error: (err: any) => console.error('❌ Failed to load user data:', err),
+      error: (err: any) => {
+        console.error('❌ Failed to load user data:', err);
+        this.loaderService.hide();
+      },
     });
   }
 

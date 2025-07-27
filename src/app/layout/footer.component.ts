@@ -22,23 +22,42 @@ import { LogoComponent } from '../shared/components/logo.component';
         class="body-font-2 col-span-2 grid grid-cols-2 gap-x-[16px] xxl:mx-auto xxl:flex xxl:gap-[172px]"
       >
         <div class="flex flex-col gap-1">
-          <a routerLink="/about" class="py-[8px] hover:underline">About Us</a>
-          <a routerLink="/faqs" class="py-[8px] hover:underline">FAQs</a>
-          <a routerLink="/contact" class="py-[8px] hover:underline">Contact Us</a>
-          <a routerLink="/social-media" class="py-[8px] hover:underline">Social Media</a>
-          <a routerLink="/feedback" class="py-[8px] hover:underline">Feedback</a>
+          <a
+            routerLink="/about"
+            class="leading-none relative inline-block w-max py-[8px] text-[var(--color-gray-75)] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[var(--color-primary)] after:transition-all after:duration-300 hover:text-[var(--color-gray-100)] hover:after:w-full"
+          >
+            About Us
+          </a>
+          <a routerLink="/faqs" class="leading-none relative inline-block w-max py-[8px] text-[var(--color-gray-75)] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[var(--color-primary)] after:transition-all after:duration-300 hover:text-[var(--color-gray-100)] hover:after:w-full">FAQs</a>
+          <a routerLink="/contact" class="leading-none relative inline-block w-max py-[8px] text-[var(--color-gray-75)] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[var(--color-primary)] after:transition-all after:duration-300 hover:text-[var(--color-gray-100)] hover:after:w-full"
+            >Contact Us</a
+          >
+          <a routerLink="/social-media" class="leading-none relative inline-block w-max py-[8px] text-[var(--color-gray-75)] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[var(--color-primary)] after:transition-all after:duration-300 hover:text-[var(--color-gray-100)] hover:after:w-full"
+            >Social Media</a
+          >
+          <a routerLink="/feedback" class="leading-none relative inline-block w-max py-[8px] text-[var(--color-gray-75)] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[var(--color-primary)] after:transition-all after:duration-300 hover:text-[var(--color-gray-100)] hover:after:w-full"
+            >Feedback</a
+          >
         </div>
         <div class="flex flex-col gap-1">
-          <a routerLink="/newsletter" class="py-[8px] hover:underline">Newsletter</a>
-          <a routerLink="/updates" class="py-[8px] hover:underline">Updates</a>
-          <a routerLink="/events" class="py-[8px] hover:underline">Events</a>
-          <a routerLink="/blog-posts" class="py-[8px] hover:underline">Blog Posts</a>
-          <a routerLink="/community" class="py-[8px] hover:underline">Community</a>
+          <a routerLink="/newsletter" class="leading-none relative inline-block w-max py-[8px] text-[var(--color-gray-75)] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[var(--color-primary)] after:transition-all after:duration-300 hover:text-[var(--color-gray-100)] hover:after:w-full"
+            >Newsletter</a
+          >
+          <a routerLink="/updates" class="leading-none relative inline-block w-max py-[8px] text-[var(--color-gray-75)] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[var(--color-primary)] after:transition-all after:duration-300 hover:text-[var(--color-gray-100)] hover:after:w-full">Updates</a>
+          <a routerLink="/events" class="leading-none relative inline-block w-max py-[8px] text-[var(--color-gray-75)] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[var(--color-primary)] after:transition-all after:duration-300 hover:text-[var(--color-gray-100)] hover:after:w-full">Events</a>
+          <a routerLink="/blog-posts" class="leading-none relative inline-block w-max py-[8px] text-[var(--color-gray-75)] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[var(--color-primary)] after:transition-all after:duration-300 hover:text-[var(--color-gray-100)] hover:after:w-full"
+            >Blog Posts</a
+          >
+          <a routerLink="/community" class="leading-none relative inline-block w-max py-[8px] text-[var(--color-gray-75)] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[var(--color-primary)] after:transition-all after:duration-300 hover:text-[var(--color-gray-100)] hover:after:w-full"
+            >Community</a
+          >
         </div>
       </div>
 
       <!-- Subscription form -->
-      <div class="col-span-2 flex flex-col gap-[24px] lg:col-span-3 xxl:ml-auto">
+      <div
+        class="col-span-2 flex flex-col gap-[24px] lg:col-span-3 xxl:ml-auto"
+      >
         <div class="flex flex-col gap-[16px]">
           <h5 class="text-[var(--color-gray-100)]">Subscribe</h5>
           <span class="body-font-2">
@@ -66,7 +85,7 @@ import { LogoComponent } from '../shared/components/logo.component';
             <button
               type="submit"
               [disabled]="subscribeForm.invalid"
-              class="flex button-bg-transparent px-[24px] py-[12px] shadow-hover"
+              class="button-bg-transparent shadow-hover flex px-[24px] py-[12px]"
               [ngClass]="{ 'cursor-default opacity-50': subscribeForm.invalid }"
             >
               Send
@@ -81,7 +100,8 @@ import { LogoComponent } from '../shared/components/logo.component';
           </div>
 
           <span class="body-font-2">
-            By subscribing, you agree to our Privacy Policy and consent to receive updates.
+            By subscribing, you agree to our Privacy Policy and consent to
+            receive updates.
           </span>
         </div>
       </div>
@@ -98,7 +118,8 @@ import { LogoComponent } from '../shared/components/logo.component';
         <div class="flex flex-col gap-[20px]">
           <h4>Thank you for subscribing!</h4>
           <p class="body-font-1">
-            You have successfully joined our newsletter. Stay tuned for updates and exciting features!
+            You have successfully joined our newsletter. Stay tuned for updates
+            and exciting features!
           </p>
         </div>
         <button
@@ -130,8 +151,8 @@ export class FooterComponent {
 
   /** Validates input on blur */
   onBlur(): void {
-  this.showError = !!this.email && !this.validateEmail(this.email);
-}
+    this.showError = !!this.email && !this.validateEmail(this.email);
+  }
 
   /** Closes success modal */
   closeModal(): void {

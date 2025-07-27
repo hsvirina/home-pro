@@ -9,7 +9,7 @@ import { RouterModule } from '@angular/router';
     <!-- Navigates to homepage on logo click -->
     <a routerLink="/">
       <img
-        src="/assets/logo.svg"
+        src="./assets/logo.svg"
         alt="beanly logo"
         class="shadow-hover h-[24px] w-[93px] object-contain lg:h-[28px] lg:w-[130px] xxl:h-[32px] xxl:w-[165px]"
       />

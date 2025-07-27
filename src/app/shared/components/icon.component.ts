@@ -9,14 +9,14 @@ import { IconData } from '../../core/constants/icons.constant';
     <img
       [src]="icon.filename"
       [alt]="icon.alt"
-      class="h-6 w-6 object-contain"
+      class="object-contain"
+      [style.width.px]="size ?? 24"
+      [style.height.px]="size ?? 24"
       loading="lazy"
     />
   `,
 })
 export class IconComponent {
-  /**
-   * Icon object containing filename (URL) and alt text
-   */
   @Input() icon!: IconData;
+  @Input() size?: number;
 }

@@ -38,4 +38,4 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
-src/app/core/config/api-endpoints.ts
+src/app/environments/api-endpoints.ts

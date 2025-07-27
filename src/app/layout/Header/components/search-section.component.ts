@@ -35,9 +35,9 @@ import { IconComponent } from '../../../shared/components/icon.component';
 
       <!-- Suggestions dropdown -->
       <ul
-        *ngIf="showSuggestions"
+        *ngIf="searchTerm.trim().length > 0"
         [@slideDownAnimation]
-        class="absolute left-0 top-full z-50 mt-2 max-h-[600px] w-full rounded-[40px] bg-[var(--color-white)] p-2 shadow-md overflow-auto"
+        class="absolute left-0 top-full z-50 mt-2 max-h-[600px] w-full overflow-auto rounded-[40px] bg-[var(--color-white)] p-2 shadow-md"
         role="listbox"
       >
         <li
@@ -58,6 +58,15 @@ import { IconComponent } from '../../../shared/components/icon.component';
             height="56"
           />
           <span class="menu-text-font">{{ place.name }}</span>
+        </li>
+
+        <!-- NO RESULTS MESSAGE -->
+        <li
+          *ngIf="filteredPlaces.length === 0"
+          class="p-4 text-gray-500"
+          role="alert"
+        >
+          No results found for "{{ searchTerm }}"
         </li>
       </ul>
     </div>
@@ -97,12 +106,15 @@ export class SearchSectionComponent implements OnInit {
 
     if (term.length > 0) {
       this.filteredPlaces = this.allPlaces
-        .filter((place) => place.name.toLowerCase().includes(term))
-        .slice(0, 5); // Limit suggestions for performance and UX
-      this.showSuggestions = this.filteredPlaces.length > 0;
+        .filter(
+          (place) =>
+            place.name.toLowerCase().includes(term) ||
+            place.city?.toLowerCase().includes(term) ||
+            place.address?.toLowerCase().includes(term),
+        )
+        .slice(0, 5); // Limit suggestions
     } else {
       this.filteredPlaces = [];
-      this.showSuggestions = false;
     }
   }
 
@@ -112,7 +124,7 @@ export class SearchSectionComponent implements OnInit {
   selectPlace(place: Place): void {
     this.showSuggestions = false;
     this.searchTerm = '';
-    this.router.navigate(['/catalog', place.id]).catch(err => {
+    this.router.navigate(['/catalog', place.id]).catch((err) => {
       console.error('Navigation error:', err);
       // Optionally show user-friendly error here
     });

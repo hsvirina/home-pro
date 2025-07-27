@@ -20,6 +20,7 @@
             "outputPath": "dist/home-pro",
             "index": "src/index.html",
             "browser": "src/main.ts",
+            "baseHref": "/home-pro/",
             "polyfills": [
               "zone.js"
             ],
@@ -31,7 +32,15 @@
             "styles": [
               "src/styles/styles.scss"
             ],
-            "scripts": []
+            "scripts": [],
+            "allowedCommonJsDependencies": [
+              "canvg",
+              "core-js",
+              "html2canvas",
+              "jspdf",
+              "rgbcolor",
+              "raf"
+            ]
           },
           "configurations": {
             "production": {
@@ -76,8 +85,7 @@
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "polyfills": [
-              "zone.js",
-              "zone.js/testing"
+              "src/polyfills.ts"
             ],
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",

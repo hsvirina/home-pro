@@ -27,7 +27,7 @@ import { fadeInOutImage } from '../../../../styles/animations/animations';
         (click)="handlePrev()"
         class="absolute left-[24px] top-1/2 z-10 flex h-[52px] w-[52px] -translate-y-1/2 items-center justify-center rounded-[40px] bg-[var(--color-bg)] p-[10px] transition hover:scale-110"
       >
-        <app-icon [icon]="ICONS.ArrowLeft" class="h-[32px] w-[32px]" />
+        <app-icon [icon]="ICONS.ArrowLeft" [size] = "32" />
       </button>
 
       <!-- Image container -->
@@ -72,7 +72,7 @@ import { fadeInOutImage } from '../../../../styles/animations/animations';
         (click)="handleNext()"
         class="absolute right-[24px] top-1/2 z-10 flex h-[52px] w-[52px] -translate-y-1/2 items-center justify-center rounded-[40px] bg-[var(--color-bg)] p-[10px] transition hover:scale-110"
       >
-        <app-icon [icon]="ICONS.ArrowRight" class="h-[32px] w-[32px]" />
+        <app-icon [icon]="ICONS.ArrowRight" [size]="32" />
       </button>
 
       <!-- Slide position indicator -->

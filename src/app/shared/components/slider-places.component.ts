@@ -29,7 +29,7 @@ import { ICONS } from '../../core/constants/icons.constant';
             'cursor-pointer': startIndex > 0,
           }"
         >
-          <app-icon [icon]="ICONS.ArrowLeft" class="h-8 w-8" />
+          <app-icon [icon]="ICONS.ArrowLeft" [size] = "32" />
         </button>
 
         <!-- Title -->
@@ -54,7 +54,7 @@ import { ICONS } from '../../core/constants/icons.constant';
             'cursor-pointer': startIndex < places.length - visibleCount,
           }"
         >
-          <app-icon [icon]="ICONS.ArrowRight" class="h-8 w-8" />
+          <app-icon [icon]="ICONS.ArrowRight" [size] = "32" />
         </button>
       </div>
 

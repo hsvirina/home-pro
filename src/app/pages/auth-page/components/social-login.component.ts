@@ -13,7 +13,7 @@ import { ICONS } from '../../../core/constants/icons.constant';
       <span class="body-font-1">Or log in with</span>
 
       <!-- Social login buttons -->
-      <div class="flex gap-[10px]">
+      <div class="flex flex-col lg:flex-row gap-[10px]">
         <button
           (click)="showTemporaryMessage()"
           class="flex flex-1 items-center justify-center gap-[8px] rounded-[40px] border border-[var(--color-button-green)] px-[24px] py-[12px]"

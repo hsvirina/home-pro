@@ -13,6 +13,7 @@ import { PaginationComponent } from './components/pagination.component';
 import { PlaceCardComponent } from '../../shared/components/place-card.component';
 import { IconComponent } from '../../shared/components/icon.component';
 import { ICONS } from '../../core/constants/icons.constant';
+import { LoaderService } from '../../core/services/loader.service';
 
 @Component({
   selector: 'app-catalog-page',
@@ -146,6 +147,17 @@ import { ICONS } from '../../core/constants/icons.constant';
             *ngFor="let place of paginatedPlaces"
             [place]="place"
           ></app-place-card>
+
+          <div
+            *ngIf="paginatedPlaces.length === 0"
+            class="col-span-full flex flex-col items-center justify-center gap-4 rounded-[40px] bg-white p-12 text-center text-gray-600 shadow-sm"
+          >
+            <h3 class="text-xl font-semibold text-gray-700">No cafés found</h3>
+            <p class="max-w-sm text-gray-500">
+              Sorry, there are no cafés matching your selected filters. Try
+              adjusting or clearing your filters to see more results.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -191,18 +203,26 @@ export class CatalogPageComponent implements OnInit {
     private placesService: PlacesService,
     private router: Router,
     private route: ActivatedRoute,
+    public loaderService: LoaderService,
   ) {}
 
   // ----------- Lifecycle hook -----------
 
-  ngOnInit() {
+  ngOnInit(): void {
+    this.loaderService.show();
+
     this.placesService.getPlaces().subscribe({
       next: (data) => {
         this.places = data;
         this.initializeFilters();
         this.applyFiltersFromQuery();
+        this.loaderService.hide();
       },
-      error: (err) => console.error('Error loading places:', err),
+      error: (err) => {
+        console.error('Error loading places:', err);
+
+        this.loaderService.hide();
+      },
     });
   }
 
@@ -248,6 +268,8 @@ export class CatalogPageComponent implements OnInit {
    * Handle filters change event from UI component
    */
   onFiltersChange(updatedFilters: CatalogFilters) {
+    this.loaderService.show();
+
     this.filters = updatedFilters;
 
     const queryParams: Record<string, string[]> = {};
@@ -260,17 +282,25 @@ export class CatalogPageComponent implements OnInit {
       }
     }
 
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams,
-      queryParamsHandling: '',
-    });
+    this.router
+      .navigate([], {
+        relativeTo: this.route,
+        queryParams,
+        queryParamsHandling: '',
+      })
+      .then(() => {
+        this.filteredPlaces = this.filterPlaces();
+        this.currentPage = 1;
+        this.updatePaginatedPlaces();
 
-    this.filteredPlaces = this.filterPlaces();
-    this.currentPage = 1;
-    this.updatePaginatedPlaces();
+        this.loaderService.hide();
+
+        // Закрываем мобильное меню фильтров
+        if (this.showFilters) {
+          this.toggleFilters();
+        }
+      });
   }
-
   /**
    * Filter places based on active filters
    */

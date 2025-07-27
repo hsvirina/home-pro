@@ -42,7 +42,8 @@ import { IconComponent } from '../../../shared/components/icon.component';
         <app-icon
           [icon]="ICONS.UserProfile"
           (click)="onToggle($event)"
-          class="h-10 w-10 cursor-pointer rounded-full transition hover:opacity-80"
+          class="cursor-pointer rounded-full transition hover:opacity-80"
+[size] = "40"
           aria-haspopup="true"
           [attr.aria-expanded]="opened"
           role="button"

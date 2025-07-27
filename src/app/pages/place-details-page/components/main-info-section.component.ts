@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Place } from '../../../core/models/place.model';
-import { IconComponent } from "../../../shared/components/icon.component";
+import { IconComponent } from '../../../shared/components/icon.component';
 import { ICONS } from '../../../core/constants/icons.constant';
 
 @Component({
@@ -13,6 +13,7 @@ import { ICONS } from '../../../core/constants/icons.constant';
       <h3>{{ place.name }}</h3>
 
       <div class="body-font-1 flex flex-col gap-[4px] text-[var(--color-gray-75)]">
+        <!-- Rating and number of reviews -->
         <div class="flex items-center gap-2">
           <div class="flex items-center gap-2">
             <app-icon [icon]="ICONS.Star" />
@@ -21,12 +22,13 @@ import { ICONS } from '../../../core/constants/icons.constant';
           <span>({{ place.reviewCount }})</span>
         </div>
 
+        <!-- Address with Google Maps link -->
         <div class="flex items-center gap-2">
-           <app-icon [icon]="ICONS.Location" class="h-9" />
+          <app-icon [icon]="ICONS.Location" [size]="36" />
           <a
             [href]="googleMapsUrl"
             target="_blank"
-            rel="noopener"
+            rel="noopener noreferrer"
             class="underline"
             style="text-decoration-style: dotted; text-underline-offset: 4px;"
           >
@@ -42,7 +44,9 @@ export class MainInfoSectionComponent {
 
   ICONS = ICONS;
 
-  // Returns Google Maps search URL based on place address and city
+  /**
+   * Generates a Google Maps search URL based on place address and city.
+   */
   get googleMapsUrl(): string {
     const query = encodeURIComponent(`${this.place.address}, ${this.place.city}`);
     return `https://www.google.com/maps/search/?api=1&query=${query}`;

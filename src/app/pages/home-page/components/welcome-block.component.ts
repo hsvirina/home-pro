@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { IconComponent } from "../../../shared/components/icon.component";
+import { IconComponent } from '../../../shared/components/icon.component';
 import { ICONS } from '../../../core/constants/icons.constant';
 
 @Component({
@@ -17,9 +17,12 @@ import { ICONS } from '../../../core/constants/icons.constant';
       >
         <div class="flex flex-col gap-[16px] lg:gap-[24px] xxl:gap-[32px]">
           <div class="flex flex-col gap-[16px]">
-            <h3 class="text-[24px] text-[var(--color-gray-100)] xxl:text-[40px]">
+            <h3
+              class="text-[24px] text-[var(--color-gray-100)] xxl:text-[40px]"
+            >
               Explore
-              <span class="text-[var(--color-primary)]">the best</span> cafés in your area
+              <span class="text-[var(--color-primary)]">the best</span> cafés in
+              your area
             </h3>
             <span class="body-font-1">
               Find your perfect café with just a few clicks. Browse through our
@@ -67,7 +70,10 @@ import { ICONS } from '../../../core/constants/icons.constant';
             [routerLink]="['/catalog']"
           >
             <span class="menu-text-font">Details</span>
-            <app-icon [icon]="ICONS.ArrowDownRightPrimary" class="h-[32px] w-[32px]" />
+            <app-icon
+              [icon]="ICONS.ArrowDownRightPrimary"
+              [size] = "32"
+            />
           </button>
         </div>
       </div>

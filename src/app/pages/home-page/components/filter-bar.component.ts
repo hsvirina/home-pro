@@ -122,7 +122,7 @@ import { ICONS } from '../../../core/constants/icons.constant';
             class="mb-[25px] flex h-10 w-10 items-center justify-center rounded-[40px] bg-[var(--color-white)]"
             aria-label="Close"
           >
-            <app-icon [icon]="ICONS.Close" class="h-5 w-5" />
+            <app-icon [icon]="ICONS.Close" [size] = "20" />
           </button>
         </div>
 

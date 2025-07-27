@@ -12,6 +12,7 @@ import { WelcomeModalComponent } from './components/welcome-modal.component';
 
 import { ICONS } from '../../core/constants/icons.constant';
 import { IconComponent } from '../../shared/components/icon.component';
+import { SPLASH_IMAGES } from '../../core/constants/splash-images.constant';
 
 @Component({
   selector: 'app-auth-page',
@@ -32,19 +33,24 @@ import { IconComponent } from '../../shared/components/icon.component';
         class="fixed left-0 top-[52px] z-[9999] h-[calc(100vh-52px)] w-full overflow-hidden bg-[var(--color-bg)] lg:top-[76px] lg:h-[calc(100vh-76px)] xxl:top-[86px] xxl:h-[calc(100vh-86px)]"
         title="Click to skip splash"
       >
-        <!-- Decorative images with absolute positioning -->
-        <img src="/assets/splash/coffee-beans.png" alt="coffee beans" class="absolute left-0 top-[8%] z-0 max-w-[184px] object-contain" />
-        <img src="/assets/splash/croissant.png" alt="croissant" class="absolute left-[32%] top-[13%] z-0 max-w-[152px] object-contain" />
-        <img src="/assets/splash/cake.png" alt="cake" class="absolute right-[28%] top-[7%] z-0 max-w-[152px] object-contain" />
-        <img src="/assets/splash/turkish-coffee.png" alt="turka" class="absolute right-0 top-[18%] z-0 max-w-[118px] object-contain" />
-        <img src="/assets/splash/donut.png" alt="donut" class="absolute right-[17%] top-[68%] z-0 max-w-[142px] object-contain" />
-        <img src="/assets/splash/coffee-cup.png" alt="coffee cup" class="absolute bottom-[13%] left-[22%] z-0 max-w-[176px] object-contain" />
+        <!-- Splash decorative images -->
+        <img
+          *ngFor="let image of splashImages"
+          [src]="image.src"
+          [alt]="image.alt"
+          [class]="image.class"
+        />
 
         <!-- Centered splash content -->
-        <div class="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">
-          <h1 class="max-w-[1068px] text-[56px] font-bold uppercase leading-tight text-[var(--color-gray-100)] lg:text-[80px] xxl:text-[96px]">
-            <span class="text-[var(--color-primary)]">Coffee</span> places you’ll
-            <span class="text-[var(--color-primary)]">love</span>, picked for you
+        <div
+          class="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center"
+        >
+          <h1
+            class="max-w-[1068px] text-[56px] font-bold uppercase leading-tight text-[var(--color-gray-100)] lg:text-[80px] xxl:text-[96px]"
+          >
+            <span class="text-[var(--color-primary)]">Coffee</span> places
+            you’ll <span class="text-[var(--color-primary)]">love</span>, picked
+            for you
           </h1>
 
           <button
@@ -60,11 +66,14 @@ import { IconComponent } from '../../shared/components/icon.component';
 
     <!-- Main auth content -->
     <ng-container *ngIf="!showSplash; else splash">
-      <div class="flex flex-col gap-[32px] px-[30px] py-[40px] text-[var(--color-gray-100)]">
-
+      <div
+        class="flex flex-col gap-[32px] px-[30px] py-[40px] text-[var(--color-gray-100)]"
+      >
         <!-- Authentication steps container -->
         <div class="grid grid-cols-8">
-          <div class="col-span-8 lg:col-span-6 lg:col-start-2 xxl:col-span-4 xxl:col-start-3">
+          <div
+            class="col-span-8 lg:col-span-6 lg:col-start-2 xxl:col-span-4 xxl:col-start-3"
+          >
             <ng-container [ngSwitch]="step">
               <app-auth-email-step
                 *ngSwitchCase="1"
@@ -125,13 +134,13 @@ import { IconComponent } from '../../shared/components/icon.component';
             class="col-span-8 lg:col-span-6 lg:col-start-2 xxl:col-span-4 xxl:col-start-3"
           ></app-welcome-modal>
         </div>
-
       </div>
     </ng-container>
   `,
 })
 export class AuthPageComponent {
   ICONS = ICONS;
+  splashImages = SPLASH_IMAGES;
 
   // Splash screen visibility
   showSplash = true;
@@ -194,30 +203,39 @@ export class AuthPageComponent {
     const firstName = fullNameParts[0] || 'User';
     const lastName = fullNameParts[1] || '';
 
-    this.authService.register(this.email, this.password, firstName, lastName).subscribe({
-      next: () => {
-        // After successful registration, log the user in
-        this.authService.login(this.email, this.password).subscribe({
-          next: () => {
-            this.isNewUser = true;
-            this.showWelcomeModal = true;
-          },
-          error: (err) =>
-            alert('Login error after registration: ' + (err.message || err.statusText)),
-        });
-      },
-      error: (err) => {
-        if (err.status === 400 && err.error?.message?.includes('Email is already taken')) {
-          alert('This email is already registered. Please use another or login.');
-          this.step = 3; // Switch to login step if email taken
-        } else {
-          alert('Registration error: ' + (err.message || err.statusText));
-        }
-      },
-    });
+    this.authService
+      .register(this.email, this.password, firstName, lastName)
+      .subscribe({
+        next: () => {
+          // After successful registration, log the user in
+          this.authService.login(this.email, this.password).subscribe({
+            next: () => {
+              this.isNewUser = true;
+              this.showWelcomeModal = true;
+            },
+            error: (err) =>
+              alert(
+                'Login error after registration: ' +
+                  (err.message || err.statusText),
+              ),
+          });
+        },
+        error: (err) => {
+          if (
+            err.status === 400 &&
+            err.error?.message?.includes('Email is already taken')
+          ) {
+            alert(
+              'This email is already registered. Please use another or login.',
+            );
+            this.step = 3; // Switch to login step if email taken
+          } else {
+            alert('Registration error: ' + (err.message || err.statusText));
+          }
+        },
+      });
   }
 
-  // Handle login submission
   onSubmitLogin(): void {
     this.loginError = false;
 
@@ -230,6 +248,7 @@ export class AuthPageComponent {
       next: () => {
         this.isNewUser = false;
         this.showWelcomeModal = true;
+        // НЕ делать переход здесь, переход будет в closeWelcomeModal()
       },
       error: (err) => alert('Login error: ' + err.message),
     });
@@ -265,10 +284,12 @@ export class AuthPageComponent {
     setTimeout(() => (this.showMessage = false), 3000);
   }
 
-  // Close welcome modal and navigate home
   closeWelcomeModal(): void {
     this.showWelcomeModal = false;
-    this.goHome();
+
+    const returnUrl = localStorage.getItem('returnUrl') || '/';
+    localStorage.removeItem('returnUrl');
+    this.router.navigateByUrl(returnUrl);
   }
 
   // Navigate to home page
