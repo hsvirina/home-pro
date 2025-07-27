@@ -34,7 +34,9 @@ import { ModalComponent } from '../../../shared/components/modal.component';
       <div class="col-span-8 flex items-center justify-between">
         <h5>
           Reviews
-          <ng-container *ngIf="reviews.length > 0">({{ reviews.length }})</ng-container>
+          <ng-container *ngIf="reviews.length > 0"
+            >({{ reviews.length }})</ng-container
+          >
         </h5>
 
         <div
@@ -60,16 +62,24 @@ import { ModalComponent } from '../../../shared/components/modal.component';
       </div>
 
       <!-- Delete Confirmation Modal -->
-      <app-modal [isOpen]="showDeleteModal" (close)="cancelDelete()">
+      <app-modal
+        *ngIf="showDeleteModal"
+        [isOpen]="true"
+        (close)="cancelDelete()"
+      >
         <h4 class="mb-4 text-center text-xl font-semibold">Delete review?</h4>
         <p class="mb-6 text-center text-gray-700">
-          Are you sure you want to delete this review? This action cannot be undone.
+          Are you sure you want to delete this review? This action cannot be
+          undone.
         </p>
         <div class="flex justify-center gap-4">
           <button (click)="deleteConfirmed()" class="button-bg-blue px-6 py-2">
             Delete
           </button>
-          <button (click)="cancelDelete()" class="button-bg-transparent px-6 py-2">
+          <button
+            (click)="cancelDelete()"
+            class="button-bg-transparent px-6 py-2"
+          >
             Cancel
           </button>
         </div>
@@ -108,7 +118,9 @@ import { ModalComponent } from '../../../shared/components/modal.component';
               (mouseleave)="hoveredRating = 0"
               (click)="newReviewRating = star"
               class="cursor-pointer transition duration-200"
-              [style.opacity]="star <= (hoveredRating || newReviewRating) ? '1' : '0.3'"
+              [style.opacity]="
+                star <= (hoveredRating || newReviewRating) ? '1' : '0.3'
+              "
             ></app-icon>
           </ng-container>
         </div>
@@ -126,7 +138,8 @@ import { ModalComponent } from '../../../shared/components/modal.component';
           [disabled]="!canSubmitReview"
           [ngClass]="{
             'button-bg-blue cursor-pointer': canSubmitReview,
-            'cursor-not-allowed bg-[var(--color-gray-20)] text-[var(--color-gray-55)]': !canSubmitReview
+            'cursor-not-allowed bg-[var(--color-gray-20)] text-[var(--color-gray-55)]':
+              !canSubmitReview,
           }"
           class="button-font h-[48px] w-[215px] flex-shrink-0 rounded-[40px] px-8 py-3"
         >
@@ -159,7 +172,9 @@ import { ModalComponent } from '../../../shared/components/modal.component';
               <div>
                 <span class="menu-text-font">{{ review.userName }}</span>
                 <div class="mt-1 flex gap-1">
-                  <ng-container *ngFor="let star of getStarsArray(review.rating)">
+                  <ng-container
+                    *ngFor="let star of getStarsArray(review.rating)"
+                  >
                     <app-icon [icon]="ICONS.Star" [size]="16" />
                   </ng-container>
                 </div>
@@ -167,7 +182,10 @@ import { ModalComponent } from '../../../shared/components/modal.component';
             </div>
 
             <button
-              *ngIf="review.userName === currentUser?.firstName && review.userSurname === currentUser?.lastName"
+              *ngIf="
+                review.userName === currentUser?.firstName &&
+                review.userSurname === currentUser?.lastName
+              "
               (click)="confirmDelete(review.id)"
               class="font-bold text-red-500 hover:text-red-700"
               aria-label="Delete review"
