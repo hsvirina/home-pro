@@ -1,0 +1,122 @@
+{
+  "BUTTON": {
+    "SEARCH": "Search",
+    "CLEAR_ALL": "Clear All",
+    "APPLY_FILTERS": "Apply Filters",
+    "LOG_IN": "Log in",
+    "CLOSE": "Close",
+    "SEND": "Send",
+        "ADD_TO_FAVORITES": "Add to favorites",
+    "LEARN_MORE": "Learn more"
+  },
+  "NAV": {
+    "HOME": "Home",
+    "CATALOG": "Catalog",
+    "CONTACT": "Contact Us"
+  },
+  "HOME": {
+    "TITLE": "Your next favorite café is just a",
+    "CLICK": "click",
+    "AWAY": "away",
+    "SUBTITLE": "Discover hidden gems, cozy corners, and top-rated spots — all matched to your vibe."
+  },
+  "SLIDER": {
+    "FOR_YOU": "Specially for you",
+    "POPULAR": "Most Popular"
+  },
+  "MODAL": {
+    "LOGIN_TITLE": "Please log in",
+    "LOGIN_TEXT": "You must be logged in to add cafés to your favorites."
+  },
+  "WELCOME": {
+    "TITLE_PART1": "Explore",
+    "TITLE_PART2": "the best",
+    "TITLE_PART3": "cafés in your area",
+    "DESCRIPTION": "Find your perfect café with just a few clicks. Browse through our curated list and discover your new favorite spot.",
+    "STATS": {
+      "DEEP_WORK": "Say it’s perfect for deep work",
+      "VIBE": "Picked it for the vibe",
+      "RETURN": "Would come back again"
+    },
+    "BUTTON": "Go to Catalog"
+  },
+  "FOOTER": {
+    "SUBSCRIBE_TITLE": "Subscribe",
+    "SUBSCRIBE_DESCRIPTION": "Join our newsletter to stay updated on features and releases.",
+    "EMAIL_PLACEHOLDER": "Your Email Here",
+    "EMAIL_ERROR": "Please enter a valid email address.",
+    "SEND_BUTTON": "Send",
+    "PRIVACY_NOTICE": "By subscribing, you agree to our Privacy Policy and consent to receive updates.",
+    "MODAL_TITLE": "Thank you for subscribing!",
+    "MODAL_TEXT": "You have successfully joined our newsletter. Stay tuned for updates and exciting features!",
+    "LINKS": {
+      "ABOUT_US": "About Us",
+      "FAQS": "FAQs",
+      "CONTACT_US": "Contact Us",
+      "SOCIAL_MEDIA": "Social Media",
+      "FEEDBACK": "Feedback",
+      "NEWSLETTER": "Newsletter",
+      "UPDATES": "Updates",
+      "EVENTS": "Events",
+      "BLOG_POSTS": "Blog Posts",
+      "COMMUNITY": "Community"
+    }
+  },
+  "THEME": {
+    "LIGHT": "Switch to light theme",
+    "DARK": "Switch to dark theme"
+  },
+  "LOCATION": {
+    "CITY": "City",
+    "KYIV": "Kyiv",
+    "LVIV": "Lviv",
+    "ODESSA": "Odesa",
+    "KHARKIV": "Kharkiv"
+  },
+    "LANGUAGE": {
+  "EN": "English",
+  "UK": "Ukrainian"
+},
+
+"CHECK_IN": {
+  "CHECK_IN": "Check in",
+  "CHECKED_IN": "Checked in",
+  "ALREADY_CHECKED_IN": "Already checked in"
+},
+"ERROR": {
+    "UPDATE_FAVORITES": "An error occurred while updating favorites."
+  },
+  "SEARCH_SECTION": {
+  "PLACEHOLDER": "Search cafés or areas…",
+  "ARIA_LABEL": "Search cafés or areas",
+  "NO_RESULTS": "No results found for \"{{term}}\""
+},
+"CATALOG": {
+    "TITLE": "Best Places to",
+    "HIGHLIGHT": "Sip & Chill",
+    "FILTERS_BUTTON": "Filters",
+    "SHOW_LABEL": "Show:",
+    "NO_CAFES_FOUND_TITLE": "No cafés found",
+    "NO_CAFES_FOUND_DESC": "Sorry, there are no cafés matching your selected filters. Try adjusting or clearing your filters to see more results.",
+    "ITEMS_PER_PAGE": {
+      "6": "6",
+      "12": "12",
+      "ALL": "All"
+    },
+
+    "FILTERS": {
+      "HEADER": "Filters",
+      "CLEAR_ALL": "Clear All",
+      "CLEAR_ALL_ARIA": "Clear all filters",
+      "APPLY": "Apply Filters"
+    },
+    "FILTERS_CATEGORIES": {
+      "categoryKey1": "Category Title 1",
+      "categoryKey2": "Category Title 2"
+    },
+    "FILTERS_OPTIONS": {
+      "optionKey1": "Option Label 1",
+      "optionKey2": "Option Label 2"
+    }
+  }
+}
