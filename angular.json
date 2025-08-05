@@ -29,9 +29,13 @@
             "assets": [
               "src/assets"
             ],
-            "styles": [
-              "src/styles/styles.scss"
-            ],
+           "styles": [
+  "node_modules/swiper/swiper.min.css",
+  "node_modules/swiper/modules/navigation.min.css",
+  "node_modules/swiper/modules/pagination.min.css",
+  "node_modules/swiper/modules/scrollbar.min.css",
+  "src/styles/styles.scss"
+],
             "scripts": [],
             "allowedCommonJsDependencies": [
               "canvg",
@@ -93,8 +97,12 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles/styles.scss"
-            ],
+  "node_modules/swiper/swiper.min.css",
+  "node_modules/swiper/modules/navigation.min.css",
+  "node_modules/swiper/modules/pagination.min.css",
+  "node_modules/swiper/modules/scrollbar.min.css",
+  "src/styles/styles.scss"
+],
             "scripts": []
           }
         },

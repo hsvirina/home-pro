@@ -27,7 +27,7 @@ export class ReviewsService {
   addReview(review: {
     cafeId: number;
     rating: number;
-    text: string;
+    text?: string;
   }): Observable<Review> {
     return this.http.post<Review>(this.baseUrl, review, {
       headers: { 'Content-Type': 'application/json' },

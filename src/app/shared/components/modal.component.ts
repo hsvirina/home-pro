@@ -1,5 +1,8 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Theme } from '../../core/models/theme.type';
+import { Observable } from 'rxjs';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-modal',
@@ -8,27 +11,33 @@ import { CommonModule } from '@angular/common';
   template: `
     <div
       *ngIf="isOpen"
-      class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center px-5 backdrop-blur"
       (click)="onBackdropClick($event)"
+      [ngClass]="{
+        'bg-[#FFFFFF]/60': (currentTheme$ | async) === 'light',
+        'bg-[#8C8C8E]/50': (currentTheme$ | async) === 'dark',
+      }"
     >
       <div
-        class="modal-content rounded-[40px] bg-white p-6 shadow-xl"
+        class="modal-content rounded-[40px] p-6"
         [ngStyle]="{ width: width }"
+        [ngClass]="{
+          'bg-[var(--color-bg-2)]': (currentTheme$ | async) === 'light',
+          'bg-[var(--color-bg-card)]': (currentTheme$ | async) === 'dark',
+        }"
       >
         <ng-content></ng-content>
       </div>
     </div>
   `,
-  styles: [`
-    .modal-backdrop {
-      backdrop-filter: blur(4px);
-    }
-
-    .modal-content {
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-  `],
+  styles: [
+    `
+      .modal-content {
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+    `,
+  ],
 })
 export class ModalComponent {
   /** Controls modal visibility */
@@ -39,6 +48,12 @@ export class ModalComponent {
 
   /** Emits when modal should be closed */
   @Output() close = new EventEmitter<void>();
+
+  currentTheme$: Observable<Theme>;
+
+  constructor(private themeService: ThemeService) {
+    this.currentTheme$ = this.themeService.theme$;
+  }
 
   /**
    * Closes modal if user clicks outside the modal content

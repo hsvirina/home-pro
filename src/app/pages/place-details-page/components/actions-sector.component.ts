@@ -14,27 +14,24 @@ import { ICONS } from '../../../core/constants/icons.constant';
         Help other coffee lovers discover this place by sharing your experience!
       </span>
 
-      <div class="flex flex-col gap-4 lg:flex-row">
-        <!-- Leave Review button for users who are not logged in and review form not shown -->
-        <button
-          *ngIf="!isLoggedIn && !showAddReviewForm"
-          (click)="leaveReviewClick.emit()"
-          class="button-font button-bg-blue px-6 py-3"
-        >
-          Leave a Review
-        </button>
+      <div class="flex w-full lg:w-auto flex-col gap-4 lg:flex-row">
+        <!-- Leave Review button -->
+<button
+  *ngIf="!showAddReviewForm && (!isLoggedIn || isMobile)"
+  (click)="leaveReviewClick.emit()"
+  class="button-font button-bg-blue w-full px-6 py-3 lg:w-auto"
+>
+  Leave a Review
+</button>
 
         <!-- Favorite toggle button -->
         <button
           (click)="onToggleFavorite.emit()"
-          [ngClass]="{
-            'button-bg-blue': isFavorite,
-            'button-bg-transparent shadow-hover': !isFavorite
-          }"
-          class="button-font flex items-center gap-2 rounded-[40px] px-6 py-3"
+
+          class="button-bg-transparent button-font flex w-full items-center gap-2 rounded-[40px] px-6 py-3 lg:w-auto"
         >
           <ng-container *ngIf="isFavorite; else blueHeart">
-            <app-icon [icon]="ICONS.Heart" />
+            <app-icon [icon]="ICONS.HeartBlueFill" />
           </ng-container>
           <ng-template #blueHeart>
             <app-icon [icon]="ICONS.HeartBlue" />
@@ -45,7 +42,7 @@ import { ICONS } from '../../../core/constants/icons.constant';
         <!-- Share button -->
         <button
           (click)="onShare.emit()"
-          class="button-font button-bg-transparent shadow-hover flex gap-2 px-6 py-3"
+          class="button-font button-bg-transparent flex w-full gap-2 px-6 py-3 lg:w-auto"
         >
           <app-icon [icon]="ICONS.ShareBlue" />
           Share this Place

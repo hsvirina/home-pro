@@ -10,11 +10,21 @@ import { CommonModule } from '@angular/common';
 import { ICONS } from '../../../core/constants/icons.constant';
 import { IconComponent } from '../../../shared/components/icon.component';
 import { fadeInOutImage } from '../../../../styles/animations/animations';
+import { Place } from '../../../core/models/place.model';
+import { ThemedIconPipe } from '../../../core/pipes/themed-icon.pipe';
+import { Observable } from 'rxjs';
+import { Theme } from '../../../core/models/theme.type';
+import { ThemeService } from '../../../core/services/theme.service';
+
+import { SharedCafesService } from '../../../core/services/shared-cafes.service';
+import { StorageService } from '../../../core/services/storage.service';
+import { AuthApiService } from '../../../core/services/auth-api.service';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-carousel-section',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, IconComponent, ThemedIconPipe, TranslateModule],
   animations: [fadeInOutImage],
   template: `
     <div
@@ -25,9 +35,17 @@ import { fadeInOutImage } from '../../../../styles/animations/animations';
       <!-- Previous slide button -->
       <button
         (click)="handlePrev()"
-        class="absolute left-[24px] top-1/2 z-10 flex h-[52px] w-[52px] -translate-y-1/2 items-center justify-center rounded-[40px] bg-[var(--color-bg)] p-[10px] transition hover:scale-110"
+        class="absolute left-[24px] top-1/2 z-10 flex h-[52px] w-[52px] -translate-y-1/2 items-center justify-center rounded-[40px] p-[10px] transition"
+        [ngClass]="{
+          'bg-[#FFFFFF]/60': (currentTheme$ | async) === 'light',
+          'bg-[#0D0D0D]/60': (currentTheme$ | async) === 'dark',
+        }"
       >
-        <app-icon [icon]="ICONS.ArrowLeft" [size] = "32" />
+        <app-icon
+          [icon]="'ArrowLeft' | themedIcon"
+          [width]="32"
+          [height]="32"
+        />
       </button>
 
       <!-- Image container -->
@@ -35,24 +53,32 @@ import { fadeInOutImage } from '../../../../styles/animations/animations';
         <!-- Action buttons (favorite and share) -->
         <div class="absolute right-[24px] top-[24px] z-10 flex gap-[16px]">
           <button
-            (click)="onToggleFavorite.emit()"
-            class="relative flex h-[44px] w-[44px] items-center justify-center rounded-full p-[10px] transition hover:scale-110"
-            [ngClass]="{
-              'button-bg-blue': isFavorite,
-              'bg-[var(--color-bg)] text-[var(--color-gray-80)]': !isFavorite
-            }"
-            title="Add to favorites"
-          >
-            <app-icon [icon]="ICONS.Heart" />
-          </button>
+  (click)="onToggleFavorite.emit()"
+  class="relative flex h-[44px] w-[44px] items-center justify-center rounded-full p-[10px] transition"
+  [ngClass]="{
+    'bg-[#FFFFFF]/60': (currentTheme$ | async) === 'light',
+    'bg-[#0D0D0D]/60': (currentTheme$ | async) === 'dark'
+  }"
+  [title]="'carousel.addToFavorites' | translate"
+>
+  <app-icon
+    [icon]="
+      isFavorite ? ICONS.HeartBlueFill : ('HeartBlue' | themedIcon)
+    "
+  />
+</button>
 
-          <button
-            (click)="onShare.emit()"
-            class="flex h-[44px] w-[44px] items-center justify-center rounded-full bg-[var(--color-bg)] p-[10px] transition hover:scale-110"
-            title="Share this place"
-          >
-            <app-icon [icon]="ICONS.Share" />
-          </button>
+<button
+  (click)="handleShare()"
+  class="flex h-[44px] w-[44px] items-center justify-center rounded-full p-[10px] backdrop-blur transition"
+  [title]="'carousel.shareThisPlace' | translate"
+  [ngClass]="{
+    'bg-[#FFFFFF]/60': (currentTheme$ | async) === 'light',
+    'bg-[#0D0D0D]/60': (currentTheme$ | async) === 'dark'
+  }"
+>
+  <app-icon [icon]="'Share' | themedIcon" />
+</button>
         </div>
 
         <!-- Display current and previous images with fade animation -->
@@ -70,14 +96,27 @@ import { fadeInOutImage } from '../../../../styles/animations/animations';
       <!-- Next slide button -->
       <button
         (click)="handleNext()"
-        class="absolute right-[24px] top-1/2 z-10 flex h-[52px] w-[52px] -translate-y-1/2 items-center justify-center rounded-[40px] bg-[var(--color-bg)] p-[10px] transition hover:scale-110"
+        class="absolute right-[24px] top-1/2 z-10 flex h-[52px] w-[52px] -translate-y-1/2 items-center justify-center rounded-[40px] p-[10px] backdrop-blur transition"
+        [ngClass]="{
+          'bg-[#FFFFFF]/60': (currentTheme$ | async) === 'light',
+          'bg-[#0D0D0D]/60': (currentTheme$ | async) === 'dark',
+        }"
       >
-        <app-icon [icon]="ICONS.ArrowRight" [size]="32" />
+        <app-icon
+          [icon]="'ArrowRight' | themedIcon"
+          [width]="32"
+          [height]="32"
+        />
       </button>
 
       <!-- Slide position indicator -->
       <div
-        class="button-font absolute bottom-5 right-5 rounded-[40px] bg-black/60 px-3 py-1 text-[var(--color-bg)]"
+        class="button-font absolute bottom-5 right-5 rounded-[40px] px-3 py-1 backdrop-blur"
+        [ngClass]="{
+          'bg-[#FFFFFF]/60': (currentTheme$ | async) === 'light',
+          'bg-[#0D0D0D]/60 text-[var(--color-white)]':
+            (currentTheme$ | async) === 'dark',
+        }"
       >
         {{ currentIndex + 1 }} / {{ photoUrls.length || 0 }}
       </div>
@@ -87,9 +126,12 @@ import { fadeInOutImage } from '../../../../styles/animations/animations';
 export class CarouselSectionComponent implements OnDestroy {
   @Input() photoUrls: string[] = [];
   @Input() isFavorite = false;
+  @Input() place!: Place;
 
   @Output() onToggleFavorite = new EventEmitter<void>();
-  @Output() onShare = new EventEmitter<void>();
+  @Output() onShare = new EventEmitter<void>(); // по желанию
+
+  currentTheme$: Observable<Theme>;
 
   ICONS = ICONS;
 
@@ -100,19 +142,50 @@ export class CarouselSectionComponent implements OnDestroy {
   private touchStartX: number | null = null;
   private readonly animationDuration = 600;
 
-  // Returns current image URL
+  constructor(
+    private themeService: ThemeService,
+    private sharedCafesService: SharedCafesService,
+      private userService: AuthApiService,      // добавить сюда
+  private storageService: StorageService,   // добавить сюда
+  ) {
+    this.currentTheme$ = this.themeService.theme$;
+  }
+
+  handleShare() {
+  if (!this.place?.id) return;
+
+  this.sharedCafesService.shareCafe(this.place.id).subscribe({
+    next: () => {
+      // После успешного шеринга обновляем публичный профиль
+      this.userService.getPublicUserProfile(this.storageService.getUser()?.userId || 0).subscribe({
+        next: (profile) => {
+          this.storageService.setPublicUserProfile(profile);
+          this.onShare.emit(); // если нужно уведомить родителя
+        },
+        error: (error) => {
+          console.error('Ошибка при обновлении публичного профиля после шеринга:', error);
+        },
+      });
+    },
+    error: (error) => {
+      console.error('Error sharing cafe:', error);
+      // Можно обработать ошибку UI, например показать уведомление
+    },
+  });
+}
+
+  // Остальной код из твоего компонента без изменений...
+
   get currentImageUrl(): string | null {
     return this.photoUrls?.[this.currentIndex] ?? null;
   }
 
-  // Returns previous image URL for fade-out animation
   get prevImageUrl(): string | null {
     return this.prevIndex !== null
-      ? this.photoUrls?.[this.prevIndex] ?? null
+      ? (this.photoUrls?.[this.prevIndex] ?? null)
       : null;
   }
 
-  // Returns array of images to render (previous + current during animation)
   get imagesToRender(): string[] {
     if (this.isAnimating && this.prevImageUrl && this.currentImageUrl) {
       return [this.prevImageUrl, this.currentImageUrl];
@@ -120,14 +193,12 @@ export class CarouselSectionComponent implements OnDestroy {
     return this.currentImageUrl ? [this.currentImageUrl] : [];
   }
 
-  // Navigate to next image
   handleNext() {
     if (!this.photoUrls?.length) return;
     const next = (this.currentIndex + 1) % this.photoUrls.length;
     this.triggerChange(next);
   }
 
-  // Navigate to previous image
   handlePrev() {
     if (!this.photoUrls?.length) return;
     const next =
@@ -137,7 +208,6 @@ export class CarouselSectionComponent implements OnDestroy {
     this.triggerChange(next);
   }
 
-  // Initiate slide change with animation
   triggerChange(index: number) {
     this.prevIndex = this.currentIndex;
     this.currentIndex = index;
@@ -149,12 +219,10 @@ export class CarouselSectionComponent implements OnDestroy {
     }, this.animationDuration);
   }
 
-  // Capture initial touch position for swipe
   onTouchStart(e: TouchEvent) {
     this.touchStartX = e.changedTouches[0].clientX;
   }
 
-  // Detect swipe direction and navigate accordingly
   onTouchEnd(e: TouchEvent) {
     const endX = e.changedTouches[0].clientX;
     if (this.touchStartX !== null && Math.abs(this.touchStartX - endX) > 50) {
@@ -163,6 +231,5 @@ export class CarouselSectionComponent implements OnDestroy {
     this.touchStartX = null;
   }
 
-  // No additional cleanup needed
   ngOnDestroy() {}
 }

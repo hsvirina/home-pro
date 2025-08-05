@@ -1,4 +1,5 @@
 :root {
+  /* Light theme (дефолтная) */
   --color-bg: #F7F7F7;
   --color-bg-2: #F2F2F5;
   --color-primary: #625DF5;
@@ -8,11 +9,19 @@
   --color-gray-75: #585858;
   --color-gray-55: #8C8C8E;
   --color-gray-20: #D2D2D3;
-  --color-gray-10: #F4F4F4;
+  --color-gray-10: #F9F9F9;
   --color-white: #FFFFFF;
   --color-secondary: #F1F1FE;
-  --color-black: #000000;
-  --color-button-green: #319F43;
-  --color-button-blue: #587DBD;
+  --color-button-green: #0ECA4C;
+  --color-button-blue: #2D71FA;
+  --color-warning: #FF8800;
   --color-button-error: #D91619;
+}
+
+[data-theme='dark'] {
+  --color-bg: #141414;
+  --color-bg-card: #0D0D0D;
+  --color-primary: #7975F6;
+  --color-border: #39393A;
+  --color-bg-footer: #1C1C1C;
 }

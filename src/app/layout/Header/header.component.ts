@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import {
   Router,
   ActivatedRoute,
@@ -7,10 +7,9 @@ import {
 } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subscription, filter } from 'rxjs';
+import { Observable, Subscription, filter } from 'rxjs';
 
 import { FILTER_CATEGORIES } from '../../core/constants/catalog-filter.config';
-import { User } from '../../core/models/user.model';
 import { slideDownAnimation } from '../../../styles/animations/animations';
 
 import { UiStateService } from '../../state/ui/ui-state.service';
@@ -25,6 +24,17 @@ import { MobileMenuComponent } from './components/mobile-menu.component';
 import { ICONS } from '../../core/constants/icons.constant';
 import { IconComponent } from '../../shared/components/icon.component';
 import { LogoComponent } from '../../shared/components/logo.component';
+import { ThemeService } from '../../core/services/theme.service';
+import { Theme } from '../../core/models/theme.type';
+import { ThemedIconPipe } from '../../core/pipes/themed-icon.pipe';
+import { AuthUser } from '../../core/models/user.model';
+import { LanguageService } from '../../core/services/language.service';
+import { TranslateModule } from '@ngx-translate/core';
+import { BadgeType, calculateBadgeType } from '../../core/utils/badge-utils';
+import { BadgeImagePipe } from '../../core/pipes/badge-image.pipe';
+import { AuthApiService } from '../../core/services/auth-api.service';
+import { getUnlockedAchievements } from '../../core/utils/achievement.utils';
+import { ACHIEVEMENTS } from '../../core/constants/achievements';
 
 @Component({
   selector: 'app-header',
@@ -41,13 +51,16 @@ import { LogoComponent } from '../../shared/components/logo.component';
     ClickOutsideDirective,
     IconComponent,
     LogoComponent,
+    ThemedIconPipe,
+    TranslateModule,
+    BadgeImagePipe,
   ],
   animations: [slideDownAnimation],
   template: `
     <header
       appClickOutside
       (appClickOutside)="activeDropdown = null"
-      class="relative z-50 flex h-[48px] items-center justify-between bg-[var(--color-bg)] px-[20px] lg:h-[72px] lg:px-[40px] xxl:h-[80px] xxl:px-0"
+      class="relative z-50 flex h-[48px] items-center justify-between bg-[var(--color-bg)] px-[20px] lg:h-[72px] xxl:h-[80px] xxl:px-0"
     >
       <div class="flex items-center gap-[8px]">
         <button class="lg:hidden" (click)="toggleDropdown('menu')">
@@ -60,14 +73,13 @@ import { LogoComponent } from '../../shared/components/logo.component';
         <app-search-section></app-search-section>
       </div>
 
-      <div class="flex items-center gap-[30px]">
-        <div class="hidden items-center gap-[30px] lg:flex">
-          <nav class="menu-text-font flex items-center gap-[30px]">
-            <a
-              routerLink="/catalog"
-              class="shadow-hover text-[var(--color-gray-100)]"
-              >Catalog</a
-            >
+      <div class="flex items-center gap-[24px] lg:gap-[20px] xxl:gap-[24px]">
+        <div class="hidden items-center lg:flex">
+          <nav
+            class="menu-text-font flex items-center gap-[24px] lg:gap-[20px] xxl:gap-[24px]"
+          >
+            <a routerLink="/catalog">{{ 'NAV.CATALOG' | translate }}</a>
+
             <app-city-dropdown
               [selectedKey]="cityKey"
               [selectedLabel]="cityLabel"
@@ -75,26 +87,78 @@ import { LogoComponent } from '../../shared/components/logo.component';
               (toggle)="toggleDropdown('city')"
               (cityChange)="setCity($event)"
             ></app-city-dropdown>
+
             <app-language-dropdown
-              [selectedLanguage]="language"
               [opened]="activeDropdown === 'lang'"
               (toggle)="toggleDropdown('lang')"
-              (close)="toggleDropdown('lang')"
-              (languageChange)="setLanguage($event)"
             ></app-language-dropdown>
           </nav>
+        </div>
+
+        <div class="flex gap-1 p-1">
+          <!-- Кнопка: Светлая тема -->
+          <button
+            class="flex h-10 w-10 items-center justify-center rounded-full"
+            [ngClass]="[
+              (currentTheme$ | async) === 'light'
+                ? 'bg-[var(--color-secondary)]'
+                : 'hover:bg-[var(--color-gray-20)]',
+            ]"
+            (click)="setTheme('light')"
+            (mouseenter)="isSunHovered = true"
+            (mouseleave)="isSunHovered = false"
+            [attr.aria-label]="'THEME.LIGHT' | translate"
+          >
+            <app-icon
+              [icon]="
+                (currentTheme$ | async) === 'dark'
+                  ? isSunHovered
+                    ? ICONS.Sun
+                    : ICONS.SunDarkThema
+                  : ('Sun' | themedIcon)
+              "
+            />
+          </button>
+
+          <!-- Кнопка: Тёмная тема (луна) -->
+          <button
+            class="flex h-10 w-10 items-center justify-center rounded-full hover:bg-[var(--color-gray-20)]"
+            [ngClass]="{
+              'bg-[var(--color-gray-20)]': (currentTheme$ | async) === 'dark',
+            }"
+            (click)="setTheme('dark')"
+            [attr.aria-label]="'THEME.DARK' | translate"
+          >
+            <app-icon [icon]="ICONS.Moon" />
+          </button>
         </div>
 
         <!-- mobile user button -->
         <ng-container *ngIf="screenIsMobile && activeDropdown !== 'menu'">
           <ng-container *ngIf="user; else mobileLogin">
-            <app-user-menu
-              [user]="user"
-              [opened]="activeDropdown === 'userMenu'"
-              (toggle)="toggleDropdown('userMenu')"
-              (logout)="handleLogout()"
-              (close)="toggleDropdown(null)"
-            ></app-user-menu>
+            <div class="relative h-[64px] w-[64px]">
+              <!-- Бейдж (больше и позади) -->
+              <img
+                *ngIf="userBadge | badgeImage as badgeImg"
+                [src]="badgeImg"
+                alt="badge"
+                class="absolute left-1/2 top-1/2 z-0"
+                style="width: 60px; height: 60px; transform: translate(-50%, -50%); object-fit: contain;"
+              />
+
+              <!-- Аватар (меньше и по центру) -->
+              <div
+                class="absolute left-1/2 top-1/2 z-10"
+                style="width: 50px; height: 50px; transform: translate(-50%, -50%);"
+              >
+                <app-user-menu
+                  [user]="user"
+                  [opened]="activeDropdown === 'userMenu'"
+                  (toggle)="toggleDropdown('userMenu')"
+                  (logout)="handleLogout()"
+                ></app-user-menu>
+              </div>
+            </div>
           </ng-container>
           <ng-template #mobileLogin>
             <button
@@ -108,19 +172,35 @@ import { LogoComponent } from '../../shared/components/logo.component';
 
         <div class="hidden items-center gap-[30px] lg:flex">
           <ng-container *ngIf="user; else showLogin">
-            <app-user-menu
-              [user]="user"
-              [opened]="activeDropdown === 'userMenu'"
-              (toggle)="toggleDropdown('userMenu')"
-              (logout)="handleLogout()"
-            ></app-user-menu>
+            <div class="relative h-[64px] w-[64px]">
+              <!-- Бейдж (больше и позади) -->
+              <img
+                *ngIf="userBadge | badgeImage as badgeImg"
+                [src]="badgeImg"
+                alt="badge"
+                class="absolute left-1/2 top-1/2 z-0"
+                style="width: 60px; height: 60px; transform: translate(-50%, -50%); object-fit: contain;"
+              />
+
+              <!-- Аватар (меньше и по центру) -->
+              <div
+                class="absolute left-1/2 top-1/2 z-10"
+                style="width: 50px; height: 50px; transform: translate(-50%, -50%);"
+              >
+                <app-user-menu
+                  [user]="user"
+                  [opened]="activeDropdown === 'userMenu'"
+                  (toggle)="toggleDropdown('userMenu')"
+                  (logout)="handleLogout()"
+                ></app-user-menu>
+              </div>
+            </div>
           </ng-container>
           <ng-template #showLogin>
-            <button
-              class="shadow-hover flex items-center gap-1"
-              (click)="navigateToAuth()"
-            >
-              <span class="hidden lg:inline">Log in</span>
+            <button class="flex items-center gap-1" (click)="navigateToAuth()">
+              <span class="hidden lg:inline">{{
+                'BUTTON.LOG_IN' | translate
+              }}</span>
               <app-icon [icon]="ICONS.UserProfile" />
             </button>
           </ng-template>
@@ -149,11 +229,16 @@ export class HeaderComponent implements OnInit, OnDestroy {
   cityLabel = 'City';
   language: 'ENG' | 'UKR' = 'ENG';
   activeDropdown: 'city' | 'lang' | 'menu' | 'userMenu' | null = null;
-  user: User | null = null;
+  user: AuthUser | null = null;
   screenIsMobile = false;
+  isSunHovered = false;
+
+  readonly currentTheme$: Observable<Theme>;
 
   private subscriptions: Subscription[] = [];
   private readonly resizeListener = () => this.checkScreenWidth();
+
+  userBadge: BadgeType | null = null;
 
   private readonly locationOptions =
     FILTER_CATEGORIES.find((c) => c.key === 'location')?.options || [];
@@ -161,10 +246,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef,
     public uiState: UiStateService,
     private authService: AuthStateService,
-  ) {}
+    private themeService: ThemeService,
+    public languageService: LanguageService,
+    private authApiService: AuthApiService, // ← добавь
+  ) {
+    this.currentTheme$ = this.themeService.theme$;
+  }
 
   ngOnInit(): void {
     this.subscriptions.push(
@@ -175,17 +264,33 @@ export class HeaderComponent implements OnInit, OnDestroy {
     );
 
     this.subscriptions.push(
-      this.router.events
-        .pipe(filter((e) => e instanceof NavigationEnd))
-        .subscribe(() => {
-          this.activeDropdown = null;
-          this.uiState.closeMobileMenu();
-          this.cdr.detectChanges();
-        }),
+      this.authService.user$.subscribe((user) => {
+        this.user = user;
+        this.initializeCityFromUserOrQuery(user);
+
+        if (user) {
+          this.authApiService.getPublicUserProfile(user.userId).subscribe({
+            next: (profile) => {
+              const unlocked = getUnlockedAchievements(profile);
+              this.userBadge = calculateBadgeType(unlocked, ACHIEVEMENTS);
+            },
+            error: (err) => {
+              console.error('Failed to fetch profile for badge', err);
+              this.userBadge = null;
+            },
+          });
+        } else {
+          this.userBadge = null;
+        }
+      }),
     );
 
     this.checkScreenWidth();
     window.addEventListener('resize', this.resizeListener);
+  }
+
+  setTheme(theme: Theme): void {
+    this.themeService.setTheme(theme);
   }
 
   ngOnDestroy(): void {
@@ -246,7 +351,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.router.navigate(['/']);
   }
 
-  private initializeCityFromUserOrQuery(user: User | null): void {
+  private initializeCityFromUserOrQuery(user: AuthUser | null): void {
     if (user?.defaultCity) {
       const found = this.locationOptions.find(
         (opt) => opt.key.toLowerCase() === user.defaultCity.toLowerCase(),

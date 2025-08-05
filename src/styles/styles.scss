@@ -3,3 +3,7 @@
 @use './base/typography';
 
 @import './tailwind/tailwind.css';
+
+html, body, #root, main, header, footer, div.flex {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}

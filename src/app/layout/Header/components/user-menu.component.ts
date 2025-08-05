@@ -7,10 +7,13 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { User } from '../../../core/models/user.model';
 import { slideDownAnimation } from '../../../../styles/animations/animations';
 import { ICONS } from '../../../core/constants/icons.constant';
 import { IconComponent } from '../../../shared/components/icon.component';
+import { ThemeService } from '../../../core/services/theme.service';
+import { Theme } from '../../../core/models/theme.type';
+import { Observable } from 'rxjs';
+import { AuthUser } from '../../../core/models/user.model';
 
 @Component({
   selector: 'app-user-menu',
@@ -25,10 +28,8 @@ import { IconComponent } from '../../../shared/components/icon.component';
           (click)="onToggle($event)"
           [src]="photoUrl"
           alt="User avatar"
-          class="h-10 w-10 cursor-pointer rounded-full object-cover transition hover:opacity-80"
-          loading="lazy"
-          width="40"
-          height="40"
+          class="h-[50px] w-[50px] cursor-pointer rounded-full object-cover transition hover:opacity-80"
+          loading="eager"
           aria-haspopup="true"
           [attr.aria-expanded]="opened"
           role="button"
@@ -39,39 +40,56 @@ import { IconComponent } from '../../../shared/components/icon.component';
       </ng-container>
 
       <ng-template #defaultIcon>
-        <app-icon
-          [icon]="ICONS.UserProfile"
-          (click)="onToggle($event)"
-          class="cursor-pointer rounded-full transition hover:opacity-80"
-[size] = "40"
-          aria-haspopup="true"
-          [attr.aria-expanded]="opened"
-          role="button"
-          tabindex="0"
-          (keydown.enter)="onToggle($event)"
-          (keydown.space)="onToggle($event)"
-        />
+        <div
+          class="flex h-[58px] w-[58px] items-center justify-center rounded-[29px] bg-[var(--color-secondary)]"
+        >
+          <app-icon
+            [icon]="ICONS.UserProfile"
+            (click)="onToggle($event)"
+            class="cursor-pointer rounded-full transition hover:opacity-80"
+            [width]="36"
+            [height]="36"
+            aria-haspopup="true"
+            [attr.aria-expanded]="opened"
+            role="button"
+            tabindex="0"
+            (keydown.enter)="onToggle($event)"
+            (keydown.space)="onToggle($event)"
+          />
+        </div>
       </ng-template>
 
       <div
         *ngIf="opened"
         @slideDownAnimation
-        class="absolute right-0 z-10 mt-2 w-40 rounded bg-white shadow-md"
+        class="absolute right-0 z-10 mt-2 w-auto origin-top rounded-[16px] border p-2"
         role="menu"
         aria-label="User menu"
+        [ngClass]="{
+          'border-[var(--color-white)] bg-[var(--color-white)]':
+            (currentTheme$ | async) === 'light',
+          'border-[var(--color-white)] bg-[var(--color-bg-card)]':
+            (currentTheme$ | async) === 'dark'
+        }"
       >
         <a
           routerLink="/profile"
-          class="block px-4 py-2 hover:bg-gray-100"
+          class="block cursor-pointer rounded-[12px] px-4 py-2 transition-colors"
           (click)="closeMenu()"
           role="menuitem"
+          [ngClass]="{
+            'hover:bg-[var(--color-bg)]': true
+          }"
         >
           Profile
         </a>
         <button
-          class="w-full px-4 py-2 text-left hover:bg-gray-100"
+          class="w-full cursor-pointer rounded-[12px] px-4 py-2 transition-colors"
           (click)="onLogout()"
           role="menuitem"
+          [ngClass]="{
+            'hover:bg-[var(--color-bg)]': true
+          }"
         >
           Logout
         </button>
@@ -80,21 +98,23 @@ import { IconComponent } from '../../../shared/components/icon.component';
   `,
 })
 export class UserMenuComponent {
-  ICONS = ICONS;
+  readonly ICONS = ICONS;
 
-  @Input() user: User | null = null;
+  @Input() user: AuthUser | null = null;
   @Input() opened = false;
 
   @Output() toggle = new EventEmitter<MouseEvent | KeyboardEvent>();
   @Output() logout = new EventEmitter<void>();
   @Output() close = new EventEmitter<void>();
 
-  /**
-   * Handle mouse and keyboard events for toggling dropdown.
-   */
+  readonly currentTheme$: Observable<Theme>;
+
+  constructor(private themeService: ThemeService) {
+    this.currentTheme$ = this.themeService.theme$;
+  }
+
   onToggle(event: Event): void {
     event.stopPropagation();
-
     if (event instanceof MouseEvent || event instanceof KeyboardEvent) {
       this.toggle.emit(event);
     }

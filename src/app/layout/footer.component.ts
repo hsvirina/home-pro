@@ -3,141 +3,191 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { LogoComponent } from '../shared/components/logo.component';
+import { ModalComponent } from '../shared/components/modal.component';
+import { ClickOutsideDirective } from '../shared/directives/click-outside.directive';
+import { Theme } from '../core/models/theme.type';
+import { Observable } from 'rxjs';
+import { ThemeService } from '../core/services/theme.service';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-footer',
   standalone: true,
-  imports: [RouterModule, FormsModule, CommonModule, LogoComponent],
+  imports: [
+    RouterModule,
+    FormsModule,
+    CommonModule,
+    LogoComponent,
+    ModalComponent,
+    ClickOutsideDirective,
+    TranslateModule,
+  ],
   template: `
+    <!-- Обёртка всего футера -->
     <footer
-      class="grid grid-cols-2 gap-x-[16px] gap-y-[40px] bg-[var(--color-secondary)] px-[20px] py-[48px] text-[var(--color-gray-75)] lg:grid-cols-6 lg:px-[40px] xxl:flex xxl:py-[60px]"
+      class="flex flex-col gap-10 px-5 py-12 lg:flex-row lg:gap-0 lg:px-[40px] lg:py-[60px] xxl:px-0"
+      [ngClass]="{
+        'text-[var(--color-gray-75)]': (currentTheme$ | async) === 'light',
+        'text-[var(--color-gray-20)]': (currentTheme$ | async) === 'dark',
+      }"
     >
-      <!-- Logo -->
-      <div class="col-span-1">
-        <app-logo></app-logo>
-      </div>
-
-      <!-- Navigation links -->
+      <!-- Левая часть: логотип + навигация -->
       <div
-        class="body-font-2 col-span-2 grid grid-cols-2 gap-x-[16px] xxl:mx-auto xxl:flex xxl:gap-[172px]"
+        class="flex flex-col gap-10 lg:w-full lg:flex-row lg:justify-between lg:gap-0"
       >
-        <div class="flex flex-col gap-1">
-          <a
-            routerLink="/about"
-            class="leading-none relative inline-block w-max py-[8px] text-[var(--color-gray-75)] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[var(--color-primary)] after:transition-all after:duration-300 hover:text-[var(--color-gray-100)] hover:after:w-full"
+        <!-- Логотип -->
+        <app-logo [sizeXxl]="true"></app-logo>
+
+        <!-- Контейнер для обоих секций -->
+        <div class="flex flex-row gap-4 lg:gap-[80px] xxl:gap-[192px]">
+          <!-- Каждая секция -->
+          <div
+            class="body-font-2 flex w-1/2 flex-col gap-1"
+            *ngFor="let section of navigationLinks"
           >
-            About Us
-          </a>
-          <a routerLink="/faqs" class="leading-none relative inline-block w-max py-[8px] text-[var(--color-gray-75)] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[var(--color-primary)] after:transition-all after:duration-300 hover:text-[var(--color-gray-100)] hover:after:w-full">FAQs</a>
-          <a routerLink="/contact" class="leading-none relative inline-block w-max py-[8px] text-[var(--color-gray-75)] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[var(--color-primary)] after:transition-all after:duration-300 hover:text-[var(--color-gray-100)] hover:after:w-full"
-            >Contact Us</a
-          >
-          <a routerLink="/social-media" class="leading-none relative inline-block w-max py-[8px] text-[var(--color-gray-75)] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[var(--color-primary)] after:transition-all after:duration-300 hover:text-[var(--color-gray-100)] hover:after:w-full"
-            >Social Media</a
-          >
-          <a routerLink="/feedback" class="leading-none relative inline-block w-max py-[8px] text-[var(--color-gray-75)] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[var(--color-primary)] after:transition-all after:duration-300 hover:text-[var(--color-gray-100)] hover:after:w-full"
-            >Feedback</a
-          >
-        </div>
-        <div class="flex flex-col gap-1">
-          <a routerLink="/newsletter" class="leading-none relative inline-block w-max py-[8px] text-[var(--color-gray-75)] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[var(--color-primary)] after:transition-all after:duration-300 hover:text-[var(--color-gray-100)] hover:after:w-full"
-            >Newsletter</a
-          >
-          <a routerLink="/updates" class="leading-none relative inline-block w-max py-[8px] text-[var(--color-gray-75)] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[var(--color-primary)] after:transition-all after:duration-300 hover:text-[var(--color-gray-100)] hover:after:w-full">Updates</a>
-          <a routerLink="/events" class="leading-none relative inline-block w-max py-[8px] text-[var(--color-gray-75)] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[var(--color-primary)] after:transition-all after:duration-300 hover:text-[var(--color-gray-100)] hover:after:w-full">Events</a>
-          <a routerLink="/blog-posts" class="leading-none relative inline-block w-max py-[8px] text-[var(--color-gray-75)] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[var(--color-primary)] after:transition-all after:duration-300 hover:text-[var(--color-gray-100)] hover:after:w-full"
-            >Blog Posts</a
-          >
-          <a routerLink="/community" class="leading-none relative inline-block w-max py-[8px] text-[var(--color-gray-75)] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[var(--color-primary)] after:transition-all after:duration-300 hover:text-[var(--color-gray-100)] hover:after:w-full"
-            >Community</a
-          >
+            <a
+              *ngFor="let link of section.links"
+              [routerLink]="link.route"
+              class="relative inline-block w-max whitespace-nowrap py-2 leading-none after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-full after:origin-left after:scale-x-0 after:bg-[var(--color-primary)] after:transition-transform after:duration-300 after:ease-in-out after:content-[''] hover:after:scale-x-100"
+              [ngClass]="{
+                'hover:text-[var(--color-gray-100)]':
+                  (currentTheme$ | async) === 'light',
+                'hover:text-[var(--color-white)]':
+                  (currentTheme$ | async) === 'dark',
+              }"
+            >
+              {{ link.label | translate }}
+            </a>
+          </div>
         </div>
       </div>
 
-      <!-- Subscription form -->
+      <!-- Правая часть: форма подписки -->
       <div
-        class="col-span-2 flex flex-col gap-[24px] lg:col-span-3 xxl:ml-auto"
+        class="flex w-full flex-col gap-[16px] lg:ml-[80px] xxl:ml-[192px] lg:w-[400px] lg:shrink-0"
+        (appClickOutside)="showError = false"
+        appClickOutside
       >
-        <div class="flex flex-col gap-[16px]">
-          <h5 class="text-[var(--color-gray-100)]">Subscribe</h5>
-          <span class="body-font-2">
-            Join our newsletter to stay updated on features and releases.
+        <!-- Заголовок и описание -->
+        <div class="flex flex-col gap-2">
+          <h5
+            [ngClass]="{
+              'text-[var(--color-gray-100)]':
+                (currentTheme$ | async) === 'light',
+              'text-[var(--color-white)]': (currentTheme$ | async) === 'dark',
+            }"
+          >
+            {{ 'FOOTER.SUBSCRIBE_TITLE' | translate }}
+          </h5>
+          <span class="body-font-1">
+            {{ 'FOOTER.SUBSCRIBE_DESCRIPTION' | translate }}.
           </span>
         </div>
 
-        <div class="flex flex-col gap-[12px]">
-          <form
-            #subscribeForm="ngForm"
-            (ngSubmit)="onSubmit()"
-            class="flex h-[48px] gap-[16px]"
-          >
-            <input
-              [(ngModel)]="email"
-              name="email"
-              type="email"
-              placeholder="Your Email Here"
-              required
-              email
-              #emailInput="ngModel"
-              (blur)="onBlur()"
-              class="body-font-1 flex-1 border-b border-[var(--color-gray-75)] bg-transparent focus:border-[var(--color-gray-100)] focus:text-[var(--color-gray-100)] focus:outline-none"
-            />
-            <button
-              type="submit"
-              [disabled]="subscribeForm.invalid"
-              class="button-bg-transparent shadow-hover flex px-[24px] py-[12px]"
-              [ngClass]="{ 'cursor-default opacity-50': subscribeForm.invalid }"
-            >
-              Send
-            </button>
-          </form>
+        <!-- Поле ввода email -->
+        <input
+          [(ngModel)]="email"
+          name="email"
+          type="email"
+          [placeholder]="'FOOTER.EMAIL_PLACEHOLDER' | translate"
+          required
+          email
+          #emailInput="ngModel"
+          (blur)="onBlur()"
+          [ngClass]="{
+            'border-[var(--color-gray-20)] bg-[var(--color-secondary)] focus:text-[var(--color-gray-100)]':
+              (currentTheme$ | async) === 'light',
+            'border-[var(--color-gray-100)] bg-transparent focus:text-[var(--color-white)]':
+              (currentTheme$ | async) === 'dark',
+          }"
+          class="body-font-1 rounded-[40px] border px-6 py-3 focus:outline-none lg:w-auto lg:flex-1"
+        />
 
-          <div
-            *ngIf="showError"
-            class="body-font-2 mt-1 text-[var(--color-primary)]"
+        <!-- Ошибка валидации email -->
+        <div *ngIf="showError" class="body-font-2 text-[var(--color-primary)]">
+          {{ 'FOOTER.EMAIL_ERROR' | translate }}
+        </div>
+
+        <!-- Кнопка отправки и подпись -->
+        <div class="flex flex-col gap-3">
+          <button
+            type="submit"
+            (click)="onSubmit()"
+            class="button-bg-transparent px-[24px] py-[12px] text-center lg:w-full lg:px-[24px]"
           >
-            Please enter a valid email address.
-          </div>
+            {{ 'FOOTER.SEND_BUTTON' | translate }}
+          </button>
 
           <span class="body-font-2">
-            By subscribing, you agree to our Privacy Policy and consent to
-            receive updates.
+            {{ 'FOOTER.PRIVACY_NOTICE' | translate }}
           </span>
         </div>
       </div>
     </footer>
 
-    <!-- Success modal -->
-    <div
-      *ngIf="showModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-    >
+    <!-- Модалка успешной подписки -->
+    <app-modal [isOpen]="showModal" (close)="closeModal()" width="650px">
       <div
-        class="flex w-full max-w-[650px] flex-col items-center justify-between gap-[32px] rounded-[40px] bg-[var(--color-bg-2)] p-[24px] text-center text-[var(--color-gray-100)] shadow-xl"
+        class="flex w-full flex-col items-center justify-between gap-[32px] text-center text-[var(--color-gray-100)]"
       >
         <div class="flex flex-col gap-[20px]">
-          <h4>Thank you for subscribing!</h4>
+          <h4>{{ 'FOOTER.MODAL_TITLE' | translate }}</h4>
           <p class="body-font-1">
-            You have successfully joined our newsletter. Stay tuned for updates
-            and exciting features!
+            {{ 'FOOTER.MODAL_TEXT' | translate }}
           </p>
         </div>
         <button
           (click)="closeModal()"
           class="button-font h-[48px] w-full rounded-[40px] bg-[var(--color-primary)] px-[32px] py-[12px] text-[var(--color-white)]"
         >
-          Close
+          {{ 'BUTTON.CLOSE' | translate }}
         </button>
       </div>
-    </div>
+    </app-modal>
   `,
 })
 export class FooterComponent {
+  /** Email, введённый пользователем */
   email = '';
+
+  /** Отображение модалки успешной подписки */
   showModal = false;
+
+  /** Ошибка валидации email */
   showError = false;
 
-  /** Handles form submission */
+  /** Текущая тема оформления (светлая / тёмная) */
+  currentTheme$: Observable<Theme>;
+
+  /** Навигационные ссылки в футере */
+  navigationLinks = [
+    {
+      title: 'FOOTER.LINKS_TITLE_COMPANY',
+      links: [
+        { label: 'FOOTER.LINKS.ABOUT_US', route: '/about' },
+        { label: 'FOOTER.LINKS.FAQS', route: '/faqs' },
+        { label: 'FOOTER.LINKS.CONTACT_US', route: '/contact' },
+        { label: 'FOOTER.LINKS.SOCIAL_MEDIA', route: '/social-media' },
+        { label: 'FOOTER.LINKS.FEEDBACK', route: '/feedback' },
+      ],
+    },
+    {
+      title: 'FOOTER.LINKS_TITLE_RESOURCES',
+      links: [
+        { label: 'FOOTER.LINKS.NEWSLETTER', route: '/newsletter' },
+        { label: 'FOOTER.LINKS.UPDATES', route: '/updates' },
+        { label: 'FOOTER.LINKS.EVENTS', route: '/events' },
+        { label: 'FOOTER.LINKS.BLOG_POSTS', route: '/blog-posts' },
+        { label: 'FOOTER.LINKS.COMMUNITY', route: '/community' },
+      ],
+    },
+  ];
+
+  constructor(private themeService: ThemeService) {
+    this.currentTheme$ = this.themeService.theme$;
+  }
+
+  /** Обработка клика по кнопке Send */
   onSubmit(): void {
     if (!this.validateEmail(this.email)) {
       this.showError = true;
@@ -149,17 +199,17 @@ export class FooterComponent {
     this.showError = false;
   }
 
-  /** Validates input on blur */
+  /** Проверка email при потере фокуса */
   onBlur(): void {
     this.showError = !!this.email && !this.validateEmail(this.email);
   }
 
-  /** Closes success modal */
+  /** Закрытие модального окна */
   closeModal(): void {
     this.showModal = false;
   }
 
-  /** Validates email using regex */
+  /** Простая валидация email через regex */
   validateEmail(email: string): boolean {
     const re = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
     return re.test(email.toLowerCase());

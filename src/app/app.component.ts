@@ -13,6 +13,10 @@ import { HeaderComponent } from './layout/Header/header.component';
 import { LoaderComponent } from './shared/components/loader.component';
 import { LoaderService } from './core/services/loader.service';
 import { AsyncPipe, NgIf } from '@angular/common';
+import { Theme } from './core/models/theme.type';
+import { Observable } from 'rxjs';
+import { ThemeService } from './core/services/theme.service';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-root',
@@ -25,15 +29,26 @@ import { AsyncPipe, NgIf } from '@angular/common';
     LoaderComponent,
     AsyncPipe,
     NgIf,
+    TranslateModule,
   ],
   template: `
-    <div class="flex min-h-screen flex-col bg-[var(--color-bg)] min-w-[375px]">
+    <div
+      class="flex min-h-screen min-w-[375px] flex-col transition-colors duration-300"
+      [ngClass]="{
+        'text-[var(--color-gray-100)]': (currentTheme$ | async) === 'light',
+        'text-[var(--color-gray-20)]': (currentTheme$ | async) === 'dark',
+      }"
+    >
       <app-loader
         *ngIf="(loaderService.isLoading$ | async) && !isHomePage && !isAuthPage"
       ></app-loader>
 
       <header
-        class="fixed left-0 right-0 top-0 z-20 bg-[var(--color-bg)] shadow-md"
+        class="fixed left-0 right-0 top-0 z-20 border-b bg-[var(--color-bg)] transition-colors duration-300"
+        [ngClass]="{
+          'border-[var(--color-gray-20)]': (currentTheme$ | async) === 'light',
+          'border-[var(--color-border)]': (currentTheme$ | async) === 'dark',
+        }"
       >
         <div class="mx-auto h-full max-w-[1320px]">
           <app-header></app-header>
@@ -41,14 +56,18 @@ import { AsyncPipe, NgIf } from '@angular/common';
       </header>
 
       <main
-        class="mt-[48px] flex-grow bg-[var(--color-bg)] pt-[40px] lg:mt-[72px] lg:pt-[64px] xxl:mt-[80px] xxl:pt-[72px]"
+        class="mt-[48px] w-full flex-grow bg-[var(--color-bg)] pt-[40px] transition-colors duration-300 lg:mt-[72px] lg:pt-[64px] xxl:mt-[80px] xxl:pt-[72px]"
       >
-        <div class="mx-auto max-w-[1320px]">
-          <router-outlet></router-outlet>
-        </div>
+        <router-outlet></router-outlet>
       </main>
 
-      <footer class="w-full bg-[var(--color-secondary)]">
+      <footer
+        class="w-full transition-colors duration-300"
+        [ngClass]="{
+          'bg-[var(--color-secondary)]': (currentTheme$ | async) === 'light',
+          'bg-[var(--color-bg-footer)]': (currentTheme$ | async) === 'dark',
+        }"
+      >
         <div class="mx-auto max-w-[1320px]">
           <app-footer></app-footer>
         </div>
@@ -59,11 +78,14 @@ import { AsyncPipe, NgIf } from '@angular/common';
 export class AppComponent {
   isHomePage = false;
   isAuthPage = false;
+  currentTheme$: Observable<Theme>;
 
   constructor(
     private router: Router,
     public loaderService: LoaderService,
+    private themeService: ThemeService, 
   ) {
+    this.currentTheme$ = this.themeService.theme$;
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationStart) {
         this.isHomePage = event.url === '/';

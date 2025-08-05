@@ -2,12 +2,17 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ICONS } from '../../../core/constants/icons.constant';
-import { IconComponent } from "../../../shared/components/icon.component";
+import { IconComponent } from '../../../shared/components/icon.component';
+import { Observable } from 'rxjs';
+import { ThemeService } from '../../../core/services/theme.service';
+import { Theme } from '../../../core/models/theme.type';
+import { ThemedIconPipe } from '../../../core/pipes/themed-icon.pipe';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-auth-password-step',
   standalone: true,
-  imports: [CommonModule, FormsModule, IconComponent],
+  imports: [CommonModule, FormsModule, IconComponent, ThemedIconPipe, TranslateModule],
   template: `
     <div class="flex flex-col gap-8">
       <!-- Header with back button and title -->
@@ -16,13 +21,19 @@ import { IconComponent } from "../../../shared/components/icon.component";
           class="flex cursor-pointer select-none items-center"
           (click)="goBack.emit()"
           style="user-select: none;"
+          [attr.aria-label]="'AUTH.BACK_BUTTON_LABEL' | translate"
         >
-          <app-icon [icon]="ICONS.ArrowLeft" class="mr-[32px]" />
-          <h4 class="m-0">Create your Beanly account</h4>
+          <app-icon
+            [icon]="'ArrowLeft' | themedIcon"
+            [width]="32"
+            [height]="32"
+            class="mr-[32px]"
+          ></app-icon>
+          <h4 class="m-0">{{ 'AUTH.REGISTER_TITLE' | translate }}</h4>
         </div>
         <span class="body-font-1 text-center">
-          Come up with a password for the email
-          <span class="font-semibold">{{ email }}</span>
+          {{ 'AUTH.EMAIL_PROMPT' | translate }} 
+          <span>{{ email }}</span>
         </span>
       </div>
 
@@ -34,21 +45,29 @@ import { IconComponent } from "../../../shared/components/icon.component";
       >
         <!-- Password input with toggle visibility -->
         <div class="relative flex flex-col gap-[4px]">
-          <span class="body-font-2 text-[var(--color-gray-75)]">Password</span>
+          <span
+            class="body-font-2"
+            [ngClass]="[
+              (currentTheme$ | async) === 'light'
+                ? 'text-[var(--color-gray-75)]'
+                : 'text-[var(--color-gray-55)]',
+            ]"
+            >{{ 'AUTH.PASSWORD_LABEL' | translate }}</span
+          >
           <div class="relative">
             <input
               [type]="showPassword ? 'text' : 'password'"
-              placeholder="Enter password"
+              placeholder="{{ 'AUTH.PASSWORD_PLACEHOLDER' | translate }}"
               [(ngModel)]="password"
               name="password"
               (ngModelChange)="passwordChange.emit($event)"
               [class.border-red-600]="passwordTooWeak"
-              [ngClass]="{
-                'text-[var(--color-gray-55)]': !password,
-                'text-[var(--color-gray-100)]': password
-              }"
-              class="body-font-1 w-full rounded-[40px] border border-[var(--color-gray-20)] bg-[var(--color-bg)] px-6 py-3 outline-none focus:border-[var(--color-gray-20)]"
-              required
+              [ngClass]="[
+                (currentTheme$ | async) === 'light'
+                  ? 'border-[var(--color-gray-20)] placeholder-[var(--color-gray-75)]'
+                  : 'border-[var(--color-gray-100)] placeholder-[var(--color-gray-55)]',
+              ]"
+              class="body-font-1 w-full rounded-[40px] border bg-[var(--color-bg)] px-6 py-3 placeholder-[var(--color-gray-75)] outline-none"
             />
             <button
               *ngIf="password"
@@ -59,9 +78,9 @@ import { IconComponent } from "../../../shared/components/icon.component";
               class="absolute right-0 top-0 flex h-full w-[60px] items-center justify-center"
             >
               <app-icon
-                [icon]="showPassword ? ICONS.EyeSlash : ICONS.Eye"
+                [icon]="(showPassword ? 'EyeSlash' : 'Eye') | themedIcon"
                 class="h-[20px] w-[20px]"
-              />
+              ></app-icon>
             </button>
           </div>
 
@@ -77,22 +96,31 @@ import { IconComponent } from "../../../shared/components/icon.component";
 
         <!-- Confirm password input with toggle visibility -->
         <div class="relative flex flex-col gap-[4px]">
-          <span class="body-font-2 text-[var(--color-gray-75)]">Confirm Password</span>
+          <span
+            class="body-font-2"
+            [ngClass]="[
+              (currentTheme$ | async) === 'light'
+                ? 'text-[var(--color-gray-75)]'
+                : 'text-[var(--color-gray-55)]',
+            ]"
+            >{{ 'AUTH.CONFIRM_PASSWORD_LABEL' | translate }}</span
+          >
           <div class="relative">
             <input
               autocomplete="new-password"
+              required
               [type]="showRepeatPassword ? 'text' : 'password'"
-              placeholder="Enter the password again"
+              placeholder="{{ 'AUTH.CONFIRM_PASSWORD_PLACEHOLDER' | translate }}"
               [(ngModel)]="repeatPassword"
               (ngModelChange)="repeatPasswordChange.emit($event)"
               name="confirmPass"
               [class.border-red-600]="passwordMismatch"
-              [ngClass]="{
-                'text-[var(--color-gray-55)]': !repeatPassword,
-                'text-[var(--color-gray-100)]': repeatPassword
-              }"
-              class="body-font-1 w-full rounded-[40px] border border-[var(--color-gray-20)] bg-[var(--color-bg)] px-6 py-3 outline-none focus:border-[var(--color-gray-20)]"
-              required
+              [ngClass]="[
+                (currentTheme$ | async) === 'light'
+                  ? 'border-[var(--color-gray-20)] placeholder-[var(--color-gray-75)]'
+                  : 'border-[var(--color-gray-100)] placeholder-[var(--color-gray-55)]',
+              ]"
+              class="body-font-1 w-full rounded-[40px] border bg-[var(--color-bg)] px-6 py-3 outline-none"
             />
             <button
               *ngIf="repeatPassword"
@@ -103,7 +131,7 @@ import { IconComponent } from "../../../shared/components/icon.component";
               class="absolute right-0 top-0 flex h-full w-[60px] items-center justify-center"
             >
               <app-icon
-                [icon]="showRepeatPassword ? ICONS.EyeSlash : ICONS.Eye"
+                [icon]="(showRepeatPassword ? 'EyeSlash' : 'Eye') | themedIcon"
                 class="h-[20px] w-[20px]"
               />
             </button>
@@ -115,8 +143,62 @@ import { IconComponent } from "../../../shared/components/icon.component";
             class="body-font-2 flex select-none items-center gap-[4px] text-[var(--color-button-error)]"
           >
             <app-icon [icon]="ICONS.RedClose" />
-            Confirm password mismatch
+            {{ 'AUTH.PASSWORD_MISMATCH' | translate }}
           </div>
+        </div>
+
+        <!-- First name input -->
+        <div class="flex flex-col gap-[4px]">
+          <span
+            class="body-font-2"
+            [ngClass]="[
+              (currentTheme$ | async) === 'light'
+                ? 'text-[var(--color-gray-75)]'
+                : 'text-[var(--color-gray-55)]',
+            ]"
+            >{{ 'AUTH.FIRST_NAME_LABEL' | translate }}</span
+          >
+          <input
+            type="text"
+            [(ngModel)]="firstName"
+            name="firstName"
+            (ngModelChange)="firstNameChange.emit($event)"
+            placeholder="{{ 'AUTH.FIRST_NAME_PLACEHOLDER' | translate }}"
+            [ngClass]="[
+              (currentTheme$ | async) === 'light'
+                ? 'border-[var(--color-gray-20)] placeholder-[var(--color-gray-75)]'
+                : 'border-[var(--color-gray-100)] placeholder-[var(--color-gray-55)]',
+            ]"
+            class="body-font-1 w-full rounded-[40px] border bg-[var(--color-bg)] px-6 py-3 placeholder-[var(--color-gray-75)] outline-none"
+            required
+          />
+        </div>
+
+        <!-- Last name input -->
+        <div class="flex flex-col gap-[4px]">
+          <span
+            class="body-font-2"
+            [ngClass]="[
+              (currentTheme$ | async) === 'light'
+                ? 'text-[var(--color-gray-75)]'
+                : 'text-[var(--color-gray-55)]',
+            ]"
+            >{{ 'AUTH.LAST_NAME_LABEL' | translate }}</span
+          >
+          <input
+            type="text"
+            [(ngModel)]="lastName"
+            name="lastName"
+            (ngModelChange)="lastNameChange.emit($event)"
+            placeholder="{{ 'AUTH.LAST_NAME_PLACEHOLDER' | translate }}"
+            [ngClass]="[
+              (currentTheme$ | async) === 'light'
+                ? 'border-[var(--color-gray-20)] placeholder-[var(--color-gray-75)]'
+                : 'border-[var(--color-gray-100)] placeholder-[var(--color-gray-55)]',
+            ]"
+            class="body-font-1 w-full rounded-[40px] border bg-[var(--color-bg)] px-6 py-3 placeholder-[var(--color-gray-75)] outline-none"
+            required
+          />
         </div>
 
         <!-- Submit button -->
@@ -124,7 +206,7 @@ import { IconComponent } from "../../../shared/components/icon.component";
           type="submit"
           class="button-font button-bg-blue px-[32px] py-[12px]"
         >
-          Create account
+          {{ 'AUTH.CREATE_ACCOUNT' | translate }}
         </button>
       </form>
     </div>
@@ -141,12 +223,22 @@ export class AuthPasswordStepComponent {
   @Input() showRepeatPassword = false;
   @Input() passwordTooWeak = false;
   @Input() passwordMismatch = false;
+  @Input() firstName = '';
+  @Input() lastName = '';
+
+  @Output() firstNameChange = new EventEmitter<string>();
+  @Output() lastNameChange = new EventEmitter<string>();
 
   // Output events to notify parent component about changes and actions
   @Output() passwordChange = new EventEmitter<string>();
   @Output() repeatPasswordChange = new EventEmitter<string>();
   @Output() passwordSubmit = new EventEmitter<void>();
   @Output() goBack = new EventEmitter<void>();
+  readonly currentTheme$: Observable<Theme>;
+
+  constructor(private themeService: ThemeService) {
+    this.currentTheme$ = this.themeService.theme$;
+  }
 
   /**
    * Toggle visibility of password input field

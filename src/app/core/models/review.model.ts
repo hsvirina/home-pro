@@ -1,3 +1,11 @@
+export interface PublicReview {
+  id: number;
+  cafeId: number;
+  rating: number;
+  text: string;
+  createdAt: string;
+}
+
 export interface Review {
   id: number;
   cafeId: number;

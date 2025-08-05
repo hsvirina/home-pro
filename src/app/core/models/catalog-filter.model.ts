@@ -1,9 +1,12 @@
-export type FilterOption = {
+export interface FilterOption {
+  id: number;               // <-- добавляем обязательное поле id
   key: string;
   label: string;
-  description: string,
-  imageURL: string
-};
+  description: string;
+  imageURL: string;
+  iconURL?: string;
+  iconURLDarkThema?: string;
+}
 
 export type FilterCategory = {
   title: string;

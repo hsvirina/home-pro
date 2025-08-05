@@ -1,3 +1,9 @@
+export interface Tag {
+  id: number;
+  key: string;  // новый ключ для сопоставления с FilterOption.key
+  name: string;
+}
+
 export interface Place {
   id: number;
   name: string;
@@ -8,6 +14,7 @@ export interface Place {
   workingHours: string;
   shortDescription: string;
   longDescription: string;
-  tags: string[];
+  tags: Tag[];
   photoUrls: string[];
+  sharedAt?: string;
 }

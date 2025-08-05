@@ -17,13 +17,15 @@ import { PlacesService } from '../../core/services/places.service';
 import { LoaderService } from '../../core/services/loader.service';
 
 import { CarouselSectionComponent } from './components/carousel-section.component';
-import { InfoSectionComponent } from './components/info-section.component';
 import { MainInfoSectionComponent } from './components/main-info-section.component';
-import { AboutSectionComponent } from './components/about-section.component';
-import { ReviewsSectionComponent } from './components/reviews-section.component';
 import { ActionsSectorComponent } from './components/actions-sector.component';
 import { BreadcrumbsComponent } from '../../shared/components/breadcrumbs.component';
 import { ModalComponent } from '../../shared/components/modal.component';
+import { FavoriteToggleService } from '../../core/services/favorite-toggle.service';
+import { RatingReviewsSectionComponent } from './components/Rating-reviews-section/rating-reviews-section.component';
+import { SliderPlacesComponent } from '../../shared/components/slider-places.component';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { LastCheckInsComponent } from './components/last-check-ins.components';
 
 @Component({
   selector: 'app-place-details-page',
@@ -32,33 +34,41 @@ import { ModalComponent } from '../../shared/components/modal.component';
     CommonModule,
     NgIf,
     CarouselSectionComponent,
-    InfoSectionComponent,
     MainInfoSectionComponent,
-    AboutSectionComponent,
-    BreadcrumbsComponent,
-    ReviewsSectionComponent,
     ActionsSectorComponent,
     ModalComponent,
+    BreadcrumbsComponent,
+    RatingReviewsSectionComponent,
+    SliderPlacesComponent,
+    TranslateModule,
+    LastCheckInsComponent,
   ],
   template: `
     <div
       *ngIf="place"
-      class="flex max-w-[1320px] flex-col gap-20 px-5 lg:gap-12 lg:px-10 xxl:mx-auto"
+      class="flex max-w-[1320px] flex-col gap-20 px-5 lg:px-10 xxl:mx-auto xxl:px-0"
     >
-      <app-breadcrumbs [lastLabel]="place.name" />
+      <div class="xxl: grid xxl:grid-cols-8 xxl:gap-5">
+        <app-breadcrumbs
+          [lastLabel]="place.name"
+          class="mb-[24px] xxl:col-span-8"
+        />
 
-      <app-carousel-section
-        [photoUrls]="place.photoUrls"
-        [isFavorite]="isFavorite"
-        (onToggleFavorite)="handleFavorite()"
-        (onShare)="openShareModal()"
-      />
+        <app-carousel-section
+          [place]="place"
+          [photoUrls]="place.photoUrls"
+          [isFavorite]="isFavorite"
+          (onToggleFavorite)="onToggleFavorite()"
+          (onShare)="openShareModal()"
+          class="xxl:col-span-4"
+        />
 
-      <app-main-info-section [place]="place" />
-      <app-info-section [place]="place" />
-      <app-about-section [place]="place" />
-
-      <app-reviews-section
+        <app-main-info-section
+          [place]="place"
+          class="mt-4 lg:mt-0 xxl:col-span-4"
+        />
+      </div>
+      <app-rating-reviews-section
         [cafeId]="place.id"
         [place]="place"
         [currentUser]="currentUser"
@@ -68,46 +78,63 @@ import { ModalComponent } from '../../shared/components/modal.component';
         (closeAddReviewForm)="showAddReviewForm = false"
       />
 
+      <app-last-check-ins
+        *ngIf="place"
+        [cafeId]="place.id"
+      ></app-last-check-ins>
+
+      <app-slider-places
+        [title]="'places.moreCafes' | translate"
+        [places]="randomPlaces"
+        (unauthorizedFavoriteClick)="showLoginModal = true"
+      />
       <app-actions-sector
         [isFavorite]="isFavorite"
         [isMobile]="isMobile"
         [showAddReviewForm]="showAddReviewForm"
         [isLoggedIn]="isLoggedIn"
         (leaveReviewClick)="handleLeaveReviewClick()"
-        (onToggleFavorite)="handleFavorite()"
+        (onToggleFavorite)="onToggleFavorite()"
         (onShare)="openShareModal()"
       />
     </div>
 
     <!-- Login Modal -->
     <app-modal [isOpen]="showLoginModal" (close)="showLoginModal = false">
-      <h4 class="mb-4 text-center text-xl font-semibold">Please log in</h4>
-      <p class="mb-4 text-center text-gray-600">
-        You must be logged in to add cafés to your favorites.
+      <h4 class="mb-4 text-center">{{ 'modals.loginTitle' | translate }}</h4>
+      <p class="menu-text-font mb-4 text-center text-[var(--color-gray-75)]">
+        {{ 'modals.loginMessage' | translate }}
       </p>
       <div class="flex justify-center gap-4">
-        <button (click)="navigateToAuth()" class="button-bg-blue px-6 py-2">
-          Log In
+        <button
+          (click)="navigateToAuth()"
+          class="button-font button-bg-blue px-6 py-2"
+        >
+          {{ 'modals.loginBtn' | translate }}
         </button>
         <button
           (click)="showLoginModal = false"
-          class="button-bg-transparent px-6 py-2"
+          class="button-font button-bg-transparent px-6 py-2"
         >
-          Close
+          {{ 'modals.closeBtn' | translate }}
         </button>
       </div>
     </app-modal>
 
     <!-- Share Modal -->
     <app-modal [isOpen]="showShareModal" (close)="showShareModal = false">
-      <h4 class="mb-4 text-xl font-semibold">Share this café</h4>
+      <h4 class="mb-4 text-center">Share this café</h4>
       <input
         [value]="currentShareLink"
         readonly
         class="mb-4 w-full truncate rounded-lg border p-3"
       />
       <button (click)="handleShare()" class="button-bg-blue h-12 w-full">
-        {{ copied ? 'Copied!' : 'Copy Link' }}
+        {{
+          copied
+            ? ('modals.copied' | translate)
+            : ('modals.copyLink' | translate)
+        }}
       </button>
     </app-modal>
   `,
@@ -123,8 +150,9 @@ export class PlaceDetailsPageComponent implements OnInit, AfterViewChecked {
 
   private scrollToReviewForm = false;
 
-  @ViewChild(ReviewsSectionComponent, { read: ElementRef })
+  @ViewChild(RatingReviewsSectionComponent, { read: ElementRef })
   reviewsSectionRef!: ElementRef;
+  randomPlaces: Place[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -134,41 +162,65 @@ export class PlaceDetailsPageComponent implements OnInit, AfterViewChecked {
     private authService: AuthStateService,
     private loaderService: LoaderService,
     private cdr: ChangeDetectorRef,
+    private favoriteToggleService: FavoriteToggleService,
+    private translate: TranslateService,
   ) {}
 
   /** Lifecycle hook: Initialize component and load place data */
-  ngOnInit(): Promise<void> {
+  ngOnInit(): void {
     this.updateScreenMode();
 
-    const id = this.route.snapshot.paramMap.get('id');
-    if (!id) {
-      this.router.navigate(['/not-found']);
-      return Promise.reject();
-    }
+    // при первой и всех последующих сменах id
+    this.route.paramMap.subscribe((params) => {
+      const id = params.get('id');
+      if (!id) {
+        this.router.navigate(['/not-found']);
+        return;
+      }
 
+      const lang = localStorage.getItem('lang') || 'en';
+      this.loadPlaceData(lang, id);
+    });
+
+    // если язык меняется, перезагружаем данные для текущего id
+    this.translate.onLangChange.subscribe((event) => {
+      const id = this.route.snapshot.paramMap.get('id'); // можно оставить snapshot здесь
+      if (id) {
+        this.loadPlaceData(event.lang, id);
+      }
+    });
+  }
+
+  loadPlaceData(lang: string, id: string) {
     this.loaderService.show();
 
-    return new Promise((resolve, reject) => {
-      this.placesService.getPlaces().subscribe({
-        next: (places) => {
-          this.place = places.find((p) => p.id.toString() === id) || null;
+    const idNum = Number(id);
+    if (isNaN(idNum)) {
+      this.router.navigate(['/not-found']);
+      this.loaderService.hide();
+      return;
+    }
 
-          if (!this.place) {
-            this.router.navigate(['/not-found']);
-            this.loaderService.hide();
-            reject('Place not found');
-            return;
-          }
+    this.placesService.getPlaces(lang).subscribe({
+      next: (places) => {
+        this.place = places.find((p) => p.id === idNum) || null;
 
-          this.loaderService.hide();
-          resolve();
-        },
-        error: (err) => {
+        if (!this.place) {
           this.router.navigate(['/not-found']);
           this.loaderService.hide();
-          reject(err);
-        },
-      });
+          return;
+        }
+
+        this.randomPlaces = this.shuffleArray(
+          places.filter((p) => p.id !== this.place!.id),
+        ).slice(0, 8);
+
+        this.loaderService.hide();
+      },
+      error: (err) => {
+        this.router.navigate(['/not-found']);
+        this.loaderService.hide();
+      },
     });
   }
 
@@ -183,11 +235,17 @@ export class PlaceDetailsPageComponent implements OnInit, AfterViewChecked {
     }
   }
 
+  private shuffleArray(array: Place[]): Place[] {
+    return array
+      .map((item) => ({ sort: Math.random(), value: item }))
+      .sort((a, b) => a.sort - b.sort)
+      .map((a) => a.value);
+  }
+
   /** Window resize event handler - update screen mode and form visibility */
   @HostListener('window:resize')
   onResize() {
     this.updateScreenMode();
-    this.showAddReviewForm = this.isMobile;
   }
 
   /** Update isMobile flag based on window width */
@@ -207,30 +265,20 @@ export class PlaceDetailsPageComponent implements OnInit, AfterViewChecked {
   }
 
   /** Handle favorite toggle */
-  handleFavorite() {
-    if (!this.currentUser || !this.place) {
-      this.showLoginModal = true;
-      return;
-    }
+  onToggleFavorite(event?: MouseEvent) {
+    event?.preventDefault();
+    event?.stopPropagation();
 
-    const cafeId = this.place.id;
-    const obs = this.isFavorite
-      ? this.favoritesService.removeFavorite(cafeId)
-      : this.favoritesService.addFavorite(cafeId);
+    if (!this.place) return; // ✅ Защита от null
 
-    obs.subscribe({
-      next: () => {
-        const user = this.authService.getCurrentUser();
-        if (!user) return;
-
-        user.favoriteCafeIds = this.isFavorite
-          ? user.favoriteCafeIds.filter((id) => id !== cafeId)
-          : [...user.favoriteCafeIds, cafeId];
-
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        // TODO: Add error handling here if needed
+    this.favoriteToggleService.toggleFavorite(this.place).subscribe({
+      next: () => this.cdr.detectChanges(),
+      error: (err) => {
+        if (err.message === 'NOT_AUTHENTICATED') {
+          this.showLoginModal = true;
+        } else {
+          alert('An error occurred while updating favorites.');
+        }
       },
     });
   }
@@ -261,13 +309,10 @@ export class PlaceDetailsPageComponent implements OnInit, AfterViewChecked {
     return this.authService.getCurrentUser();
   }
 
-  /** Check if current place is in user's favorites */
   get isFavorite(): boolean {
-    return !!(
-      this.place &&
-      this.currentUser &&
-      this.currentUser.favoriteCafeIds.includes(this.place.id)
-    );
+    return this.place
+      ? this.favoriteToggleService.isFavorite(this.place.id)
+      : false;
   }
 
   /** Check if user is logged in */

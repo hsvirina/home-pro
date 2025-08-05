@@ -13,6 +13,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     '/api/cafes',
     '/api/auth/register',
     '/api/auth/login',
+     '/api/users/public/',
   ];
 
   // Check if the current request is public

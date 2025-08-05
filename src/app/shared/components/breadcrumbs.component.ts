@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { filter } from 'rxjs/operators';
 import { IconComponent } from './icon.component';
 import { ICONS } from '../../core/constants/icons.constant';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-breadcrumbs',
@@ -28,7 +29,7 @@ import { ICONS } from '../../core/constants/icons.constant';
           <app-icon
             *ngIf="!last"
             [icon]="ICONS.ArrowBack"
-            class="mx-3 inline-block"
+            class="mx-3 inline-block rotate-180"
           />
         </li>
       </ol>
@@ -41,12 +42,16 @@ export class BreadcrumbsComponent implements OnChanges {
 
   breadcrumbs: { label: string; url: string }[] = [];
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private translate: TranslateService) {
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe(() => {
         this.buildBreadcrumbs();
       });
+
+    this.translate.onLangChange.subscribe(() => {
+      this.buildBreadcrumbs();
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -66,14 +71,14 @@ export class BreadcrumbsComponent implements OnChanges {
     }
 
     const crumbs = [
-      { label: 'Home', url: '/' },
-      { label: 'Catalog', url: '/catalog' },
+      { label: this.translate.instant('breadcrumb.home'), url: '/' },
+      { label: this.translate.instant('breadcrumb.catalog'), url: '/catalog' },
     ];
 
     // If there's a numeric ID segment, treat it as a detail page
     if (segments.length === 2 && /^\d+$/.test(segments[1])) {
       crumbs.push({
-        label: this.lastLabel || 'Details',
+        label: this.lastLabel || this.translate.instant('breadcrumb.details'),
         url: `/catalog/${segments[1]}`,
       });
     }

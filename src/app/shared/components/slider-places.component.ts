@@ -1,49 +1,66 @@
 import { NgClass, NgForOf, NgStyle } from '@angular/common';
-import { Component, Input, HostListener, OnInit } from '@angular/core';
+import {
+  Component,
+  Input,
+  HostListener,
+  OnInit,
+  EventEmitter,
+  Output,
+} from '@angular/core';
 import { PlaceCardComponent } from './place-card.component';
 import { PlaceCardType } from '../../core/constants/place-card-type.enum';
 import { IconComponent } from './icon.component';
-import { ICONS } from '../../core/constants/icons.constant';
+import { IconData, ICONS } from '../../core/constants/icons.constant';
+import { ThemeService } from '../../core/services/theme.service';
+import { ThemedIconPipe } from '../../core/pipes/themed-icon.pipe';
 
 @Component({
   selector: 'app-slider-places',
   standalone: true,
-  imports: [NgStyle, NgClass, NgForOf, PlaceCardComponent, IconComponent],
+  imports: [
+    NgStyle,
+    NgClass,
+    NgForOf,
+    PlaceCardComponent,
+    IconComponent,
+    ThemedIconPipe,
+  ],
   template: `
     <div
-      class="flex flex-col items-center gap-[24px] lg:px-0"
-      [ngClass]="{
-        'px-[20px]': cardType !== PlaceCardType.Favourites,
-        'px-0': cardType === PlaceCardType.Favourites,
-      }"
+      class="pl-5 flex flex-col items-center gap-[24px] lg:px-0"
     >
-      <!-- Header with navigation arrows -->
-      <div class="flex w-full items-center justify-between">
-        <!-- Left arrow -->
+      <!-- Родитель: добавляем relative -->
+      <div class="relative flex w-full items-center justify-between mr-5">
+        <!-- Левая стрелка -->
         <button
           (click)="prev()"
           [disabled]="startIndex === 0"
-          class="hidden p-2 focus:outline-none lg:flex"
+          class="flex p-2 focus:outline-none"
           [ngClass]="{
             'cursor-not-allowed opacity-50': startIndex === 0,
             'cursor-pointer': startIndex > 0,
           }"
         >
-          <app-icon [icon]="ICONS.ArrowLeft" [size] = "32" />
+          <app-icon
+            [icon]="'ArrowLeft' | themedIcon"
+            [width]="32"
+            [height]="32"
+          />
         </button>
 
-        <!-- Title -->
+        <!-- Заголовок с абсолютным позиционированием -->
         <h3
+          class="absolute left-1/2 -translate-x-1/2 text-center text-[20px] lg:text-[32px] xxl:text-[40px]"
           [ngClass]="{
-            'text-[24px] text-[var(--color-gray-100)] lg:text-[32px] xxl:text-[40px]': true,
-            'lg:absolute lg:left-1/2 lg:-translate-x-1/2':
+            'left-1/2 -translate-x-1/2 lg:absolute':
               cardType !== PlaceCardType.Favourites,
+            static: cardType === PlaceCardType.Favourites,
           }"
         >
           {{ title }}
         </h3>
 
-        <!-- Right arrow -->
+        <!-- Правая стрелка -->
         <button
           (click)="next()"
           [disabled]="startIndex >= places.length - visibleCount"
@@ -54,17 +71,22 @@ import { ICONS } from '../../core/constants/icons.constant';
             'cursor-pointer': startIndex < places.length - visibleCount,
           }"
         >
-          <app-icon [icon]="ICONS.ArrowRight" [size] = "32" />
+          <app-icon
+            [icon]="'ArrowRight' | themedIcon"
+            [width]="32"
+            [height]="32"
+          />
         </button>
       </div>
 
       <!-- Card slider -->
-      <div class="w-full overflow-hidden py-[22px] lg:py-0">
+      <div class="w-full overflow-hidden lg:py-0">
         <div
-          class="duration-400 flex transition-transform ease-in-out"
+          class="flex"
           [ngStyle]="{
             transform: 'translateX(-' + shift + 'px)',
             gap: gap + 'px',
+            transition: 'transform 400ms ease-in-out',
           }"
         >
           <app-place-card
@@ -73,6 +95,8 @@ import { ICONS } from '../../core/constants/icons.constant';
             [cardType]="cardType"
             class="flex-shrink-0"
             [ngStyle]="{ width: cardWidth + 'px' }"
+            (unauthorizedFavoriteClick)="unauthorizedFavoriteClick.emit()"
+
           />
         </div>
       </div>
@@ -83,8 +107,10 @@ export class SliderPlacesComponent implements OnInit {
   ICONS = ICONS;
 
   @Input() places: any[] = [];
-  @Input() title!: string;
+  @Input() title?: string;
   @Input() cardType: PlaceCardType = PlaceCardType.Full;
+  @Output() unauthorizedFavoriteClick = new EventEmitter<void>();
+
 
   PlaceCardType = PlaceCardType;
 
@@ -124,7 +150,7 @@ export class SliderPlacesComponent implements OnInit {
       // Medium desktop
       this.visibleCount = 3;
       this.cardWidth = 301;
-      this.gap = Math.floor((w - 3 * this.cardWidth - 100) / 2);
+      this.gap = Math.floor((w - 3 * this.cardWidth - 80) / 2);
     } else {
       // Mobile and tablets
       this.cardWidth = 315;

@@ -27,13 +27,3 @@
     @apply border-[var(--color-pressed-primary)] text-[var(--color-hover-primary)];
   }
 }
-
-@layer utilities {
-  .shadow-hover {
-    @apply transition-shadow duration-300;
-  }
-  .shadow-hover:hover {
-    box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.15),
-                0 10px 15px -7px rgba(0, 0, 0, 0.1);
-  }
-}

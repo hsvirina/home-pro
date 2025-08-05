@@ -11,8 +11,8 @@ import { AuthLoginStepComponent } from './components/auth-login-step.component';
 import { WelcomeModalComponent } from './components/welcome-modal.component';
 
 import { ICONS } from '../../core/constants/icons.constant';
-import { IconComponent } from '../../shared/components/icon.component';
-import { SPLASH_IMAGES } from '../../core/constants/splash-images.constant';
+import { StorageService } from '../../core/services/storage.service';
+import { AuthApiService } from '../../core/services/auth-api.service';
 
 @Component({
   selector: 'app-auth-page',
@@ -25,130 +25,83 @@ import { SPLASH_IMAGES } from '../../core/constants/splash-images.constant';
     AuthPasswordStepComponent,
     AuthLoginStepComponent,
     WelcomeModalComponent,
-    IconComponent,
   ],
   template: `
-    <ng-template #splash>
-      <div
-        class="fixed left-0 top-[52px] z-[9999] h-[calc(100vh-52px)] w-full overflow-hidden bg-[var(--color-bg)] lg:top-[76px] lg:h-[calc(100vh-76px)] xxl:top-[86px] xxl:h-[calc(100vh-86px)]"
-        title="Click to skip splash"
-      >
-        <!-- Splash decorative images -->
-        <img
-          *ngFor="let image of splashImages"
-          [src]="image.src"
-          [alt]="image.alt"
-          [class]="image.class"
-        />
-
-        <!-- Centered splash content -->
-        <div
-          class="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center"
-        >
-          <h1
-            class="max-w-[1068px] text-[56px] font-bold uppercase leading-tight text-[var(--color-gray-100)] lg:text-[80px] xxl:text-[96px]"
-          >
-            <span class="text-[var(--color-primary)]">Coffee</span> places
-            you’ll <span class="text-[var(--color-primary)]">love</span>, picked
-            for you
-          </h1>
-
-          <button
-            (click)="onContinueFromSplash()"
-            class="button-font button-bg-blue mt-[60px] flex h-[84px] w-[315px] gap-[12px] px-[32px] py-[12px]"
-          >
-            Explore now
-            <app-icon [icon]="ICONS.ArrowDownRightWhite" />
-          </button>
-        </div>
-      </div>
-    </ng-template>
-
     <!-- Main auth content -->
-    <ng-container *ngIf="!showSplash; else splash">
-      <div
-        class="flex flex-col gap-[32px] px-[30px] py-[40px] text-[var(--color-gray-100)]"
-      >
-        <!-- Authentication steps container -->
-        <div class="grid grid-cols-8">
-          <div
-            class="col-span-8 lg:col-span-6 lg:col-start-2 xxl:col-span-4 xxl:col-start-3"
-          >
-            <ng-container [ngSwitch]="step">
-              <app-auth-email-step
-                *ngSwitchCase="1"
-                [email]="email"
-                (emailSubmit)="onEmailSubmit($event)"
-                (toggleForm)="toggleForm()"
-                class="w-full"
-              ></app-auth-email-step>
 
-              <app-auth-password-step
-                *ngSwitchCase="2"
-                [email]="email"
-                [password]="password"
-                [repeatPassword]="repeatPassword"
-                [showPassword]="showPassword"
-                [showRepeatPassword]="showRepeatPassword"
-                [passwordTooWeak]="passwordTooWeak"
-                [passwordMismatch]="passwordMismatch"
-                (passwordChange)="onPasswordChange($event)"
-                (repeatPasswordChange)="onRepeatPasswordChange($event)"
-                (passwordSubmit)="onSubmitPassword()"
-                (goBack)="goBackToEmail()"
-                class="w-full"
-              ></app-auth-password-step>
+    <div
+      class="mx-auto flex max-w-[1320px] flex-col gap-[32px] px-5 lg:px-10 xxl:px-0"
+    >
+      <!-- Authentication steps container -->
+      <div class="grid grid-cols-8">
+        <div
+          class="col-span-8 lg:col-span-6 lg:col-start-2 xxl:col-span-4 xxl:col-start-3"
+        >
+          <ng-container [ngSwitch]="step">
+            <app-auth-email-step
+              *ngSwitchCase="1"
+              [email]="email"
+              (emailSubmit)="onEmailSubmit($event)"
+              (toggleForm)="toggleForm()"
+              class="w-full"
+            ></app-auth-email-step>
 
-              <app-auth-login-step
-                *ngSwitchCase="3"
-                [email]="email"
-                [password]="password"
-                [showPassword]="showPassword"
-                [loginError]="loginError"
-                (loginSubmit)="onSubmitLogin()"
-                (goBack)="goBackToEmail()"
-                (emailChange)="email = $event"
-                (passwordChange)="password = $event"
-                (togglePasswordVisibility)="showPassword = !showPassword"
-                class="w-full"
-              ></app-auth-login-step>
-            </ng-container>
-          </div>
-        </div>
+            <app-auth-password-step
+              *ngSwitchCase="2"
+              [email]="email"
+              [password]="password"
+              [repeatPassword]="repeatPassword"
+              [firstName]="firstName"
+              [lastName]="lastName"
+              (passwordChange)="password = $event"
+              (repeatPasswordChange)="repeatPassword = $event"
+              (firstNameChange)="firstName = $event"
+              (lastNameChange)="lastName = $event"
+              (passwordSubmit)="onSubmitPassword()"
+              (goBack)="goBackToEmail()"
+            ></app-auth-password-step>
 
-        <!-- Social login section -->
-        <div class="grid grid-cols-8">
-          <app-social-login
-            (showTemporaryMessage)="showTemporaryMessage()"
-            [showMessage]="showMessage"
-            class="col-span-8 lg:col-span-6 lg:col-start-2 xxl:col-span-4 xxl:col-start-3"
-          ></app-social-login>
-        </div>
-
-        <!-- Welcome modal -->
-        <div class="grid grid-cols-8">
-          <app-welcome-modal
-            *ngIf="showWelcomeModal"
-            [isNewUser]="isNewUser"
-            (close)="closeWelcomeModal()"
-            class="col-span-8 lg:col-span-6 lg:col-start-2 xxl:col-span-4 xxl:col-start-3"
-          ></app-welcome-modal>
+            <app-auth-login-step
+              *ngSwitchCase="3"
+              [email]="email"
+              [password]="password"
+              [showPassword]="showPassword"
+              [loginError]="loginError"
+              (loginSubmit)="onSubmitLogin()"
+              (goBack)="goBackToEmail()"
+              (emailChange)="email = $event"
+              (passwordChange)="password = $event"
+              (togglePasswordVisibility)="showPassword = !showPassword"
+              class="w-full"
+            ></app-auth-login-step>
+          </ng-container>
         </div>
       </div>
-    </ng-container>
+
+      <!-- Social login section -->
+      <div class="grid grid-cols-8">
+        <app-social-login
+          (showTemporaryMessage)="showTemporaryMessage()"
+          [showMessage]="showMessage"
+          class="col-span-8 lg:col-span-6 lg:col-start-2 xxl:col-span-4 xxl:col-start-3"
+        ></app-social-login>
+      </div>
+
+      <!-- Welcome modal -->
+      <div class="grid grid-cols-8">
+        <app-welcome-modal
+          *ngIf="showWelcomeModal"
+          (close)="closeWelcomeModal()"
+        ></app-welcome-modal>
+      </div>
+    </div>
   `,
 })
 export class AuthPageComponent {
   ICONS = ICONS;
-  splashImages = SPLASH_IMAGES;
 
-  // Splash screen visibility
-  showSplash = true;
-
-  // Auth step control: 1 = email, 2 = password, 3 = login
   step = 1;
 
-  // Form data and state flags
   email = '';
   password = '';
   repeatPassword = '';
@@ -158,27 +111,23 @@ export class AuthPageComponent {
   passwordMismatch = false;
   loginError = false;
   showMessage = false;
+  firstName = '';
+  lastName = '';
 
-  // Welcome modal control
   showWelcomeModal = false;
   isNewUser = false;
 
   constructor(
     private router: Router,
     private authService: AuthStateService,
+    private storageService: StorageService,
+    private userApi: AuthApiService,
   ) {}
 
-  // Hide splash screen and show auth forms
-  onContinueFromSplash(): void {
-    this.showSplash = false;
-  }
-
-  // Handle email submission, move to password step
   onEmailSubmit(email: string): void {
     this.email = email;
     this.step = 2;
 
-    // Reset password-related fields and flags
     this.password = '';
     this.repeatPassword = '';
     this.passwordTooWeak = false;
@@ -187,31 +136,45 @@ export class AuthPageComponent {
     this.showRepeatPassword = false;
   }
 
-  // Handle password submission and registration flow
   onSubmitPassword(): void {
+    this.passwordTooWeak = false;
+    this.passwordMismatch = false;
+
     if (this.password.length < 6) {
       this.passwordTooWeak = true;
       return;
     }
+
     if (this.password !== this.repeatPassword) {
       this.passwordMismatch = true;
       return;
     }
 
-    // Extract first and last name from email for registration
-    const fullNameParts = this.email.split('@')[0].split('.');
-    const firstName = fullNameParts[0] || 'User';
-    const lastName = fullNameParts[1] || '';
-
     this.authService
-      .register(this.email, this.password, firstName, lastName)
+      .register(
+        this.email,
+        this.password,
+        this.firstName.trim(),
+        this.lastName.trim(),
+      )
       .subscribe({
         next: () => {
-          // After successful registration, log the user in
           this.authService.login(this.email, this.password).subscribe({
             next: () => {
-              this.isNewUser = true;
-              this.showWelcomeModal = true;
+              const userId = this.storageService.getUser()?.userId;
+              if (userId) {
+                this.userApi.getPublicUserProfile(userId).subscribe({
+                  next: (profile) => {
+                    this.storageService.setPublicUserProfile(profile);
+                    this.isNewUser = true;
+                    this.showWelcomeModal = true;
+                  },
+                  error: (err) => {
+                    alert('Failed to load profile: ' + err.message);
+                    this.showWelcomeModal = true;
+                  },
+                });
+              }
             },
             error: (err) =>
               alert(
@@ -228,7 +191,7 @@ export class AuthPageComponent {
             alert(
               'This email is already registered. Please use another or login.',
             );
-            this.step = 3; // Switch to login step if email taken
+            this.step = 3;
           } else {
             alert('Registration error: ' + (err.message || err.statusText));
           }
@@ -246,27 +209,35 @@ export class AuthPageComponent {
 
     this.authService.login(this.email, this.password).subscribe({
       next: () => {
-        this.isNewUser = false;
-        this.showWelcomeModal = true;
-        // НЕ делать переход здесь, переход будет в closeWelcomeModal()
+        const userId = this.storageService.getUser()?.userId;
+        if (userId) {
+          this.userApi.getPublicUserProfile(userId).subscribe({
+            next: (profile) => {
+              this.storageService.setPublicUserProfile(profile);
+              this.isNewUser = false;
+              this.showWelcomeModal = true;
+            },
+            error: (err) => {
+              alert('Failed to load profile: ' + err.message);
+              this.showWelcomeModal = true;
+            },
+          });
+        }
       },
       error: (err) => alert('Login error: ' + err.message),
     });
   }
 
-  // Toggle between email form and login form
   toggleForm(): void {
     this.step = this.step === 1 ? 3 : 1;
   }
 
-  // Return to email step and reset passwords
   goBackToEmail(): void {
     this.step = 1;
     this.password = '';
     this.repeatPassword = '';
   }
 
-  // Reset password-related errors on password input change
   onPasswordChange(password: string): void {
     this.password = password;
     this.passwordTooWeak = false;
@@ -278,7 +249,6 @@ export class AuthPageComponent {
     this.passwordMismatch = false;
   }
 
-  // Show temporary message for social login notifications
   showTemporaryMessage(): void {
     this.showMessage = true;
     setTimeout(() => (this.showMessage = false), 3000);
@@ -292,7 +262,6 @@ export class AuthPageComponent {
     this.router.navigateByUrl(returnUrl);
   }
 
-  // Navigate to home page
   goHome(): void {
     this.router.navigate(['/']);
   }

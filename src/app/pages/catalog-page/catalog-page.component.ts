@@ -10,10 +10,21 @@ import { BreadcrumbsComponent } from '../../shared/components/breadcrumbs.compon
 import { FormsModule } from '@angular/forms';
 import { slideDownAnimation } from '../../../styles/animations/animations';
 import { PaginationComponent } from './components/pagination.component';
-import { PlaceCardComponent } from '../../shared/components/place-card.component';
+
 import { IconComponent } from '../../shared/components/icon.component';
 import { ICONS } from '../../core/constants/icons.constant';
 import { LoaderService } from '../../core/services/loader.service';
+import { ThemeService } from '../../core/services/theme.service';
+import { Observable, Subscription } from 'rxjs';
+import { Theme } from '../../core/models/theme.type';
+import { PlaceCardComponent } from '../../shared/components/place-card.component';
+import {
+  LangChangeEvent,
+  TranslateModule,
+  TranslateService,
+} from '@ngx-translate/core';
+import { PlacesStoreService } from '../../core/services/places-store.service';
+import { FILTER_CATEGORIES_UK } from '../../core/constants/catalog-filter.uk.config';
 
 @Component({
   selector: 'app-catalog-page',
@@ -21,16 +32,17 @@ import { LoaderService } from '../../core/services/loader.service';
   imports: [
     CommonModule,
     CatalogFiltersComponent,
-    PlaceCardComponent,
     BreadcrumbsComponent,
     PaginationComponent,
     FormsModule,
     IconComponent,
+    PlaceCardComponent,
+    TranslateModule,
   ],
   animations: [slideDownAnimation],
   template: `
     <div
-      class="grid grid-cols-4 gap-[16px] px-[20px] xxl:grid-cols-8 xxl:gap-[20px] xxl:px-[0px]"
+      class="mx-auto grid w-full max-w-[1320px] grid-cols-4 gap-[16px] px-[20px] xxl:grid-cols-8 xxl:gap-[20px] xxl:px-[0px]"
     >
       <!-- Breadcrumbs -->
       <div class="col-span-4 xxl:col-span-8">
@@ -41,8 +53,10 @@ import { LoaderService } from '../../core/services/loader.service';
       <h2
         class="col-span-4 mb-[60px] text-center text-[32px] xxl:col-span-8 xxl:text-[64px]"
       >
-        Best Places to
-        <span class="text-[var(--color-primary)]">Sip & Chill</span>
+        {{ 'CATALOG.TITLE' | translate }}
+        <span class="text-[var(--color-primary)]">{{
+          'CATALOG.HIGHLIGHT' | translate
+        }}</span>
       </h2>
 
       <!-- Filters toggle button (mobile only) -->
@@ -53,7 +67,7 @@ import { LoaderService } from '../../core/services/loader.service';
           class="flex h-full w-full items-center justify-center"
           (click)="toggleFilters()"
         >
-          Filters
+          {{ 'CATALOG.FILTERS_BUTTON' | translate }}
         </button>
       </div>
 
@@ -61,11 +75,11 @@ import { LoaderService } from '../../core/services/loader.service';
       <div class="col-span-4 xxl:col-span-8">
         <div class="mb-4 flex justify-end">
           <div class="custom-dropdown relative flex items-center gap-2">
-            <span>Show:</span>
+            <span>{{ 'CATALOG.SHOW_LABEL' | translate }}</span>
 
             <!-- Dropdown trigger -->
             <div
-              class="shadow-hover flex w-[80px] cursor-pointer items-center justify-between rounded bg-[var(--color-white)] px-3 py-1"
+              class="flex w-[80px] cursor-pointer items-center justify-between rounded px-3 py-1"
               (click)="toggleDropdown()"
             >
               {{ getSelectedLabel() }}
@@ -90,15 +104,27 @@ import { LoaderService } from '../../core/services/loader.service';
             <div
               *ngIf="dropdownOpen"
               [@slideDownAnimation]
-              class="absolute right-0 top-[110%] z-10 w-[80px] rounded bg-[var(--color-white)]"
+              class="absolute right-0 top-[110%] z-20 w-[80px] rounded-[16px] border p-2"
+              [ngClass]="{
+                'border-[var(--color-white)] bg-[var(--color-white)]':
+                  (currentTheme$ | async) === 'light',
+                'border-[var(--color-white)] bg-[var(--color-bg-card)]':
+                  (currentTheme$ | async) === 'dark',
+              }"
             >
               <div
                 *ngFor="let option of sizeOptions"
                 (click)="selectOption(option.value)"
-                class="cursor-pointer px-3 py-2 hover:bg-gray-100"
-                [class.font-bold]="itemsPerPage === option.value"
+                class="cursor-pointer rounded px-2 py-1 transition-colors duration-300"
+                [ngClass]="{
+                  'hover:bg-[var(--color-bg)]': true,
+                  'font-bold': itemsPerPage === option.value,
+                }"
               >
-                {{ option.label }}
+                {{
+                  'CATALOG.ITEMS_PER_PAGE.' +
+                    (option.label === 'All' ? 'ALL' : option.label) | translate
+                }}
               </div>
             </div>
           </div>
@@ -109,6 +135,7 @@ import { LoaderService } from '../../core/services/loader.service';
       <div class="col-span-4 hidden xxl:col-span-2 xxl:block">
         <app-catalog-filters
           [filters]="filters"
+          [filterCategories]="filterCategories"
           (filtersChange)="onFiltersChange($event)"
         ></app-catalog-filters>
       </div>
@@ -135,13 +162,14 @@ import { LoaderService } from '../../core/services/loader.service';
 
           <app-catalog-filters
             [filters]="filters"
+            [filterCategories]="filterCategories"
             (filtersChange)="onFiltersChange($event)"
           ></app-catalog-filters>
         </div>
       </div>
 
       <!-- Places cards -->
-      <div class="col-span-6">
+      <div class="col-span-4 lg:col-span-6">
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           <app-place-card
             *ngFor="let place of paginatedPlaces"
@@ -150,12 +178,13 @@ import { LoaderService } from '../../core/services/loader.service';
 
           <div
             *ngIf="paginatedPlaces.length === 0"
-            class="col-span-full flex flex-col items-center justify-center gap-4 rounded-[40px] bg-white p-12 text-center text-gray-600 shadow-sm"
+            class="col-span-full flex flex-col items-center justify-center gap-4 rounded-[40px] bg-white p-12 text-center text-gray-600"
           >
-            <h3 class="text-xl font-semibold text-gray-700">No cafés found</h3>
+            <h3 class="text-xl font-semibold text-gray-700">
+              {{ 'CATALOG.NO_CAFES_FOUND_TITLE' | translate }}
+            </h3>
             <p class="max-w-sm text-gray-500">
-              Sorry, there are no cafés matching your selected filters. Try
-              adjusting or clearing your filters to see more results.
+              {{ 'CATALOG.NO_CAFES_FOUND_DESC' | translate }}
             </p>
           </div>
         </div>
@@ -163,7 +192,7 @@ import { LoaderService } from '../../core/services/loader.service';
 
       <!-- Pagination -->
       <div
-        class="col-span-6 mt-6 flex flex-col items-center gap-4 xxl:col-span-8 xxl:mb-[148px]"
+        class="col-span-4 lg:col-span-6 mt-6 flex flex-col items-center gap-4 xxl:col-span-8 xxl:mb-[148px]"
       >
         <app-pagination
           [totalItems]="filteredPlaces.length"
@@ -178,20 +207,16 @@ import { LoaderService } from '../../core/services/loader.service';
 export class CatalogPageComponent implements OnInit {
   ICONS = ICONS;
 
-  // Main data arrays
   places: Place[] = [];
   filteredPlaces: Place[] = [];
   paginatedPlaces: Place[] = [];
 
-  // Filters
   filters: CatalogFilters = {};
   showFilters = false;
 
-  // Pagination
-  itemsPerPage = -1; // -1 means show all
+  itemsPerPage = -1;
   currentPage = 1;
-
-  // Dropdown state for items per page selector
+  filterCategories = FILTER_CATEGORIES;
   dropdownOpen = false;
   sizeOptions = [
     { label: '6', value: 6 },
@@ -199,50 +224,87 @@ export class CatalogPageComponent implements OnInit {
     { label: 'All', value: -1 },
   ];
 
+  currentTheme$: Observable<Theme>;
+  langChangeSub!: Subscription;
+
   constructor(
     private placesService: PlacesService,
     private router: Router,
     private route: ActivatedRoute,
     public loaderService: LoaderService,
-  ) {}
-
-  // ----------- Lifecycle hook -----------
+    private themeService: ThemeService,
+    private translate: TranslateService,
+    private placesStore: PlacesStoreService,
+  ) {
+    this.currentTheme$ = this.themeService.theme$;
+  }
 
   ngOnInit(): void {
     this.loaderService.show();
 
-    this.placesService.getPlaces().subscribe({
+    this.placesStore.loadPlaces();
+
+    this.placesStore.places$.subscribe({
       next: (data) => {
-        this.places = data;
+        this.places = data || [];
+
+        // Устанавливаем категории фильтров в зависимости от текущего языка
+        this.setFilterCategories(this.translate.currentLang);
+
         this.initializeFilters();
         this.applyFiltersFromQuery();
+
         this.loaderService.hide();
       },
       error: (err) => {
         console.error('Error loading places:', err);
-
         this.loaderService.hide();
       },
     });
+
+    this.langChangeSub = this.translate.onLangChange.subscribe(
+      (event: LangChangeEvent) => {
+        this.setFilterCategories(event.lang);
+        this.initializeFilters();
+        this.filteredPlaces = this.filterPlaces();
+        this.updatePaginatedPlaces();
+      },
+    );
   }
 
-  // ----------- Filtering logic -----------
-
-  /**
-   * Initialize filter structure with all options set to false
-   */
-  initializeFilters() {
-    for (const category of FILTER_CATEGORIES) {
+  initializeFilters(): void {
+    for (const category of this.filterCategories) {
       this.filters[category.key] = {};
       for (const option of category.options) {
         this.filters[category.key][option.key] = false;
       }
     }
   }
+  setFilterCategories(lang: string) {
+    if (lang === 'uk') {
+      this.filterCategories = FILTER_CATEGORIES_UK;
+    } else {
+      this.filterCategories = FILTER_CATEGORIES;
+    }
+  }
 
-  /**
-   * Apply filters from URL query parameters
-   */
+  getSelectedLabel(): string {
+    const selected = this.sizeOptions.find(
+      (opt) => opt.value === this.itemsPerPage,
+    );
+    if (!selected) return 'Select';
+    switch (selected.label) {
+      case 'All':
+        return this.translate.instant('CATALOG.ITEMS_PER_PAGE.ALL');
+      case '6':
+        return this.translate.instant('CATALOG.ITEMS_PER_PAGE.6');
+      case '12':
+        return this.translate.instant('CATALOG.ITEMS_PER_PAGE.12');
+      default:
+        return selected.label;
+    }
+  }
+
   applyFiltersFromQuery() {
     this.route.queryParams.subscribe((params) => {
       for (const key in params) {
@@ -256,7 +318,6 @@ export class CatalogPageComponent implements OnInit {
         });
       }
 
-      // Force reactive update
       this.filters = JSON.parse(JSON.stringify(this.filters));
 
       this.filteredPlaces = this.filterPlaces();
@@ -264,9 +325,6 @@ export class CatalogPageComponent implements OnInit {
     });
   }
 
-  /**
-   * Handle filters change event from UI component
-   */
   onFiltersChange(updatedFilters: CatalogFilters) {
     this.loaderService.show();
 
@@ -295,15 +353,12 @@ export class CatalogPageComponent implements OnInit {
 
         this.loaderService.hide();
 
-        // Закрываем мобильное меню фильтров
         if (this.showFilters) {
           this.toggleFilters();
         }
       });
   }
-  /**
-   * Filter places based on active filters
-   */
+
   private filterPlaces(): Place[] {
     return this.places.filter((place) => {
       const tags = place.tags || [];
@@ -316,16 +371,28 @@ export class CatalogPageComponent implements OnInit {
         if (selected.length === 0) continue;
 
         if (category === 'location') {
-          const matches = selected.some((key) =>
-            city.includes(key.toLowerCase()),
+          const locationCategory = this.filterCategories.find(
+            (cat) => cat.key === 'location',
           );
-          if (!matches) return false;
+          const selectedLabels = selected.map((key) => {
+            const option = locationCategory?.options.find(
+              (opt) => opt.key === key,
+            );
+            return option ? option.label.toLowerCase() : key.toLowerCase();
+          });
+
+          const matches = selectedLabels.some((label) => city.includes(label));
+          if (!matches) {
+            return false;
+          }
         } else {
           const matches = selected.some((key) => {
             const label = this.getLabelByKey(category, key);
-            return tags.includes(label);
+            return tags.some((tag) => tag.name === label);
           });
-          if (!matches) return false;
+          if (!matches) {
+            return false;
+          }
         }
       }
 
@@ -333,21 +400,17 @@ export class CatalogPageComponent implements OnInit {
     });
   }
 
-  /**
-   * Get human-readable label for a filter option by keys
-   */
   private getLabelByKey(categoryKey: string, optionKey: string): string {
-    const category = FILTER_CATEGORIES.find((cat) => cat.key === categoryKey);
+    const category = this.filterCategories.find(
+      (cat) => cat.key === categoryKey,
+    );
     return category?.options.find((opt) => opt.key === optionKey)?.label || '';
   }
-
-  // ----------- Pagination logic -----------
 
   onPageChange(page: number) {
     this.currentPage = page;
     this.updatePaginatedPlaces();
 
-    // Smooth scroll to top on page change
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -359,7 +422,6 @@ export class CatalogPageComponent implements OnInit {
 
   private updatePaginatedPlaces() {
     if (this.itemsPerPage === -1) {
-      // Show all places
       setTimeout(() => {
         this.paginatedPlaces = [...this.filteredPlaces];
       });
@@ -372,11 +434,9 @@ export class CatalogPageComponent implements OnInit {
     }
   }
 
-  // ----------- UI interactions -----------
-
   toggleFilters() {
     this.showFilters = !this.showFilters;
-    // Lock body scroll when filters modal is open
+
     document.body.style.overflow = this.showFilters ? 'hidden' : '';
   }
 
@@ -391,15 +451,6 @@ export class CatalogPageComponent implements OnInit {
     this.dropdownOpen = false;
   }
 
-  getSelectedLabel(): string {
-    const selected = this.sizeOptions.find(
-      (opt) => opt.value === this.itemsPerPage,
-    );
-    return selected ? selected.label : 'Select';
-  }
-
-  // ----------- Close dropdown on outside click -----------
-
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     const target = event.target as HTMLElement;
@@ -407,5 +458,9 @@ export class CatalogPageComponent implements OnInit {
     if (!clickedInsideDropdown) {
       this.dropdownOpen = false;
     }
+  }
+
+  ngOnDestroy(): void {
+    this.langChangeSub?.unsubscribe();
   }
 }
