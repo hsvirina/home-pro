@@ -44,29 +44,28 @@ import {
     slideUpModal,
     trigger('slideDownMobile', [
       state('closed', style({ height: '0px', opacity: 0, overflow: 'hidden' })),
-      state('open', style({ height: '*', opacity: 1, overflow: 'hidden' })), // overflow: visible явно
+      state('open', style({ height: '*', opacity: 1, overflow: 'hidden' })),
       transition('closed <=> open', animate('300ms ease')),
     ]),
   ],
   styles: [
     `
-      /* Ограничиваем высоту и включаем вертикальный скролл */
+      /* Scrollable container for mobile dropdown options */
       .dropdown-mobile-options {
         max-height: 60vh;
         overflow-y: auto;
-        overflow-x: hidden; /* чтобы не было горизонтального скролла */
+        overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
         box-sizing: border-box;
       }
     `,
   ],
-
   template: `
-    <!-- Обёртка всей фильтр-панели -->
+    <!-- Filter bar wrapper -->
     <div
       class="flex w-full flex-col gap-[16px] px-[20px] lg:h-[72px] lg:flex-row lg:gap-[20px] lg:px-0 xxl:h-[84px] xxl:max-w-[896px] xxl:gap-[24px]"
     >
-      <!-- Кнопка открытия фильтров на мобильных устройствах -->
+      <!-- Mobile filter toggle button -->
       <button
         class="button-bg-transparent flex h-[48px] w-full lg:hidden"
         type="button"
@@ -75,82 +74,72 @@ import {
         Filters
       </button>
 
-      <!-- Секция с фильтрами (для десктопа или открытая на мобилке) -->
+      <!-- Filters container: hidden on mobile unless open -->
       <div
         class="gap-[24px]"
         [ngClass]="{
           'hidden h-[100%] lg:flex': !isMobileFilterOpen,
-          'flex flex-col': isMobileFilterOpen,
+          'flex flex-col': isMobileFilterOpen
         }"
       >
-        <!-- Контейнер всех категорий фильтров -->
         <div
           class="relative flex w-[688px] items-center justify-between gap-[4px] rounded-[40px] border lg:h-[72px] xxl:h-[84px]"
           [ngClass]="{
-            'border-[var(--color-gray-20)]':
-              (currentTheme$ | async) === 'light',
-            'border-[var(--color-gray-75)]': (currentTheme$ | async) === 'dark',
+            'border-[var(--color-gray-20)]': (currentTheme$ | async) === 'light',
+            'border-[var(--color-gray-75)]': (currentTheme$ | async) === 'dark'
           }"
         >
-          <!-- Каждая категория фильтра -->
+          <!-- Filter categories -->
           <div
             *ngFor="let category of filterCategories; let i = index"
             class="relative flex h-full flex-1 cursor-pointer flex-col items-center justify-center gap-[4px] whitespace-nowrap rounded-[40px] text-center transition-colors duration-300"
             [ngClass]="{
               'text-[var(--color-primary)]': selectedOptions[category.key],
               'bg-[var(--color-white)]':
-                selectedOptions[category.key] &&
-                (currentTheme$ | async) === 'light',
+                selectedOptions[category.key] && (currentTheme$ | async) === 'light',
               'bg-[var(--color-bg-card)]':
-                selectedOptions[category.key] &&
-                (currentTheme$ | async) === 'dark',
-              'hover:bg-[var(--color-white)]': !selectedOptions[category.key],
+                selectedOptions[category.key] && (currentTheme$ | async) === 'dark',
+              'hover:bg-[var(--color-white)]': !selectedOptions[category.key]
             }"
             (click)="toggleDropdown(i)"
             (mouseenter)="handleMouseEnter(i)"
           >
-            <!-- Название категории -->
+            <!-- Category title -->
             <span
               class="menu-text-font"
               [ngClass]="{
-                'text-[var(--color-gray-100)]':
-                  (currentTheme$ | async) === 'light',
-                'text-[var(--color-gray-10)]':
-                  (currentTheme$ | async) === 'dark',
+                'text-[var(--color-gray-100)]': (currentTheme$ | async) === 'light',
+                'text-[var(--color-gray-10)]': (currentTheme$ | async) === 'dark'
               }"
             >
               {{ category.title }}
             </span>
 
-            <!-- Выбранное значение или описание -->
+            <!-- Selected option or default description -->
             <span
               class="body-font-1"
               [ngClass]="{
-                'text-[var(--color-gray-75)]':
-                  (currentTheme$ | async) === 'light',
-                'text-[var(--color-gray-20)]':
-                  (currentTheme$ | async) === 'dark',
+                'text-[var(--color-gray-75)]': (currentTheme$ | async) === 'light',
+                'text-[var(--color-gray-20)]': (currentTheme$ | async) === 'dark'
               }"
             >
               {{ selectedOptions[category.key] || category.description }}
             </span>
 
-            <!-- Выпадающее меню (dropdown) с вариантами (только для десктопа) -->
+            <!-- Dropdown options (desktop) -->
             <ul
               *ngIf="openedDropdownIndex === i"
               @slideDownAnimation
               class="absolute left-0 top-full z-50 mt-2 w-max rounded-[40px] border border-[var(--color-white)] p-2"
               [ngClass]="{
                 'bg-[var(--color-white)]': (currentTheme$ | async) === 'light',
-                'bg-[var(--color-bg-card)]': (currentTheme$ | async) === 'dark',
+                'bg-[var(--color-bg-card)]': (currentTheme$ | async) === 'dark'
               }"
               (click)="$event.stopPropagation()"
             >
-              <!-- Один вариант фильтра -->
               <li
                 *ngFor="let option of category.options"
-                class="flex cursor-pointer gap-[12px] rounded-[40px] p-2"
-                [ngClass]="{ 'hover:bg-[var(--color-bg)]': true }"
+                class="flex cursor-pointer gap-[12px] rounded-[40px] p-2 hover:bg-[var(--color-bg)]"
                 (click)="selectOption(category.key, option.label, $event)"
               >
                 <img
@@ -168,7 +157,7 @@ import {
         </div>
       </div>
 
-      <!-- Кнопка поиска (для всех экранов) -->
+      <!-- Search button -->
       <button
         class="button-bg-blue flex h-[48px] w-full gap-3 lg:h-[72px] lg:w-[168px] xxl:h-[84px] xxl:w-[184px]"
         type="button"
@@ -178,21 +167,21 @@ import {
         <span class="button-font">{{ 'BUTTON.SEARCH' | translate }}</span>
       </button>
 
-      <!-- Затемнённый фон при открытом фильтре на мобилке -->
+      <!-- Backdrop overlay for mobile filter -->
       <div
         *ngIf="isMobileFilterOpen"
         @fadeInBackdrop
-        class="bg-[var(--color-bg)]/70 fixed inset-0 z-40 backdrop-blur-3xl lg:hidden"
+        class="bg-[var(--color-bg)]/90 fixed inset-0 z-40 backdrop-blur-3xl lg:hidden"
       ></div>
 
-      <!-- Модальное окно фильтрации для мобильной версии -->
+      <!-- Mobile filter modal -->
       <div
         *ngIf="isMobileFilterOpen"
         @slideUpModal
         class="fixed inset-0 z-40 flex max-w-full flex-col justify-between overflow-x-hidden overflow-y-scroll overscroll-contain px-5 pt-3 lg:hidden"
         #mobileFilterModal
       >
-        <!-- Верхняя панель с кнопкой закрытия -->
+        <!-- Close button -->
         <div class="flex justify-end">
           <button
             (click)="toggleMobileFilter()"
@@ -203,61 +192,46 @@ import {
           </button>
         </div>
 
-        <!-- Контейнер категорий фильтров -->
+        <!-- Mobile filter categories -->
         <div class="flex-grow" (click)="onMobileModalClick($event)">
           <div class="flex-grow">
             <div class="relative flex h-full flex-col">
-              <!-- Категории фильтров (мобильная версия) -->
-              <div class="flex flex-col gap-[16px] px-[20px]">
+              <div class="flex flex-col">
                 <div
                   *ngFor="let category of filterCategories; let i = index"
                   class="category-filter-block col-span-4"
                   style="max-width: 100%; overflow-x: hidden"
                 >
-                  <!-- Заголовок категории -->
+                  <!-- Category header -->
                   <div
-                    class="flex cursor-pointer rounded-[24px] px-6 py-4 transition-all duration-300"
+                    class="flex cursor-pointer rounded-[24px] px-4 py-6 transition-all duration-300"
                     (click)="toggleMobileFilterCategory(i)"
                     (mouseenter)="onMobileCategoryHover(i)"
                     [ngClass]="{
-                      'flex-row items-center justify-between gap-2':
-                        mobileOpenedIndex !== i,
+                      'flex-row items-center justify-between gap-2': mobileOpenedIndex !== i,
                       'flex-col': mobileOpenedIndex === i,
-
-                      'bg-[var(--color-white)] text-[var(--color-gray-100)]':
-                        (currentTheme$ | async) === 'light',
-                      'border border-[var(--color-gray-75)] bg-[var(--color-bg-card)] text-[var(--color-white)]':
-                        (currentTheme$ | async) === 'dark',
-
-                      'hover:bg-[var(--color-bg)]': true,
+                      'bg-[var(--color-white)] text-[var(--color-gray-100)]': (currentTheme$ | async) === 'light',
+                      'border border-[var(--color-gray-75)] bg-[var(--color-bg-card)] text-[var(--color-white)]': (currentTheme$ | async) === 'dark',
+                      'hover:bg-[var(--color-bg)]': true
                     }"
                   >
                     <div class="menu-text-font">{{ category.title }}</div>
                     <div
                       class="body-font-1 text-[var(--color-gray-75)]"
-                      [ngClass]="{
-                        'text-[var(--color-white)]':
-                          (currentTheme$ | async) === 'dark',
-                      }"
+                      [ngClass]="{ 'text-[var(--color-white)]': (currentTheme$ | async) === 'dark' }"
                     >
-                      {{
-                        selectedOptions[category.key] || category.description
-                      }}
+                      {{ selectedOptions[category.key] || category.description }}
                     </div>
                   </div>
 
-                  <!-- Выпадающие варианты фильтра (мобильная версия) -->
+                  <!-- Mobile dropdown options -->
                   <div
                     #dropdownOptions
-                    [@slideDownMobile]="
-                      isMobileFilterOpenAt(i) ? 'open' : 'closed'
-                    "
-                    class="dropdown-mobile-options mt-1 flex flex-col gap-1 rounded-[24px] border p-4"
+                    [@slideDownMobile]="isMobileFilterOpenAt(i) ? 'open' : 'closed'"
+                    class="dropdown-mobile-options mt-1 mb-4 flex flex-col gap-1 rounded-[24px] border p-4"
                     [ngClass]="{
-                      'border-[var(--color-white)] bg-[var(--color-white)]':
-                        (currentTheme$ | async) === 'light',
-                      'border-[var(--color-gray-75)] bg-[var(--color-bg)]':
-                        (currentTheme$ | async) === 'dark',
+                      'border-[var(--color-white)] bg-[var(--color-white)]': (currentTheme$ | async) === 'light',
+                      'border-[var(--color-gray-75)] bg-[var(--color-bg)]': (currentTheme$ | async) === 'dark'
                     }"
                   >
                     <div
@@ -272,9 +246,7 @@ import {
                       />
                       <div class="flex flex-col">
                         <span class="menu-text-font">{{ option.label }}</span>
-                        <span class="body-font-2">{{
-                          option.description
-                        }}</span>
+                        <span class="body-font-2">{{ option.description }}</span>
                       </div>
                     </div>
                   </div>
@@ -284,7 +256,7 @@ import {
           </div>
         </div>
 
-        <!-- Кнопки "Применить" и "Сбросить" (мобилка) -->
+        <!-- Mobile action buttons -->
         <div class="flex w-full gap-4">
           <button
             class="button-bg-blue mb-4 mt-4 h-12 flex-1"
@@ -305,14 +277,12 @@ import {
   `,
 })
 export class FilterBarComponent implements OnDestroy, AfterViewInit {
-  @ViewChild('mobileFilterModal', { static: false })
-  mobileFilterModal?: ElementRef;
-
-  @ViewChildren('dropdownOptions')
-  dropdownOptions!: QueryList<ElementRef>;
+  @ViewChild('mobileFilterModal', { static: false }) mobileFilterModal?: ElementRef;
+  @ViewChildren('dropdownOptions') dropdownOptions!: QueryList<ElementRef>;
 
   ICONS = ICONS;
   private langSub?: Subscription;
+
   selectedOptions: Record<string, string> = {};
 
   isMobileFilterOpen = false;
@@ -337,11 +307,13 @@ export class FilterBarComponent implements OnDestroy, AfterViewInit {
   ) {
     this.currentTheme$ = this.themeService.theme$;
 
-    this.langSub = this.languageService.lang$.subscribe((lang) => {
-      this.filterCategories = this.filterService.categories; // можно адаптировать, если нужна логика по lang
-      this.cdr.markForCheck(); // если используешь onPush (в будущем), пригодится
+    // Update filter categories on language change
+    this.langSub = this.languageService.lang$.subscribe(() => {
+      this.filterCategories = this.filterService.categories;
+      this.cdr.markForCheck();
     });
 
+    // Listen for document clicks to handle closing dropdowns and modals
     this.globalClickUnlistener = this.renderer.listen(
       'document',
       'click',
@@ -350,16 +322,14 @@ export class FilterBarComponent implements OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy(): void {
-    if (this.globalClickUnlistener) {
-      this.globalClickUnlistener();
-    }
-
-    this.langSub?.unsubscribe(); // важно: отписываемся от LanguageService
-
+    // Clean up subscriptions and listeners
+    this.globalClickUnlistener?.();
+    this.langSub?.unsubscribe();
     this.enableBodyScroll();
   }
 
-  ngAfterViewInit() {
+  ngAfterViewInit(): void {
+    // Debug dropdown sizes on options changes (optional)
     this.dropdownOptions.changes.subscribe(() => {
       this.logDropdownSizes();
     });
@@ -369,6 +339,7 @@ export class FilterBarComponent implements OnDestroy, AfterViewInit {
     return this.mobileOpenedIndex === index;
   }
 
+  /** Toggle mobile filter modal visibility */
   toggleMobileFilter(): void {
     this.isMobileFilterOpen = !this.isMobileFilterOpen;
 
@@ -384,52 +355,48 @@ export class FilterBarComponent implements OnDestroy, AfterViewInit {
     }
   }
 
+  /** Toggle mobile category dropdown */
   toggleMobileFilterCategory(index: number): void {
     if (this.mobileOpenedIndex === index) {
-      console.log('[click] Закрытие категории по индексу:', index);
       this.mobileOpenedIndex = null;
-      // НЕ выключаем mobileMouseControlEnabled сразу
-      // Чтобы ховер не пропадал сразу
     } else {
-      console.log('[click] Открытие категории по индексу:', index);
       this.mobileOpenedIndex = index;
       this.mobileMouseControlEnabled = true;
     }
   }
 
+  /** Select an option from category */
   selectOption(categoryKey: string, label: string, event?: MouseEvent): void {
-    if (event) {
-      event.stopPropagation();
-    }
-    console.log('[select] Выбрана опция:', categoryKey, label);
+    event?.stopPropagation();
     this.selectedOptions[categoryKey] = label;
     this.mobileOpenedIndex = null;
-    this.mobileMouseControlEnabled = false; // здесь можно оставлять false, тк выбор завершён
+    this.mobileMouseControlEnabled = false;
     this.openedDropdownIndex = null;
   }
 
-  logDropdownSizes() {
+  /** Log dropdown sizes (for debugging) */
+  logDropdownSizes(): void {
     this.dropdownOptions.forEach((el, idx) => {
       const native = el.nativeElement as HTMLElement;
-      console.log(
-        `Dropdown #${idx} width: ${native.offsetWidth}px, scrollWidth: ${native.scrollWidth}px`,
-      );
+      // console.log(`Dropdown ${idx} height: ${native.offsetHeight}px`);
     });
   }
 
+  /** Handle search button click */
   onSearchClick(): void {
     if (window.innerWidth < 1024) {
-      // On mobile, close filters and open mobile menu
+      // On mobile: close filters and open mobile menu
       this.isMobileFilterOpen = false;
       this.enableBodyScroll();
       this.cdr.detectChanges();
-
       this.uiState.openMobileMenu();
     } else {
+      // On desktop: apply filters immediately
       this.applyFilters();
     }
   }
 
+  /** Handle click outside mobile modal to close category dropdown */
   onMobileModalClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
     const clickedInsideCategory = target.closest('.category-filter-block');
@@ -441,20 +408,19 @@ export class FilterBarComponent implements OnDestroy, AfterViewInit {
     }
   }
 
+  /** Toggle desktop dropdown open/close */
   toggleDropdown(index: number): void {
-    this.openedDropdownIndex =
-      this.openedDropdownIndex === index ? null : index;
+    this.openedDropdownIndex = this.openedDropdownIndex === index ? null : index;
   }
 
+  /** Handle mouse enter for desktop dropdown hover */
   handleMouseEnter(index: number): void {
-    if (
-      this.openedDropdownIndex !== null &&
-      this.openedDropdownIndex !== index
-    ) {
+    if (this.openedDropdownIndex !== null && this.openedDropdownIndex !== index) {
       this.openedDropdownIndex = index;
     }
   }
 
+  /** Apply selected filters by navigating to catalog with query params */
   applyFilters(): void {
     const queryParams: Record<string, string> = {};
 
@@ -463,9 +429,7 @@ export class FilterBarComponent implements OnDestroy, AfterViewInit {
       const selectedLabel = this.selectedOptions[key];
 
       if (selectedLabel) {
-        const matched = category.options.find(
-          (opt) => opt.label === selectedLabel,
-        );
+        const matched = category.options.find(opt => opt.label === selectedLabel);
         if (matched) {
           queryParams[key] = matched.key;
         }
@@ -476,6 +440,7 @@ export class FilterBarComponent implements OnDestroy, AfterViewInit {
     this.router.navigate(['/catalog'], { queryParams });
   }
 
+  /** Document click handler to close dropdowns/modals when clicking outside */
   private onDocumentClick(event: MouseEvent): void {
     const path = event.composedPath ? event.composedPath() : [];
 
@@ -485,12 +450,8 @@ export class FilterBarComponent implements OnDestroy, AfterViewInit {
 
     const clickedInsideComponent = path.includes(this.elementRef.nativeElement);
 
-    // Close mobile filter if clicked outside
-    if (
-      !clickedInsideModal &&
-      !clickedInsideComponent &&
-      this.isMobileFilterOpen
-    ) {
+    // Close mobile filter modal if clicked outside
+    if (!clickedInsideModal && !clickedInsideComponent && this.isMobileFilterOpen) {
       this.isMobileFilterOpen = false;
       this.enableBodyScroll();
       this.mobileOpenedIndex = null;
@@ -499,35 +460,34 @@ export class FilterBarComponent implements OnDestroy, AfterViewInit {
     }
 
     // Close desktop dropdown if clicked outside
-    if (
-      !clickedInsideComponent &&
-      this.openedDropdownIndex !== null &&
-      !this.isMobileFilterOpen
-    ) {
+    if (!clickedInsideComponent && this.openedDropdownIndex !== null && !this.isMobileFilterOpen) {
       this.openedDropdownIndex = null;
       this.cdr.detectChanges();
     }
   }
 
+  /** Handle hover on mobile category dropdown (for mouse users) */
   onMobileCategoryHover(index: number): void {
     if (!this.mobileMouseControlEnabled) {
       return;
     }
     if (this.mobileOpenedIndex !== index) {
-      // НЕ сбрасывай в null, а меняй сразу
       this.mobileOpenedIndex = index;
       this.cdr.detectChanges();
     }
   }
 
+  /** Enable body scroll (used when modal is closed) */
   private enableBodyScroll(): void {
     document.body.style.overflow = '';
   }
 
+  /** Disable body scroll (used when modal is open) */
   private disableBodyScroll(): void {
     document.body.style.overflow = 'hidden';
   }
 
+  /** Clear all selected filters */
   clearAllFilters(): void {
     this.selectedOptions = {};
   }

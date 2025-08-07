@@ -1,11 +1,11 @@
-import { AchievementSection } from '../constants/achievements';
+import { AchievementSection } from "../constants/achievements";
 
-export type BadgeType = 'gold' | 'silver' | 'bronze' | 'neutral';
+export type BadgeType = 'gold' | 'silver' | 'bronze' | null;
 
 export function calculateBadgeType(
   unlockedAchievements: AchievementSection[],
   allAchievements: AchievementSection[],
-): BadgeType {
+): BadgeType | null {
   const totalCount = allAchievements.reduce(
     (acc, section) => acc + section.achievements.length,
     0,
@@ -20,5 +20,5 @@ export function calculateBadgeType(
   if (percent >= 85) return 'gold';
   if (percent >= 65) return 'silver';
   if (percent >= 35) return 'bronze';
-  return 'neutral';
+  return null; // Вернуть null, если бейдж не получен
 }

@@ -7,11 +7,14 @@ import { RouterModule } from '@angular/router';
   standalone: true,
   imports: [RouterModule, CommonModule],
   template: `
-    <!-- Navigates to homepage on logo click -->
-    <a routerLink="/">
+    <!--
+      Logo image wrapped in a routerLink to navigate to the homepage.
+      Responsive sizing based on the 'sizeXxl' input property.
+    -->
+    <a routerLink="/" aria-label="Navigate to homepage">
       <img
         src="./assets/logo.svg"
-        alt="beanly logo"
+        alt="Beanly logo"
         [ngClass]="
           sizeXxl
             ? 'h-[32px] w-[165px] object-contain'
@@ -22,5 +25,9 @@ import { RouterModule } from '@angular/router';
   `,
 })
 export class LogoComponent {
+  /**
+   * Determines whether to use extra-large size for the logo.
+   * Defaults to false (standard size).
+   */
   @Input() sizeXxl = false;
 }

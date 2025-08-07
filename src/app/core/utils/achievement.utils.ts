@@ -1,46 +1,48 @@
-import { AchievementSection, ACHIEVEMENTS } from '../constants/achievements';
-import { PublicUserProfile } from '../models/user.model';
+import { ACHIEVEMENTS, AchievementSection } from "../constants/achievements";
+import { PublicUserProfile } from "../models/user.model";
 
 export function getUnlockedAchievements(profile: PublicUserProfile): AchievementSection[] {
-  const uniqueCheckIns = profile.totalUniqueCheckIns; // Уникальные посещения кафе
-  const ratedCafesCount = new Set(profile.reviews.map(r => r.cafeId)).size; // Кол-во кафе с отзывами
-  const detailedReviewsCount = profile.reviews.filter(r => r.text.trim().length > 0).length; // Кол-во отзывов с текстом
-  const sharedCafesCount = profile.totalSharedCafes; // Кол-во кафе, которыми поделились
-  const favoriteCafesCount = profile.totalFavoriteCafes; // Кол-во избранных кафе
+  const uniqueCheckIns = profile.totalUniqueCheckIns;
+
+  // Считаем только кафе с рейтингом
+  const ratedCafesCount = new Set(
+    profile.reviews.filter(r => r.rating !== null && r.rating !== undefined).map(r => r.cafeId)
+  ).size;
+
+  // Считаем отзывы с текстом (текст не пустой после трима)
+  const detailedReviewsCount = profile.reviews.filter(r => r.text && r.text.trim().length > 0).length;
+
+  const sharedCafesCount = profile.totalSharedCafes;
+  const favoriteCafesCount = profile.totalFavoriteCafes;
 
   return ACHIEVEMENTS.map(section => {
     const filteredAchievements = section.achievements.filter(a => {
-      switch (a.title) {
-        // Ачивки за посещения кафе
-        case 'Curiouser Cup':
+      switch (a.key) {
+        case 'curiouserCup':
           return uniqueCheckIns > 0;
-        case 'Snow Roast':
+        case 'snowRoast':
           return uniqueCheckIns >= 5;
-        case 'City Bean Genie':
+        case 'cityBeanGenie':
           return uniqueCheckIns >= 10;
 
-        // Ачивки за отзывы по кафе
-        case 'The Bean Pirate':
+        case 'beanPirate':
           return ratedCafesCount >= 1;
-        case 'The Hat Rater':
+        case 'hatRater':
           return ratedCafesCount >= 5;
-        case 'Star Wizard':
+        case 'starWizard':
           return ratedCafesCount >= 10;
 
-        // Ачивки за детальные отзывы с текстом
-        case 'Magic Reviewer':
+        case 'magicReviewer':
           return detailedReviewsCount >= 1;
-        case 'Café Moments':
+        case 'cafeMoments':
           return detailedReviewsCount >= 5;
-        case 'Code & Coffee':
+        case 'codeCoffee':
           return detailedReviewsCount >= 10;
 
-        // Ачивка за количество кафе, которыми поделились
-        case 'Spider-Share':
+        case 'spiderShare':
           return sharedCafesCount >= 1;
 
-        // Ачивка за избранные кафе
-        case 'Brew Trooper':
+        case 'brewTrooper':
           return favoriteCafesCount >= 1;
 
         default:
@@ -49,10 +51,8 @@ export function getUnlockedAchievements(profile: PublicUserProfile): Achievement
     });
 
     return {
-      sectionTitle: section.sectionTitle,
+      sectionKey: section.sectionKey,
       achievements: filteredAchievements,
     };
-  })
-  // Убираем секции без ачивок
-  .filter(section => section.achievements.length > 0);
+  }).filter(section => section.achievements.length > 0);
 }

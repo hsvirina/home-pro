@@ -48,7 +48,7 @@ import { LastCheckInsComponent } from './components/last-check-ins.components';
       *ngIf="place"
       class="flex max-w-[1320px] flex-col gap-20 px-5 lg:px-10 xxl:mx-auto xxl:px-0"
     >
-      <div class="xxl: grid xxl:grid-cols-8 xxl:gap-5">
+      <div class="xxl:grid xxl:grid-cols-8 xxl:gap-5">
         <app-breadcrumbs
           [lastLabel]="place.name"
           class="mb-[24px] xxl:col-span-8"
@@ -68,6 +68,7 @@ import { LastCheckInsComponent } from './components/last-check-ins.components';
           class="mt-4 lg:mt-0 xxl:col-span-4"
         />
       </div>
+
       <app-rating-reviews-section
         [cafeId]="place.id"
         [place]="place"
@@ -81,13 +82,14 @@ import { LastCheckInsComponent } from './components/last-check-ins.components';
       <app-last-check-ins
         *ngIf="place"
         [cafeId]="place.id"
-      ></app-last-check-ins>
+      />
 
       <app-slider-places
         [title]="'places.moreCafes' | translate"
         [places]="randomPlaces"
         (unauthorizedFavoriteClick)="showLoginModal = true"
       />
+
       <app-actions-sector
         [isFavorite]="isFavorite"
         [isMobile]="isMobile"
@@ -102,9 +104,6 @@ import { LastCheckInsComponent } from './components/last-check-ins.components';
     <!-- Login Modal -->
     <app-modal [isOpen]="showLoginModal" (close)="showLoginModal = false">
       <h4 class="mb-4 text-center">{{ 'modals.loginTitle' | translate }}</h4>
-      <p class="menu-text-font mb-4 text-center text-[var(--color-gray-75)]">
-        {{ 'modals.loginMessage' | translate }}
-      </p>
       <div class="flex justify-center gap-4">
         <button
           (click)="navigateToAuth()"
@@ -140,19 +139,36 @@ import { LastCheckInsComponent } from './components/last-check-ins.components';
   `,
 })
 export class PlaceDetailsPageComponent implements OnInit, AfterViewChecked {
+  /** Currently displayed place */
   place: Place | null = null;
 
+  /** Flag indicating mobile viewport */
   isMobile = false;
+
+  /** Controls visibility of the review form */
   showAddReviewForm = false;
+
+  /** Controls visibility of login modal */
   showLoginModal = false;
+
+  /** Controls visibility of share modal */
   showShareModal = false;
+
+  /** Indicates if share link was copied */
   copied = false;
 
+  /** Flag to trigger scroll to review form */
   private scrollToReviewForm = false;
 
+  /** Reference to the reviews section for scrolling */
   @ViewChild(RatingReviewsSectionComponent, { read: ElementRef })
-  reviewsSectionRef!: ElementRef;
+  private reviewsSectionRef!: ElementRef;
+
+  /** List of random places for slider */
   randomPlaces: Place[] = [];
+
+  /** Current favorite status of the place */
+  isFavorite = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -166,32 +182,36 @@ export class PlaceDetailsPageComponent implements OnInit, AfterViewChecked {
     private translate: TranslateService,
   ) {}
 
-  /** Lifecycle hook: Initialize component and load place data */
+  /**
+   * Initialize component, load place data, and subscribe to language changes
+   */
   ngOnInit(): void {
     this.updateScreenMode();
 
-    // при первой и всех последующих сменах id
     this.route.paramMap.subscribe((params) => {
       const id = params.get('id');
       if (!id) {
         this.router.navigate(['/not-found']);
         return;
       }
-
       const lang = localStorage.getItem('lang') || 'en';
       this.loadPlaceData(lang, id);
     });
 
-    // если язык меняется, перезагружаем данные для текущего id
     this.translate.onLangChange.subscribe((event) => {
-      const id = this.route.snapshot.paramMap.get('id'); // можно оставить snapshot здесь
+      const id = this.route.snapshot.paramMap.get('id');
       if (id) {
         this.loadPlaceData(event.lang, id);
       }
     });
   }
 
-  loadPlaceData(lang: string, id: string) {
+  /**
+   * Fetches place data based on current language and ID
+   * @param lang Current language code
+   * @param id Place identifier as string
+   */
+  private loadPlaceData(lang: string, id: string): void {
     this.loaderService.show();
 
     const idNum = Number(id);
@@ -211,21 +231,26 @@ export class PlaceDetailsPageComponent implements OnInit, AfterViewChecked {
           return;
         }
 
+        this.isFavorite = this.favoriteToggleService.isFavorite(this.place.id);
+        this.cdr.detectChanges();
+
         this.randomPlaces = this.shuffleArray(
           places.filter((p) => p.id !== this.place!.id),
         ).slice(0, 8);
 
         this.loaderService.hide();
       },
-      error: (err) => {
+      error: () => {
         this.router.navigate(['/not-found']);
         this.loaderService.hide();
       },
     });
   }
 
-  /** Lifecycle hook: After view checked, scroll to review form if needed */
-  ngAfterViewChecked() {
+  /**
+   * Scroll to the review form if triggered after view checked
+   */
+  ngAfterViewChecked(): void {
     if (this.scrollToReviewForm && this.reviewsSectionRef) {
       this.scrollToReviewForm = false;
       this.reviewsSectionRef.nativeElement.scrollIntoView({
@@ -235,44 +260,65 @@ export class PlaceDetailsPageComponent implements OnInit, AfterViewChecked {
     }
   }
 
+  /**
+   * Shuffle array elements using Fisher-Yates algorithm
+   * @param array Array of Place objects
+   * @returns Shuffled array
+   */
   private shuffleArray(array: Place[]): Place[] {
-    return array
-      .map((item) => ({ sort: Math.random(), value: item }))
-      .sort((a, b) => a.sort - b.sort)
-      .map((a) => a.value);
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
   }
 
-  /** Window resize event handler - update screen mode and form visibility */
+  /** Window resize event listener to update mobile mode flag */
   @HostListener('window:resize')
-  onResize() {
+  onResize(): void {
     this.updateScreenMode();
   }
 
-  /** Update isMobile flag based on window width */
-  private updateScreenMode() {
+  /** Updates the isMobile flag based on viewport width */
+  private updateScreenMode(): void {
     this.isMobile = window.innerWidth < 1024;
     this.cdr.detectChanges();
   }
 
-  /** Handle click on "Leave a review" button */
-  handleLeaveReviewClick() {
+  /**
+   * Handles user action to leave a review.
+   * Shows login modal if not authenticated,
+   * otherwise reveals review form and scrolls to it on mobile.
+   */
+  handleLeaveReviewClick(): void {
     if (!this.currentUser) {
       this.showLoginModal = true;
       return;
     }
     this.showAddReviewForm = true;
-    if (this.isMobile) this.scrollToReviewForm = true;
+
+    if (this.isMobile) {
+      this.scrollToReviewForm = true;
+    }
   }
 
-  /** Handle favorite toggle */
-  onToggleFavorite(event?: MouseEvent) {
+  /**
+   * Toggles favorite status of the current place.
+   * Shows login modal on authentication error.
+   * @param event Optional MouseEvent to prevent propagation
+   */
+  onToggleFavorite(): void {
     event?.preventDefault();
     event?.stopPropagation();
 
-    if (!this.place) return; // ✅ Защита от null
+    if (!this.place) return;
 
     this.favoriteToggleService.toggleFavorite(this.place).subscribe({
-      next: () => this.cdr.detectChanges(),
+      next: () => {
+        this.isFavorite = this.favoriteToggleService.isFavorite(this.place!.id);
+        this.cdr.detectChanges();
+      },
       error: (err) => {
         if (err.message === 'NOT_AUTHENTICATED') {
           this.showLoginModal = true;
@@ -283,45 +329,68 @@ export class PlaceDetailsPageComponent implements OnInit, AfterViewChecked {
     });
   }
 
-  /** Navigate to auth page and store return URL */
-  navigateToAuth() {
+  /**
+   * Navigates to authentication page while saving current URL for redirection after login
+   */
+  navigateToAuth(): void {
     localStorage.setItem('returnUrl', this.router.url);
     this.showLoginModal = false;
     this.router.navigate(['/auth']);
   }
 
-  /** Open share modal */
-  openShareModal() {
-    this.showShareModal = true;
-    this.copied = false;
+  /** Opens share modal and resets copy state */
+openShareModal(): void {
+  if (!this.isLoggedIn) {
+    this.showLoginModal = true;
+    return;
   }
 
-  /** Copy share link to clipboard */
-  handleShare() {
-    navigator.clipboard.writeText(this.currentShareLink).then(() => {
-      this.copied = true;
-      setTimeout(() => (this.copied = false), 3000);
-    });
-  }
+  this.showShareModal = true;
+  this.copied = false;
+}
 
-  /** Current logged-in user getter */
+  /**
+   * Copies current share URL to clipboard and temporarily shows feedback
+   */
+  // handleShare(): void {
+  //   navigator.clipboard.writeText(this.currentShareLink).then(() => {
+  //     this.copied = true;
+  //     setTimeout(() => (this.copied = false), 3000);
+  //   });
+  // }
+
+  handleShare(): void {
+  console.log('Share button clicked');
+  if (!this.place?.id) return;
+
+  // Копирование ссылки в буфер обмена
+  navigator.clipboard.writeText(this.currentShareLink).then(() => {
+    console.log('Cafe URL copied to clipboard');
+    // После успешного копирования, меняем текст кнопки
+    this.copied = true;
+    setTimeout(() => {
+      this.copied = false;
+    }, 3000);  // Ожидаем 3 секунды, чтобы вернуть текст кнопки
+  }).catch((err) => {
+    console.error('Failed to copy URL: ', err);
+  });
+}
+
+  /** Retrieves current authenticated user */
   get currentUser() {
     return this.authService.getCurrentUser();
   }
 
-  get isFavorite(): boolean {
-    return this.place
-      ? this.favoriteToggleService.isFavorite(this.place.id)
-      : false;
-  }
-
-  /** Check if user is logged in */
+  /** Checks if user is logged in */
   get isLoggedIn(): boolean {
     return !!this.currentUser;
   }
 
-  /** Construct current page share link */
+  /** Builds current shareable URL for the place */
+  // get currentShareLink(): string {
+  //   return `${window.location.origin}/places/${this.place?.id}`;
+  // }
   get currentShareLink(): string {
-    return `${window.location.origin}/places/${this.place?.id}`;
-  }
+  return `${window.location.origin}/places/${this.place?.id}`;
+}
 }

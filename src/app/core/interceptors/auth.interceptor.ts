@@ -1,37 +1,47 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 
 /**
- * HTTP interceptor for attaching Authorization header to protected requests.
+ * HTTP interceptor to append Authorization header with Bearer token
+ * for protected API requests.
+ *
+ * It excludes public endpoints and GET requests to reviews from adding the token.
+ * The token is retrieved from localStorage.
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = localStorage.getItem('token');
-  const requestUrl = req.url;
-  const requestMethod = req.method;
+  const { url: requestUrl, method: requestMethod } = req;
 
-  // Public endpoints that do not require authentication
+  /**
+   * List of public API endpoints that do NOT require authorization.
+   * Any request matching these URLs will bypass token injection.
+   */
   const publicEndpoints = [
     '/api/cafes',
     '/api/auth/register',
     '/api/auth/login',
-     '/api/users/public/',
+    '/api/users/public/',
   ];
 
-  // Check if the current request is public
+  /**
+   * Determines if the request URL is public:
+   * - Matches any of the public endpoints
+   * - OR is a GET request to '/api/reviews'
+   */
   const isPublic =
     publicEndpoints.some((url) => requestUrl.includes(url)) ||
     (requestUrl.includes('/api/reviews') && requestMethod === 'GET');
 
-  // Attach Authorization header if token is present and endpoint is protected
+  // If there is a token and the request is to a protected endpoint,
+  // clone the request and add the Authorization header.
   if (token && !isPublic) {
-    const cloned = req.clone({
+    const authReq = req.clone({
       setHeaders: {
         Authorization: `Bearer ${token}`,
       },
     });
-
-    return next(cloned);
+    return next(authReq);
   }
 
-  // Proceed without modifying the request
+  // For public requests or when token is missing, continue without modification.
   return next(req);
 };

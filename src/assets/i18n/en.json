@@ -64,8 +64,8 @@
     "KHARKIV": "Kharkiv"
   },
   "LANGUAGE": {
-    "EN": "English",
-    "UK": "Ukrainian"
+    "EN": "EN",
+    "UK": "UA"
   },
   "CHECK_IN": {
     "CHECK_IN": "Check in",
@@ -119,7 +119,7 @@
       "VIBE": "Picked it for the vibe",
       "RETURN": "Would come back again"
     },
-    "BUTTON": "Go to Catalog"
+    "BUTTON": "Find your next favorite spot"
   },
   "SOCIAL_LOGIN": {
     "OR_SIGN_IN_WITH": "Or sign in with",
@@ -216,12 +216,162 @@
   "closeBtn": "Close",
     "shareTitle": "Share this café",
   "copied": "Copied!",
-  "copyLink": "Copy Link"
+  "copyLink": "Copy Link",
+
+  "loginMessageForLike": "You must be logged in to like this review."
+
 },
   "date": {
     "today": "Today",
     "yesterday": "Yesterday",
     "at": "at"
+  },
+  "actions": {
+    "title": "Like Larks & Owls?",
+    "subtitle": "Help other coffee lovers discover this place by sharing your experience!",
+    "leaveReview": "Leave a Review",
+    "saveToFavorites": "Save to Favorites",
+    "removeFromFavorites": "Remove from Favorites",
+    "share": "Share this Place"
+  },
+  "checkIns": {
+    "title": "Last Check-ins",
+    "subtitle": "See who's recently visited this coffee shop",
+    "noRecent": "No recent check-ins"
+  },
+  "profile": {
+    "saveButton": "Save All Changes",
+    "modal": {
+      "title": "Changes saved successfully",
+      "message": "Your profile has been updated. Thank you!",
+      "close": "Close"
+    },
+    "achievementModal": {
+      "congrats": "Congratulations!",
+      "unlocked": "You have unlocked a new achievement:",
+      "close": "Close"
+    },
+      "achievements": {
+    "title": "Achievements",
+    "subtitle": "Discover, explore, and unlock badges as you sip your way through the city"
   }
+  },
+  "achievements": {
+    "title": "Achievements",
+    "subtitle": "Discover, explore, and unlock badges as you sip your way through the city",
+    "sections": {
+      "visiting": "Visiting coffee shops",
+      "evaluation": "Evaluation",
+      "interaction": "Interaction with content",
+      "social": "Social activity"
+    },
+    "list": {
+      "curiouserCup": {
+        "title": "Curiouser Cup",
+        "description": "For the first visit to the coffee shop"
+      },
+      "snowRoast": {
+        "title": "Snow Roast",
+        "description": "For visiting 5 different coffee shops"
+      },
+      "cityBeanGenie": {
+        "title": "City Bean Genie",
+        "description": "For visiting 10+ different coffee shops"
+      },
+      "beanPirate": {
+        "title": "The Bean Pirate",
+        "description": "For the first rating of the coffee shop (1–5)"
+      },
+      "hatRater": {
+        "title": "The Hat Rater",
+        "description": "For 5 different rated coffee shops"
+      },
+      "starWizard": {
+        "title": "Star Wizard",
+        "description": "For 10+ different rated coffee shops"
+      },
+      "magicReviewer": {
+        "title": "Magic Reviewer",
+        "description": "For the first fabulous review"
+      },
+      "cafeMoments": {
+        "title": "Café Moments",
+        "description": "For 5+ detailed reviews"
+      },
+      "codeCoffee": {
+        "title": "Code & Coffee",
+        "description": "For 10+ detailed reviews"
+      },
+      "spiderShare": {
+        "title": "Spider-Share",
+        "description": "For sharing a coffee shop with a friend"
+      },
+      "brewTrooper": {
+        "title": "Brew Trooper",
+        "description": "First time add a coffee shop to favorites"
+      }
+    }
+  },
+  "infoSector": {
+    "editProfile": "Edit Profile",
+    "save": "Save",
+    "fullName": "Full Name",
+    "location": "Location",
+    "email": "Email",
+    "unsavedChanges": "Unsaved Changes",
+    "unsavedChangesMessage": "You have updated your profile. To save changes, please click \"Save All Changes\" below.",
+    "gotIt": "Got it",
+    "cityCountry": "{{city}}, Ukraine",
+    "country": ", Ukraine"
+  },
+  "favoritesVisited": {
+    "favoriteCafes": "Favorite Cafés",
+    "favoriteCafesDescription": "Saved coffee spots ({{count}})",
+    "alreadyVisited": "Already visited",
+    "alreadyVisitedDescription": "One more place on your personal coffee map",
+     "noVisitedPlaces": "No visited places yet."
+  },
+  "myReviews": {
+    "title": "Your Reviews",
+    "description": "Details shared about favorite coffee spots",
+    "noReviewText": "No review text provided.",
+    "goToCafe": "Go to the cafe",
+    "noReviews": "You have not left any reviews yet.",
+    "ariaPrev": "Previous slide",
+    "ariaNext": "Next slide",
+    "ratingStars": "Rating stars"
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Manage your account preferences",
+    "appearance": "Appearance",
+    "theme": "Theme",
+    "themeDescription": "Choose your preferred color scheme",
+    "language": "Language",
+    "languageDescription": "Select your preferred language",
+    "notifications": "Notifications",
+    "emailNotifications": "Email Notifications",
+    "emailNotificationsDesc": "Receive updates about new cafés and reviews",
+    "pushNotifications": "Push Notifications",
+    "pushNotificationsDesc": "Get notified when someone likes your reviews",
+    "reviewNotifications": "Review Notifications",
+    "reviewNotificationsDesc": "Get notified when someone likes your reviews",
+    "privacy": "Privacy",
+    "locationSharing": "Location Sharing",
+    "locationSharingDesc": "Allow the app to access your location for recommendations",
+    "account": "Account",
+    "logout": "Log out of the account",
+    "deleteAccount": "Delete account",
+    "deleteAccountModalTitle": "Delete Account",
+    "deleteAccountModalDesc": "This feature is currently under development.",
+    "close": "Close",
+        "themeLight": "Light",
+    "themeDark": "Dark"
+  },
+  "languages": {
+    "en": "English",
+    "uk": "Ukrainian"
+  }
+
 }
 

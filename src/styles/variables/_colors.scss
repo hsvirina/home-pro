@@ -1,27 +1,28 @@
 :root {
-  /* Light theme (дефолтная) */
-  --color-bg: #F7F7F7;
-  --color-bg-2: #F2F2F5;
-  --color-primary: #625DF5;
-  --color-hover-primary: #4843CC;
-  --color-pressed-primary: #2C299A;
-  --color-gray-100: #2A2A2A;
-  --color-gray-75: #585858;
-  --color-gray-55: #8C8C8E;
-  --color-gray-20: #D2D2D3;
-  --color-gray-10: #F9F9F9;
-  --color-white: #FFFFFF;
-  --color-secondary: #F1F1FE;
-  --color-button-green: #0ECA4C;
-  --color-button-blue: #2D71FA;
-  --color-warning: #FF8800;
-  --color-button-error: #D91619;
+  /* Light Theme - Default Color Palette */
+  --color-bg: #F7F7F7;                  /* Main background color */
+  --color-bg-2: #F2F2F5;                /* Secondary background color */
+  --color-primary: #625DF5;             /* Primary action color */
+  --color-hover-primary: #4843CC;       /* Primary color on hover */
+  --color-pressed-primary: #2C299A;     /* Primary color when pressed */
+  --color-gray-100: #2A2A2A;            /* Dark gray - primary text */
+  --color-gray-75: #585858;             /* Medium gray */
+  --color-gray-55: #8C8C8E;             /* Light gray */
+  --color-gray-20: #D2D2D3;             /* Very light gray */
+  --color-gray-10: #F9F9F9;             /* Near white */
+  --color-white: #FFFFFF;                /* Pure white */
+  --color-secondary: #F1F1FE;           /* Secondary accent background */
+  --color-button-green: #0ECA4C;        /* Green button color */
+  --color-button-blue: #2D71FA;         /* Blue button color */
+  --color-warning: #FF8800;             /* Warning color */
+  --color-button-error: #D91619;        /* Error button color */
 }
 
 [data-theme='dark'] {
-  --color-bg: #141414;
-  --color-bg-card: #0D0D0D;
-  --color-primary: #7975F6;
-  --color-border: #39393A;
-  --color-bg-footer: #1C1C1C;
+  /* Dark Theme Overrides */
+  --color-bg: #141414;                  /* Main background for dark mode */
+  --color-bg-card: #0D0D0D;             /* Card background in dark mode */
+  --color-primary: #7975F6;             /* Primary color adapted for dark */
+  --color-border: #39393A;              /* Border color in dark theme */
+  --color-bg-footer: #1C1C1C;           /* Footer background in dark mode */
 }

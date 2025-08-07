@@ -1,15 +1,15 @@
 import {
   Component,
   Input,
+  Output,
+  EventEmitter,
   ElementRef,
   ViewChild,
   AfterViewInit,
   ChangeDetectorRef,
   NgZone,
-  EventEmitter,
-  Output,
 } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { NgIf, NgForOf, NgClass, AsyncPipe } from '@angular/common';
 import { Place } from '../../core/models/place.model';
 import { PlaceCardType } from '../../core/constants/place-card-type.enum';
@@ -28,7 +28,15 @@ import { TranslateModule } from '@ngx-translate/core';
 @Component({
   selector: 'app-place-card',
   standalone: true,
-  imports: [NgIf, NgForOf, NgClass, IconComponent, AsyncPipe, ThemedIconPipe, TranslateModule],
+  imports: [
+    NgIf,
+    NgForOf,
+    NgClass,
+    IconComponent,
+    AsyncPipe,
+    ThemedIconPipe,
+    TranslateModule,
+  ],
   template: `
     <div
       (mouseenter)="isHovered = true"
@@ -37,6 +45,7 @@ import { TranslateModule } from '@ngx-translate/core';
       [ngClass]="{
         'h-[570px]': cardType === PlaceCardType.Full,
         'h-[334px]': cardType === PlaceCardType.Favourites,
+        'h-[510px]': cardType === PlaceCardType.Catalog,
         'bg-[var(--color-white)] hover:bg-[var(--color-gray-10)]':
           (currentTheme$ | async) === 'light',
         'bg-[var(--color-bg-card)] hover:bg-[var(--color-gray-100)]':
@@ -68,8 +77,9 @@ import { TranslateModule } from '@ngx-translate/core';
                   (currentTheme$ | async) === 'light',
                 'text-[var(--color-white)]': (currentTheme$ | async) === 'dark',
               }"
-              >{{ place.rating }}</span
             >
+              {{ place.rating }}
+            </span>
             <app-icon [icon]="ICONS.Star" />
           </div>
 
@@ -107,6 +117,7 @@ import { TranslateModule } from '@ngx-translate/core';
             </h5>
           </div>
 
+          <!-- Address with external Google Maps link -->
           <a
             [href]="getGoogleMapsLink(place.address)"
             target="_blank"
@@ -115,26 +126,32 @@ import { TranslateModule } from '@ngx-translate/core';
             (click)="$event.stopPropagation()"
           >
             <app-icon [icon]="ICONS.Location" />
-            <span class="body-font-1 relative underline">
-              {{ place.address }}
-            </span>
+            <span class="body-font-1 relative underline">{{
+              place.address
+            }}</span>
           </a>
 
-          <!-- Short description (only in Full card) -->
+          <!-- Short description (visible in Full and Catalog card types) -->
           <p
-            *ngIf="cardType === PlaceCardType.Full"
+            *ngIf="
+              cardType === PlaceCardType.Full ||
+              cardType === PlaceCardType.Catalog
+            "
             class="body-font-1 line-clamp-3 h-[72px] overflow-hidden"
           >
             {{ place.shortDescription }}
           </p>
 
-          <!-- Tags (truncated dynamically) -->
+          <!-- Tags container (visible in Full and Catalog card types) -->
           <div
-            *ngIf="cardType === PlaceCardType.Full"
+            *ngIf="
+              cardType === PlaceCardType.Full ||
+              cardType === PlaceCardType.Catalog
+            "
             #tagsContainer
             class="flex h-[80px] flex-wrap gap-2 overflow-hidden"
           >
-            <ng-container *ngIf="cardType === PlaceCardType.Full">
+            <ng-container>
               <span
                 *ngFor="let tag of displayTags"
                 class="body-font-2 whitespace-nowrap rounded-[40px] px-[12px] py-[8px]"
@@ -166,24 +183,31 @@ import { TranslateModule } from '@ngx-translate/core';
             </ng-container>
           </div>
 
+          <!-- Check-in button, only visible in Full card type -->
           <button
             *ngIf="cardType === PlaceCardType.Full"
             class="button-bg-transparent gap-2 py-3"
             (click)="onCheckInClick($event)"
             [disabled]="isCheckedIn"
             [title]="
-    isCheckedIn
-      ? ('CHECK_IN.ALREADY_CHECKED_IN' | translate)
-      : ('CHECK_IN.CHECK_IN' | translate)
-  "
+              isCheckedIn
+                ? ('CHECK_IN.ALREADY_CHECKED_IN' | translate)
+                : ('CHECK_IN.CHECK_IN' | translate)
+            "
           >
             <ng-container *ngIf="isAuthenticated; else learnMore">
               <app-icon
                 [icon]="isCheckedIn ? ICONS.CheckCircle : ICONS.AddCircle"
               ></app-icon>
-              {{ isCheckedIn ? ('CHECK_IN.CHECKED_IN' | translate) : ('CHECK_IN.CHECK_IN' | translate) }}
+              {{
+                isCheckedIn
+                  ? ('CHECK_IN.CHECKED_IN' | translate)
+                  : ('CHECK_IN.CHECK_IN' | translate)
+              }}
             </ng-container>
-            <ng-template #learnMore> {{ 'BUTTON.LEARN_MORE' | translate }} </ng-template>
+            <ng-template #learnMore>
+              {{ 'BUTTON.LEARN_MORE' | translate }}
+            </ng-template>
           </button>
         </div>
       </div>
@@ -191,18 +215,44 @@ import { TranslateModule } from '@ngx-translate/core';
   `,
 })
 export class PlaceCardComponent implements AfterViewInit {
+  /** Place data to display */
   @Input() place!: Place;
+
+  /** Type of card: Full, Favourites, or Catalog */
   @Input() cardType: PlaceCardType = PlaceCardType.Full;
+
+  /** Event emitted when user clicks favorite toggle but is unauthorized */
   @Output() unauthorizedFavoriteClick = new EventEmitter<void>();
 
-  displayTags: { id: number; name: string }[] = [];
-  ICONS = ICONS;
-  protected readonly PlaceCardType = PlaceCardType;
+  /** Event emitted when favorite status toggled */
+  @Output() favoriteToggled = new EventEmitter<{
+    placeId: number;
+    isFavorite: boolean;
+  }>();
 
-  isHovered = false;
+  /** Reference to tags container to manage tag overflow */
+  @ViewChild('tagsContainer', { static: false })
+  tagsContainer!: ElementRef<HTMLDivElement>;
+
+  /** Tags displayed based on space and hover */
+  displayTags: { id: number; name: string }[] = [];
+
+  /** Show ellipsis if tags overflow */
   showEllipsis = false;
+
+  /** Hover state to change tag background */
+  isHovered = false;
+
+  /** Check-in status for the place */
   isCheckedIn = false;
 
+  /** Icon constants */
+  ICONS = ICONS;
+
+  /** Expose PlaceCardType enum for template usage */
+  protected readonly PlaceCardType = PlaceCardType;
+
+  /** Observable for current theme */
   readonly currentTheme$: Observable<Theme>;
 
   constructor(
@@ -218,79 +268,31 @@ export class PlaceCardComponent implements AfterViewInit {
     this.currentTheme$ = this.themeService.theme$;
   }
 
-  ngOnChanges() {
+  /**
+   * Angular lifecycle hook - detect changes on @Input properties.
+   * Updates displayed tags and check-in status when input changes.
+   */
+  ngOnChanges(): void {
     if (this.place?.tags) {
       this.displayTags = [...this.place.tags];
     }
     this.updateCheckInStatus();
   }
-  /** Определяет, добавлен ли объект в избранное */
-  get isFavorite(): boolean {
-    return this.favoriteToggleService.isFavorite(this.place.id);
-  }
 
-  get isAuthenticated(): boolean {
-    return !!this.storageService.getUser();
-  }
-
-  onCardClick(): void {
-    this.router.navigate(['/catalog', this.place.id]);
-  }
-
-  @Output() favoriteToggled = new EventEmitter<{
-    placeId: number;
-    isFavorite: boolean;
-  }>();
-
-  onToggleFavorite(event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    this.favoriteToggleService.toggleFavorite(this.place).subscribe({
-      next: () => {
-        this.cdr.detectChanges();
-        this.favoriteToggled.emit({
-          placeId: this.place.id,
-          isFavorite: this.isFavorite,
-        });
-      },
-      error: (err) => {
-        if (err.message === 'NOT_AUTHENTICATED') {
-          this.unauthorizedFavoriteClick.emit();
-        } else {
-          alert('An error occurred while updating favorites.');
-        }
-      },
-    });
-  }
-
-  navigateToAuth() {
-    localStorage.setItem('returnUrl', this.router.url);
-
-    this.router.navigate(['/auth']);
-  }
-
-  /** Построение ссылки на Google Maps */
-  getGoogleMapsLink(address: string): string {
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
-  }
-
-  /** Отображение тегов */
-  @ViewChild('tagsContainer', { static: false })
-  tagsContainer!: ElementRef<HTMLDivElement>;
-
+  /**
+   * Lifecycle hook runs after view init
+   * Handles tag overflow and check-in status for Full card type.
+   */
   ngAfterViewInit(): void {
     if (this.cardType !== PlaceCardType.Full) return;
 
     this.displayTags = [...this.place.tags];
     this.updateCheckInStatus();
 
+    // Run layout calculation outside Angular zone for performance
     this.ngZone.runOutsideAngular(() => {
       requestAnimationFrame(() => {
-        // Безопасно маппим tags, чтобы гарантировать, что displayTags - строки
-
         this.displayTags = [...this.place.tags];
-
         this.cdr.detectChanges();
 
         setTimeout(() => {
@@ -317,10 +319,9 @@ export class PlaceCardComponent implements AfterViewInit {
             } else {
               lineCount++;
               if (lineCount > maxLines) break;
-              currentLineWidth = childWidth;
+              currentLineWidth = childWidth + gap;
             }
 
-            // Вместо this.place.tags[i] используем displayTags[i], чтобы соответствовать отображаемым тегам
             fitted.push(this.displayTags[i]);
           }
 
@@ -329,6 +330,7 @@ export class PlaceCardComponent implements AfterViewInit {
             this.showEllipsis = true;
           }
 
+          // Apply changes inside Angular zone
           this.ngZone.run(() => {
             this.displayTags = fitted;
             this.cdr.detectChanges();
@@ -338,6 +340,70 @@ export class PlaceCardComponent implements AfterViewInit {
     });
   }
 
+  /**
+   * Checks if the current place is in the user's favorites.
+   */
+  get isFavorite(): boolean {
+    return this.favoriteToggleService.isFavorite(this.place.id);
+  }
+
+  /**
+   * Checks if the user is authenticated.
+   */
+  get isAuthenticated(): boolean {
+    return !!this.storageService.getUser();
+  }
+
+  /**
+   * Navigate to place details page when card is clicked.
+   */
+  onCardClick(): void {
+    this.router.navigate(['/catalog', this.place.id]);
+  }
+
+  /**
+   * Handle favorite toggle click.
+   * Prevents event bubbling and updates favorite status.
+   * Emits unauthorizedFavoriteClick if user is not authenticated.
+   */
+  onToggleFavorite(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.favoriteToggleService.toggleFavorite(this.place).subscribe({
+      next: (newFavoriteStatus) => {
+        this.cdr.detectChanges();
+        this.favoriteToggled.emit({
+          placeId: this.place.id,
+          isFavorite: newFavoriteStatus,
+        });
+        console.log('Favorite toggled:', {
+          placeId: this.place.id,
+          isFavorite: newFavoriteStatus,
+        });
+      },
+      error: (err) => {
+        if (err.message === 'NOT_AUTHENTICATED') {
+          this.unauthorizedFavoriteClick.emit();
+        } else {
+          alert('An error occurred while updating favorites.');
+        }
+      },
+    });
+  }
+
+  /**
+   * Generates a Google Maps search URL for the provided address.
+   * @param address Address string to encode
+   * @returns URL string to Google Maps search
+   */
+  getGoogleMapsLink(address: string): string {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+  }
+
+  /**
+   * Updates the check-in status for the place based on user profile data.
+   */
   private updateCheckInStatus(): void {
     if (!this.place) return;
 
@@ -353,23 +419,29 @@ export class PlaceCardComponent implements AfterViewInit {
     this.cdr.detectChanges();
   }
 
+  /**
+   * Handles check-in button click.
+   * If user is not authenticated, allows click to bubble to card navigation.
+   * Prevents click propagation when authenticated.
+   */
   onCheckInClick(event: MouseEvent): void {
     if (!this.isAuthenticated) {
-      // Просто позволяем всплытие, чтоб onCardClick сработал
+      // Let event bubble to allow navigation to details
       return;
     }
 
-    // Предотвращаем всплытие — чтоб карточка не кликалась
     event.preventDefault();
     event.stopPropagation();
 
-    if (this.isCheckedIn) {
-      return;
-    }
+    if (this.isCheckedIn) return;
 
     this.performCheckIn();
   }
 
+  /**
+   * Performs check-in operation via CheckInsService.
+   * Updates user profile on success and navigates to place details.
+   */
   private performCheckIn(): void {
     this.checkInsService.checkInToCafe(this.place.id).subscribe({
       next: () => {
@@ -380,15 +452,15 @@ export class PlaceCardComponent implements AfterViewInit {
               this.storageService.setPublicUserProfile(profile);
               this.isCheckedIn = true;
               this.cdr.detectChanges();
-              this.router.navigate(['/catalog', this.place.id]); // ⬅ переход после чекина
+              this.router.navigate(['/catalog', this.place.id]);
             },
             error: (err) => {
-              console.error('Ошибка при обновлении публичного профиля:', err);
+              console.error('Error updating public profile:', err);
             },
           });
       },
       error: (err) => {
-        console.error('Ошибка при выполнении чекина:', err);
+        console.error('Error during check-in:', err);
       },
     });
   }

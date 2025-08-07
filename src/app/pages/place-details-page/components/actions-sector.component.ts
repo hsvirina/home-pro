@@ -2,32 +2,32 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IconComponent } from '../../../shared/components/icon.component';
 import { ICONS } from '../../../core/constants/icons.constant';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-actions-sector',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, IconComponent, TranslateModule],
   template: `
     <div class="mb-11 flex flex-col items-center gap-4">
-      <h5>Like Larks & Owls?</h5>
+      <h5>{{ 'actions.title' | translate }}</h5>
       <span class="body-font-1">
-        Help other coffee lovers discover this place by sharing your experience!
+        {{ 'actions.subtitle' | translate }}
       </span>
 
-      <div class="flex w-full lg:w-auto flex-col gap-4 lg:flex-row">
-        <!-- Leave Review button -->
-<button
-  *ngIf="!showAddReviewForm && (!isLoggedIn || isMobile)"
-  (click)="leaveReviewClick.emit()"
-  class="button-font button-bg-blue w-full px-6 py-3 lg:w-auto"
->
-  Leave a Review
-</button>
+      <div class="flex w-full flex-col gap-4 lg:w-auto lg:flex-row">
+        <!-- Leave Review button: shown only if review form is hidden and user is either not logged in or on mobile -->
+        <button
+          *ngIf="!showAddReviewForm && (!isLoggedIn || isMobile)"
+          (click)="leaveReviewClick.emit()"
+          class="button-font button-bg-blue w-full px-6 py-3 lg:w-auto"
+        >
+          {{ 'actions.leaveReview' | translate }}
+        </button>
 
         <!-- Favorite toggle button -->
         <button
           (click)="onToggleFavorite.emit()"
-
           class="button-bg-transparent button-font flex w-full items-center gap-2 rounded-[40px] px-6 py-3 lg:w-auto"
         >
           <ng-container *ngIf="isFavorite; else blueHeart">
@@ -36,7 +36,12 @@ import { ICONS } from '../../../core/constants/icons.constant';
           <ng-template #blueHeart>
             <app-icon [icon]="ICONS.HeartBlue" />
           </ng-template>
-          {{ isFavorite ? 'Remove from Favorites' : 'Save to Favorites' }}
+          <!-- Button text changes based on favorite state -->
+          {{
+            isFavorite
+              ? ('actions.removeFromFavorites' | translate)
+              : ('actions.saveToFavorites' | translate)
+          }}
         </button>
 
         <!-- Share button -->
@@ -45,24 +50,50 @@ import { ICONS } from '../../../core/constants/icons.constant';
           class="button-font button-bg-transparent flex w-full gap-2 px-6 py-3 lg:w-auto"
         >
           <app-icon [icon]="ICONS.ShareBlue" />
-          Share this Place
+          {{ 'actions.share' | translate }}
         </button>
       </div>
     </div>
   `,
 })
 export class ActionsSectorComponent {
-  // Icons used in the component
-  ICONS = ICONS;
+  /**
+   * Constant holding icon definitions for easy use in template
+   */
+  readonly ICONS = ICONS;
 
-  // Inputs controlling component behavior
-  @Input() isFavorite = false; // Whether the place is favorited
-  @Input() showAddReviewForm = false; // Controls visibility of review form
-  @Input() isMobile = false; // Indicates if the view is on mobile
-  @Input() isLoggedIn = false; // Indicates if user is logged in
+  /**
+   * Whether the item/place is currently marked as favorite.
+   */
+  @Input() isFavorite = false;
 
-  // Output events to notify parent component about user actions
-  @Output() leaveReviewClick = new EventEmitter<void>(); // Emitted when the review button is clicked
-  @Output() onToggleFavorite = new EventEmitter<void>(); // Emitted when favorite toggle button is clicked
-  @Output() onShare = new EventEmitter<void>(); // Emitted when share button is clicked
+  /**
+   * Flag to show/hide the add review form.
+   */
+  @Input() showAddReviewForm = false;
+
+  /**
+   * Indicates if the current device is mobile.
+   */
+  @Input() isMobile = false;
+
+  /**
+   * Indicates if the user is currently logged in.
+   */
+  @Input() isLoggedIn = false;
+
+  /**
+   * Event emitted when the "Leave Review" button is clicked.
+   */
+  @Output() leaveReviewClick = new EventEmitter<void>();
+
+  /**
+   * Event emitted when the favorite toggle button is clicked.
+   */
+  @Output() onToggleFavorite = new EventEmitter<void>();
+
+  /**
+   * Event emitted when the share button is clicked.
+   */
+  @Output() onShare = new EventEmitter<void>();
 }

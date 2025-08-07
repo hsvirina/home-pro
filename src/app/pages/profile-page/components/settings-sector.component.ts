@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Theme, ThemeValues } from '../../../core/models/theme.type';
 import { Place } from '../../../core/models/place.model';
@@ -12,6 +12,8 @@ import { Observable } from 'rxjs';
 import { ClickOutsideDirective } from '../../../shared/directives/click-outside.directive';
 import { slideDownAnimation } from '../../../../styles/animations/animations';
 import { AuthUser } from '../../../core/models/user.model';
+import { TranslateModule } from '@ngx-translate/core';
+import { LanguageService } from '../../../core/services/language.service';
 
 @Component({
   selector: 'app-settings-sector',
@@ -21,16 +23,21 @@ import { AuthUser } from '../../../core/models/user.model';
     IconComponent,
     ToggleSwitchComponent,
     ClickOutsideDirective,
+    TranslateModule,
   ],
   animations: [slideDownAnimation],
   template: `
-    <div class="flex flex-col gap-4">
+    <!-- User settings panel wrapper; rendered only if user is defined -->
+    <div class="flex flex-col gap-4" *ngIf="user">
+      <!-- Title and description section -->
       <div class="flex flex-col gap-2">
-        <h4>Settings</h4>
-        <span class="body-font-1">Manage your account preferences</span>
+        <h4>{{ 'settings.title' | translate }}</h4>
+        <span class="body-font-1">{{
+          'settings.description' | translate
+        }}</span>
       </div>
 
-      <!-- Appearance Section -->
+      <!-- Appearance Settings Section -->
       <section
         class="flex flex-col gap-8 rounded-[24px] border p-4 lg:p-6"
         [ngClass]="{
@@ -40,136 +47,117 @@ import { AuthUser } from '../../../core/models/user.model';
             (currentTheme$ | async) === 'dark',
         }"
       >
-        <h5>Appearance</h5>
+        <!-- Section header -->
+        <h5>{{ 'settings.appearance' | translate }}</h5>
 
         <div class="flex flex-col gap-5">
-          <!-- Theme selector -->
+          <!-- Theme selector with label and dropdown -->
           <div
             class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
           >
             <div class="flex flex-col gap-2">
-              <h6>Theme</h6>
-              <span class="body-font-1"
-                >Choose your preferred color scheme</span
-              >
+              <h6>{{ 'settings.theme' | translate }}</h6>
+              <span class="body-font-1">{{
+                'settings.themeDescription' | translate
+              }}</span>
             </div>
-            <div class="relative">
-              <div
-                class="flex cursor-pointer items-center justify-between rounded-3xl border px-6 py-3 lg:gap-3 lg:px-6 lg:py-3"
+            <div class="relative w-full lg:w-auto">
+              <button
+                type="button"
+                class="flex w-full cursor-pointer items-center justify-between rounded-3xl border px-6 py-3 lg:w-auto lg:gap-3"
+                [ngClass]="themeDropdownClasses"
+                aria-haspopup="listbox"
+                [attr.aria-expanded]="isThemeDropdownOpen"
                 (click)="toggleThemeDropdown($event)"
-                [ngClass]="{
-                  'border-[var(--color-gray-20)] bg-[var(--color-white)]':
-                    (currentTheme$ | async) === 'light',
-                  'border-[var(--color-gray-75)] bg-[var(--color-bg-card)]':
-                    (currentTheme$ | async) === 'dark',
-                }"
               >
-                <span class="capitalize">{{ user.theme }}</span>
+                <span class="capitalize">{{
+                  'settings.theme' + capitalize(user.theme) | translate
+                }}</span>
                 <app-icon
                   [icon]="ICONS.ChevronDown"
                   class="transition-transform"
-                  [ngClass]="{ 'rotate-180': isThemeDropdownOpen }"
-                />
-              </div>
+                  [class.rotate-180]="isThemeDropdownOpen"
+                ></app-icon>
+              </button>
 
-              <div
+              <ul
                 *ngIf="isThemeDropdownOpen"
                 @slideDownAnimation
                 appClickOutside
-                (appClickOutside)="isThemeDropdownOpen = false"
-                class="absolute left-0 top-full z-10 mt-2 w-full"
+                (appClickOutside)="closeDropdowns()"
+                class="absolute left-0 top-full z-10 mt-2 w-full rounded-[16px] border p-2"
+                [ngClass]="themeDropdownListClasses"
+                role="listbox"
+                tabindex="-1"
               >
-                <ul
-                  class="flex origin-top flex-col gap-[12px] rounded-[16px] border p-2"
-                  [ngClass]="{
-                    'border-[var(--color-white)] bg-[var(--color-white)]':
-                      (currentTheme$ | async) === 'light',
-                    'border-[var(--color-white)] bg-[var(--color-bg-card)]':
-                      (currentTheme$ | async) === 'dark',
-                  }"
+                <li
+                  *ngFor="let option of themeOptions"
+                  (click)="selectTheme(option)"
+                  class="cursor-pointer rounded-[16px] px-2 py-1 capitalize transition-colors duration-300 hover:bg-[var(--color-bg)]"
+                  role="option"
+                  [attr.aria-selected]="user.theme === option"
                 >
-                  <li
-                    *ngFor="let option of themeOptions"
-                    (click)="selectTheme(option)"
-                    class="cursor-pointer rounded-[16px] px-2 py-1 capitalize transition-colors duration-300"
-                    [ngClass]="{
-                      'hover:bg-[var(--color-bg)]': true,
-                    }"
-                  >
-                    {{ option }}
-                  </li>
-                </ul>
-              </div>
+                  {{ 'settings.theme' + capitalize(option) | translate }}
+                </li>
+              </ul>
             </div>
           </div>
 
-          <!-- Language selector -->
+          <!-- Language selector with label and dropdown -->
           <div
             class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
           >
             <div class="flex flex-col gap-2">
-              <h6>Language</h6>
-              <span class="body-font-1">Select your preferred language</span>
+              <h6>{{ 'settings.language' | translate }}</h6>
+              <span class="body-font-1">{{
+                'settings.languageDescription' | translate
+              }}</span>
             </div>
-            <div class="relative">
-              <div
-                class="flex cursor-pointer items-center justify-between rounded-[40px] border px-6 py-3 lg:gap-3 lg:px-6 lg:py-3"
+            <div class="relative w-full lg:w-auto">
+              <button
+                type="button"
+                class="flex w-full cursor-pointer items-center justify-between rounded-[40px] border px-6 py-3 lg:w-auto lg:gap-3"
+                [ngClass]="themeDropdownClasses"
+                aria-haspopup="listbox"
+                [attr.aria-expanded]="isLanguageDropdownOpen"
                 (click)="toggleLanguageDropdown($event)"
-                [ngClass]="{
-                  'border-[var(--color-gray-20)] bg-[var(--color-white)]':
-                    (currentTheme$ | async) === 'light',
-                  'border-[var(--color-gray-75)] bg-[var(--color-bg-card)]':
-                    (currentTheme$ | async) === 'dark',
-                }"
               >
-                <span class="capitalize">
-                  {{
-                    user.language && languageMap[user.language]
-                      ? languageLabels[languageMap[user.language]]
-                      : 'English'
-                  }}
-                </span>
+                <span class="capitalize">{{
+                  'languages.' + languageService.currentLang | translate
+                }}</span>
                 <app-icon
                   [icon]="ICONS.ChevronDown"
                   class="transition-transform duration-300"
-                  [ngClass]="{ 'rotate-180': isLanguageDropdownOpen }"
-                />
-              </div>
+                  [class.rotate-180]="isLanguageDropdownOpen"
+                ></app-icon>
+              </button>
 
-              <div
+              <ul
                 *ngIf="isLanguageDropdownOpen"
                 @slideDownAnimation
                 appClickOutside
-                (appClickOutside)="isLanguageDropdownOpen = false"
-                class="absolute left-0 top-full z-10 mt-2 w-full"
+                (appClickOutside)="closeDropdowns()"
+                class="absolute left-0 top-full z-10 mt-2 w-full rounded-[16px] border p-2"
+                [ngClass]="themeDropdownListClasses"
+                role="listbox"
+                tabindex="-1"
               >
-                <ul
-                  class="flex origin-top flex-col gap-[12px] rounded-[16px] border p-2"
-                  [ngClass]="{
-                    'border-[var(--color-white)] bg-[var(--color-white)]':
-                      (currentTheme$ | async) === 'light',
-                    'border-[var(--color-white)] bg-[var(--color-bg-card)]':
-                      (currentTheme$ | async) === 'dark',
-                  }"
+                <li
+                  *ngFor="let lang of languageOptions"
+                  (click)="selectLanguage(lang)"
+                  class="cursor-pointer rounded-[16px] px-2 py-1 capitalize transition-colors duration-300 hover:bg-[var(--color-bg)]"
+                  role="option"
+                  [attr.aria-selected]="languageService.currentLang === lang"
                 >
-                  <li
-                    *ngFor="let lang of languageOptions"
-                    (click)="selectLanguage(lang)"
-                    class="cursor-pointer rounded-[16px] px-2 py-1 capitalize transition-colors duration-300"
-                    [ngClass]="{
-                      'hover:bg-[var(--color-bg)]': true,
-                    }"
-                  >
-                    {{ languageLabels[lang] }}
-                  </li>
-                </ul>
-              </div>
+                  {{ 'languages.' + lang | translate }}
+                </li>
+              </ul>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Notifications Section -->
+      <!-- Notifications Settings Section -->
       <section
         class="flex flex-col gap-8 rounded-[24px] border p-4 lg:p-6"
         [ngClass]="{
@@ -179,16 +167,17 @@ import { AuthUser } from '../../../core/models/user.model';
             (currentTheme$ | async) === 'dark',
         }"
       >
-        <h5>Notifications</h5>
+        <h5>{{ 'settings.notifications' | translate }}</h5>
 
+        <!-- Individual notification toggle items -->
         <div class="flex flex-col gap-5">
           <!-- Email Notifications -->
           <div class="flex items-center justify-between gap-4">
             <div class="flex flex-col gap-1">
-              <h6>Email Notifications</h6>
-              <span class="body-font-1"
-                >Receive updates about new cafés and reviews</span
-              >
+              <h6>{{ 'settings.emailNotifications' | translate }}</h6>
+              <span class="body-font-1">{{
+                'settings.emailNotificationsDesc' | translate
+              }}</span>
             </div>
             <app-toggle-switch
               [checked]="user.emailNotifications"
@@ -199,10 +188,10 @@ import { AuthUser } from '../../../core/models/user.model';
           <!-- Push Notifications -->
           <div class="flex items-center justify-between gap-4">
             <div class="flex flex-col gap-1">
-              <h6>Push Notifications</h6>
-              <span class="body-font-1"
-                >Get notified when someone likes your reviews</span
-              >
+              <h6>{{ 'settings.pushNotifications' | translate }}</h6>
+              <span class="body-font-1">{{
+                'settings.pushNotificationsDesc' | translate
+              }}</span>
             </div>
             <app-toggle-switch
               [checked]="user.pushNotifications"
@@ -213,10 +202,10 @@ import { AuthUser } from '../../../core/models/user.model';
           <!-- Review Notifications -->
           <div class="flex items-center justify-between gap-4">
             <div class="flex flex-col gap-1">
-              <h6>Review Notifications</h6>
-              <span class="body-font-1"
-                >Get notified when someone likes your reviews</span
-              >
+              <h6>{{ 'settings.reviewNotifications' | translate }}</h6>
+              <span class="body-font-1">{{
+                'settings.reviewNotificationsDesc' | translate
+              }}</span>
             </div>
             <app-toggle-switch
               [checked]="user.reviewNotifications"
@@ -226,7 +215,7 @@ import { AuthUser } from '../../../core/models/user.model';
         </div>
       </section>
 
-      <!-- Privacy Section -->
+      <!-- Privacy Settings Section -->
       <section
         class="flex flex-col gap-8 rounded-[24px] border p-4 lg:p-6"
         [ngClass]="{
@@ -236,14 +225,15 @@ import { AuthUser } from '../../../core/models/user.model';
             (currentTheme$ | async) === 'dark',
         }"
       >
-        <h5>Privacy</h5>
-        <!-- Location Sharing -->
+        <h5>{{ 'settings.privacy' | translate }}</h5>
+
+        <!-- Location Sharing toggle -->
         <div class="flex items-center justify-between gap-4">
           <div class="flex flex-col gap-1">
-            <h6>Location Sharing</h6>
-            <span class="body-font-1">
-              Allow the app to access your location for recommendations
-            </span>
+            <h6>{{ 'settings.locationSharing' | translate }}</h6>
+            <span class="body-font-1">{{
+              'settings.locationSharingDesc' | translate
+            }}</span>
           </div>
           <app-toggle-switch
             [checked]="user.locationSharing"
@@ -252,7 +242,7 @@ import { AuthUser } from '../../../core/models/user.model';
         </div>
       </section>
 
-      <!-- Account Section -->
+      <!-- Account Settings Section -->
       <section
         class="flex flex-col gap-8 rounded-[24px] border p-4 lg:p-6"
         [ngClass]="{
@@ -262,25 +252,28 @@ import { AuthUser } from '../../../core/models/user.model';
             (currentTheme$ | async) === 'dark',
         }"
       >
-        <h5>Account</h5>
+        <h5>{{ 'settings.account' | translate }}</h5>
+
+        <!-- Logout and Delete Account buttons -->
         <div class="button-font text-primary flex flex-col gap-4 lg:flex-row">
           <button
             class="button-bg-transparent flex h-12 w-full px-3 py-6"
             (click)="logout()"
           >
-            Log out of the account
+            {{ 'settings.logout' | translate }}
           </button>
+
           <button
             class="button-font flex h-12 w-full items-center justify-center rounded-[40px] border border-[var(--color-button-error)] px-3 py-6 text-[var(--color-button-error)]"
             (click)="openDeleteAccountModal()"
           >
-            Delete account
+            {{ 'settings.deleteAccount' | translate }}
           </button>
         </div>
       </section>
     </div>
 
-    <!-- Delete Account Modal -->
+    <!-- Delete Account Confirmation Modal -->
     <div
       *ngIf="showDeleteAccountModal"
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
@@ -288,139 +281,177 @@ import { AuthUser } from '../../../core/models/user.model';
       <div
         class="flex w-full max-w-md flex-col items-center rounded-2xl bg-white p-6 text-center"
       >
-        <h4 class="mb-4 text-lg font-semibold">Delete Account</h4>
-        <p class="mb-6">This feature is currently under development.</p>
+        <h4 class="mb-4 text-lg font-semibold">
+          {{ 'settings.deleteAccountModalTitle' | translate }}
+        </h4>
+        <p class="mb-6">{{ 'settings.deleteAccountModalDesc' | translate }}</p>
         <button
           (click)="closeDeleteAccountModal()"
           class="button-font rounded-full bg-indigo-600 px-6 py-2 text-white transition hover:bg-indigo-700"
         >
-          Close
+          {{ 'settings.close' | translate }}
         </button>
       </div>
     </div>
   `,
 })
-export class SettingsSectorComponent {
-  // User object with current settings
+export class SettingsSectorComponent implements OnInit {
+  /** Authenticated user whose settings are being displayed */
   @Input() user!: AuthUser;
 
-  // List of places (cafes) to extract favorites for export
+  /** List of user places (unused here, but could be used for future logic) */
   @Input() places: Place[] = [];
 
-  // Emits when user changes any setting to notify parent component
+  /** Emits when settings are changed and should be saved */
   @Output() settingsChanged = new EventEmitter<void>();
 
-  // Controls the visibility of the theme dropdown
+  /** Theme dropdown open state */
   isThemeDropdownOpen = false;
 
-  // Controls the visibility of the language dropdown
+  /** Language dropdown open state */
   isLanguageDropdownOpen = false;
 
-  // Controls the visibility of the delete account modal
+  /** Delete account modal state */
   showDeleteAccountModal = false;
 
+  /** Icon library */
   ICONS = ICONS;
 
+  /** Current theme as observable for template use */
   readonly currentTheme$: Observable<Theme>;
 
-  // Available theme options from enum
+  /** Available theme options */
   readonly themeOptions = ThemeValues;
 
-  // Supported languages
+  /** Available language options */
   readonly languageOptions: Array<'en' | 'uk'> = ['en', 'uk'];
 
-  // Human-readable language labels
+  /** Human-readable labels for languages (not currently used in template) */
   readonly languageLabels: Record<'en' | 'uk', string> = {
     en: 'English',
     uk: 'Ukrainian',
-  };
-
-  // Maps various language codes to supported keys
-  readonly languageMap: Record<string, 'en' | 'uk'> = {
-    ENG: 'en',
-    UKR: 'uk',
-    en: 'en',
-    uk: 'uk',
   };
 
   constructor(
     private themeService: ThemeService,
     private authService: AuthStateService,
     private router: Router,
+    public languageService: LanguageService,
   ) {
     this.currentTheme$ = this.themeService.theme$;
   }
 
   ngOnInit(): void {
+    if (!this.user) {
+      throw new Error('Input user is required');
+    }
+
+    // Sync user theme with ThemeService
     if (this.user.theme !== this.themeService.currentTheme) {
       this.themeService.setTheme(this.user.theme as Theme);
     }
+
+    // Sync language from user preference
+    this.languageService.syncFromUser(this.user);
   }
 
-  // Toggles theme dropdown and closes language dropdown
+  /** Returns dropdown button style classes depending on the theme */
+  get themeDropdownClasses(): string {
+    return this.themeService.currentTheme === 'light'
+      ? 'border-[var(--color-gray-20)] bg-[var(--color-white)]'
+      : 'border-[var(--color-gray-75)] bg-[var(--color-bg-card)] text-[var(--color-white)]';
+  }
+
+  /** Returns dropdown list style classes depending on the theme */
+  get themeDropdownListClasses(): string {
+    return this.themeService.currentTheme === 'light'
+      ? 'border-[var(--color-white)] bg-[var(--color-white)]'
+      : 'border-[var(--color-white)] bg-[var(--color-bg-card)]';
+  }
+
+  /** Capitalizes the first letter of a string */
+  capitalize(text: string): string {
+    if (!text) return '';
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  }
+
+  /** Toggles theme dropdown visibility */
   toggleThemeDropdown(event: MouseEvent): void {
     event.stopPropagation();
-    event.preventDefault();
     this.isThemeDropdownOpen = !this.isThemeDropdownOpen;
+    if (this.isThemeDropdownOpen) this.isLanguageDropdownOpen = false;
   }
 
+  /** Toggles language dropdown visibility */
   toggleLanguageDropdown(event: MouseEvent): void {
     event.stopPropagation();
     this.isLanguageDropdownOpen = !this.isLanguageDropdownOpen;
-    this.isThemeDropdownOpen = false;
+    if (this.isLanguageDropdownOpen) this.isThemeDropdownOpen = false;
   }
 
-  // Selects a theme and emits change event
-  selectTheme(theme: Theme): void {
-    this.user.theme = theme;
-    this.themeService.setTheme(theme); // устанавливаем тему глобально
+  /** Closes both dropdowns */
+  closeDropdowns(): void {
     this.isThemeDropdownOpen = false;
-    this.settingsChanged.emit();
-  }
-
-  // Selects a language and emits change event
-  selectLanguage(lang: 'en' | 'uk'): void {
-    this.user.language = lang;
     this.isLanguageDropdownOpen = false;
-    this.settingsChanged.emit();
   }
 
-  // Toggles email notifications setting and emits change event
+  /** Handles theme selection */
+  selectTheme(theme: Theme): void {
+    if (this.user.theme !== theme) {
+      this.user.theme = theme;
+      this.themeService.setTheme(theme);
+      this.settingsChanged.emit();
+    }
+    this.isThemeDropdownOpen = false;
+  }
+
+  /** Handles language selection */
+  selectLanguage(lang: 'en' | 'uk'): void {
+    if (this.user.language !== lang) {
+      this.user.language = lang;
+      this.languageService.setLang(lang);
+      this.settingsChanged.emit();
+    }
+    this.isLanguageDropdownOpen = false;
+  }
+
+  /** Toggles email notifications on/off */
   toggleEmailNotifications(): void {
     this.user.emailNotifications = !this.user.emailNotifications;
     this.settingsChanged.emit();
   }
 
-  // Toggles push notifications setting and emits change event
+  /** Toggles push notifications on/off */
   togglePushNotifications(): void {
     this.user.pushNotifications = !this.user.pushNotifications;
     this.settingsChanged.emit();
   }
 
-  // Toggles review notifications setting and emits change event
+  /** Toggles review notifications on/off */
   toggleReviewNotifications(): void {
     this.user.reviewNotifications = !this.user.reviewNotifications;
     this.settingsChanged.emit();
   }
 
-  // Toggles location sharing setting and emits change event
+  /** Toggles location sharing on/off */
   toggleLocationSharing(): void {
     this.user.locationSharing = !this.user.locationSharing;
     this.settingsChanged.emit();
   }
 
-  // Opens the "Delete Account" modal
+  /** Opens delete account confirmation modal */
   openDeleteAccountModal(): void {
     this.showDeleteAccountModal = true;
   }
 
-  // Closes the "Delete Account" modal
+  /** Closes delete account modal */
   closeDeleteAccountModal(): void {
     this.showDeleteAccountModal = false;
   }
 
+  /** Logs out the current user */
   logout(): void {
     this.authService.logout();
-    this.router.navigate(['/']); // переход на главную страницу после выхода
+    this.router.navigate(['/']);
   }
 }

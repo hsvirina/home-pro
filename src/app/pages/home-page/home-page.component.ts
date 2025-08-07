@@ -29,28 +29,23 @@ import { TranslateModule } from '@ngx-translate/core';
   template: `
     <div class="flex w-full flex-col items-center">
       <div class="flex w-full max-w-[1320px] flex-col gap-8">
-        <!-- Коллаж -->
+        <!-- Image Collage -->
         <div class="order-1 lg:order-3">
           <app-image-collage class="w-full"></app-image-collage>
         </div>
 
-        <!-- Тайтл и подзаголовок -->
+        <!-- Title and Subtitle -->
         <div
           class="order-2 flex flex-col gap-6 px-5 text-center lg:order-2"
-          [ngClass]="{
-            'text-[var(--color-white)]': (currentTheme$ | async) === 'dark',
-          }"
+          *ngIf="currentTheme$ | async as theme"
+          [ngClass]="{ 'text-[var(--color-white)]': theme === 'dark' }"
         >
           <h2 class="max-w-[1172px] text-[36px] lg:text-[64px] xxl:text-[80px]">
             {{ 'HOME.TITLE' | translate }}
-            <span class="text-[var(--color-primary)]">{{
-              'HOME.CLICK' | translate
-            }}</span>
+            <span class="text-[var(--color-primary)]">{{ 'HOME.CLICK' | translate }}</span>
             {{ 'HOME.AWAY' | translate }}
           </h2>
-          <span class="body-font-1">
-            {{ 'HOME.SUBTITLE' | translate }}
-          </span>
+          <span class="body-font-1">{{ 'HOME.SUBTITLE' | translate }}</span>
         </div>
 
         <!-- Filter Bar -->
@@ -61,20 +56,21 @@ import { TranslateModule } from '@ngx-translate/core';
         </div>
       </div>
 
-      <!-- Слайдер популярных -->
+      <!-- Slider: Recommended for you -->
       <app-slider-places
         [title]="'SLIDER.FOR_YOU' | translate"
-        [places]="places"
+        [places]="(places$ | async) ?? []"
         (unauthorizedFavoriteClick)="handleUnauthorizedFavoriteClick()"
         class="my-[64px] w-full max-w-[1320px] lg:mb-[150px] lg:mt-[150px] lg:px-10 xxl:px-0"
       ></app-slider-places>
 
-      <!-- Welcome-блок: фон на всю ширину -->
+      <!-- Welcome block with theme-based background -->
       <div
-        class="w-full"
+        class="w-full rounded-[24px]"
+        *ngIf="currentTheme$ | async as theme"
         [ngClass]="{
-          'bg-[var(--color-gray-100)]': (currentTheme$ | async) === 'dark',
-          'bg-[var(--color-white)]': (currentTheme$ | async) === 'light',
+          'bg-[var(--color-gray-100)]': theme === 'dark',
+          'bg-[var(--color-white)]': theme === 'light'
         }"
       >
         <div class="mx-auto w-full max-w-[1320px]">
@@ -82,12 +78,12 @@ import { TranslateModule } from '@ngx-translate/core';
         </div>
       </div>
 
-      <!-- Слайдер самых популярных -->
+      <!-- Slider: Popular places -->
       <app-slider-places
         [title]="'SLIDER.POPULAR' | translate"
-        [places]="popularPlaces"
+        [places]="(popularPlaces$ | async) ?? []"
         (unauthorizedFavoriteClick)="handleUnauthorizedFavoriteClick()"
-        class="my-[64px] w-full max-w-[1320px] lg:mb-[150px] lg:mt-[150px]  lg:px-10 xxl:px-0"
+        class="my-[64px] w-full max-w-[1320px] lg:mb-[150px] lg:mt-[150px] lg:px-10 xxl:px-0"
       ></app-slider-places>
     </div>
 
@@ -115,37 +111,36 @@ import { TranslateModule } from '@ngx-translate/core';
   `,
 })
 export class HomePageComponent implements OnInit {
-  places: Place[] = [];
-  popularPlaces: Place[] = [];
-  showLoginModal = false;
+  places$: Observable<Place[]>;
+  popularPlaces$: Observable<Place[]>;
   currentTheme$: Observable<Theme>;
+  showLoginModal = false;
 
   constructor(
     private placesStore: PlacesStoreService,
     private router: Router,
-    private themeService: ThemeService,
+    private themeService: ThemeService
   ) {
+    this.places$ = this.placesStore.places$;
+    this.popularPlaces$ = this.placesStore.popularPlaces$;
     this.currentTheme$ = this.themeService.theme$;
   }
 
-  ngOnInit() {
+  /** Load places data on component initialization */
+  ngOnInit(): void {
     this.placesStore.loadPlaces();
-
-    this.placesStore.places$.subscribe((data) => {
-      if (data) {
-        this.places = [...data];
-        this.popularPlaces = [...data]
-          .sort((a, b) => b.rating - a.rating)
-          .slice(0, 10);
-      }
-    });
   }
 
-  handleUnauthorizedFavoriteClick() {
+  /** Open login modal when user tries to favorite a place without authorization */
+  handleUnauthorizedFavoriteClick(): void {
     this.showLoginModal = true;
   }
 
-  navigateToAuth() {
+  /**
+   * Navigate to the authentication page.
+   * Save current route to return to after successful login.
+   */
+  navigateToAuth(): void {
     localStorage.setItem('returnUrl', this.router.url);
     this.showLoginModal = false;
     this.router.navigate(['/auth']);

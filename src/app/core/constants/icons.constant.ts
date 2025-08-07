@@ -1,3 +1,8 @@
+/**
+ * ICONS constant holds icon metadata for the application.
+ * Each icon includes a file path and an alt text for accessibility.
+ * Some icons have variants for dark theme usage, denoted by suffix 'DarkTheme' or similar.
+ */
 export const ICONS = {
   Accessibility: {
     filename: './assets/icons/accessibility.png',
@@ -11,9 +16,9 @@ export const ICONS = {
     filename: './assets/icons/apple.svg',
     alt: 'Apple logo',
   },
-  AppleDarkThema: {
+  AppleDarkTheme: {
     filename: './assets/icons/apple-dark-thema.svg',
-    alt: 'Apple dark thema logo',
+    alt: 'Apple dark theme logo',
   },
   ArrowDownRight: {
     filename: './assets/icons/arrow_down_right.svg',
@@ -35,17 +40,17 @@ export const ICONS = {
     filename: './assets/icons/arrow-left.svg',
     alt: 'Left arrow',
   },
-  ArrowLeftDarkThema: {
+  ArrowLeftDarkTheme: {
     filename: './assets/icons/arrow-left-dark-thema.svg',
-    alt: 'Left arrow dark thema',
+    alt: 'Left arrow dark theme',
   },
   ArrowRight: {
     filename: './assets/icons/arrow-right.svg',
     alt: 'Right arrow',
   },
-  ArrowRightDarkThema: {
+  ArrowRightDarkTheme: {
     filename: './assets/icons/arrow-right-dark-thema.svg',
-    alt: 'Right arrow dark thema',
+    alt: 'Right arrow dark theme',
   },
   ChevronDown: {
     filename: './assets/icons/chevron-down.svg',
@@ -55,9 +60,9 @@ export const ICONS = {
     filename: './assets/icons/clock.svg',
     alt: 'Clock',
   },
-  ClockDarkThema: {
+  ClockDarkTheme: {
     filename: './assets/icons/clock-dark-thema.png',
-    alt: 'Clock',
+    alt: 'Clock dark theme',
   },
   Close: {
     filename: './assets/icons/close.svg',
@@ -65,7 +70,7 @@ export const ICONS = {
   },
   CoffeeBean: {
     filename: './assets/icons/coffee-bean.svg',
-    alt: 'Coffee Bean icon',
+    alt: 'Coffee bean icon',
   },
   CheckCircle: {
     filename: './assets/icons/check-circle.svg',
@@ -75,17 +80,17 @@ export const ICONS = {
     filename: './assets/icons/eye.svg',
     alt: 'Show password',
   },
-  EyeDarkThema: {
-    filename: './assets/icons/eyeDarkThema.svg',
-    alt: 'Show password',
+  EyeDarkTheme: {
+    filename: './assets/icons/eyeDarkTheme.svg',
+    alt: 'Show password (dark theme)',
   },
   EyeSlash: {
     filename: './assets/icons/eye-slash.svg',
     alt: 'Hide password',
   },
-  EyeSlashDarkThema: {
-    filename: './assets/icons/eye-slashDarkThema.svg',
-    alt: 'Hide password',
+  EyeSlashDarkTheme: {
+    filename: './assets/icons/eye-slashDarkTheme.svg',
+    alt: 'Hide password (dark theme)',
   },
   Facebook: {
     filename: './assets/icons/facebook.svg',
@@ -99,9 +104,9 @@ export const ICONS = {
     filename: './assets/icons/heart.svg',
     alt: 'Heart icon',
   },
-  HeartBlueDarkThema: {
+  HeartBlueDarkTheme: {
     filename: './assets/icons/heart-dark-thema.svg',
-    alt: 'Heart dark thema icon',
+    alt: 'Heart dark theme icon',
   },
   HeartBlue: {
     filename: './assets/icons/heart-blue.svg',
@@ -113,39 +118,39 @@ export const ICONS = {
   },
   IdPass: {
     filename: './assets/icons/id-pass.svg',
-    alt: 'ID pass',
+    alt: 'ID pass icon',
   },
-  IdPassDarkThema: {
+  IdPassDarkTheme: {
     filename: './assets/icons/id-pass-dark-thema.png',
-    alt: 'ID dark thema pass',
+    alt: 'ID pass dark theme icon',
   },
   Laptop: {
     filename: './assets/icons/laptop.png',
-    alt: 'Laptop',
+    alt: 'Laptop icon',
   },
   Letter: {
     filename: './assets/icons/letter.svg',
-    alt: 'Letter',
+    alt: 'Letter icon',
   },
-  LetterDarkThema: {
-    filename: './assets/icons/letterDarkThema.png',
-    alt: 'Letter',
+  LetterDarkTheme: {
+    filename: './assets/icons/letterDarkTheme.png',
+    alt: 'Letter dark theme icon',
   },
   Like: {
     filename: './assets/icons/like.svg',
-    alt: 'Like',
+    alt: 'Like icon',
   },
   LikeFill: {
     filename: './assets/icons/like-fill.svg',
-    alt: 'Like Fill',
+    alt: 'Like fill icon',
   },
   Location: {
     filename: './assets/icons/location.svg',
-    alt: 'Location',
+    alt: 'Location icon',
   },
-  LocationDarkThema: {
-    filename: './assets/icons/locationDarkThema.svg',
-    alt: 'Location dark thema',
+  LocationDarkTheme: {
+    filename: './assets/icons/locationDarkTheme.svg',
+    alt: 'Location dark theme icon',
   },
   Menu: {
     filename: './assets/icons/menu.png',
@@ -161,19 +166,19 @@ export const ICONS = {
   },
   SearchDark: {
     filename: './assets/icons/search-dark.svg',
-    alt: 'Search (dark)',
+    alt: 'Search icon (dark theme)',
   },
   SearchWhite: {
     filename: './assets/icons/search-white.svg',
-    alt: 'Search (white)',
+    alt: 'Search icon (white)',
   },
   Share: {
     filename: './assets/icons/share.svg',
     alt: 'Share icon',
   },
-  ShareDarkThema: {
+  ShareDarkTheme: {
     filename: './assets/icons/share-dark-thema.svg',
-    alt: 'Share dark thema icon',
+    alt: 'Share dark theme icon',
   },
   ShareBlue: {
     filename: './assets/icons/share-blue.svg',
@@ -189,15 +194,15 @@ export const ICONS = {
   },
   StarsCollage: {
     filename: './assets/icons/stars-collage.svg',
-    alt: 'Star collage icon',
+    alt: 'Stars collage icon',
   },
-  StarsCollageDarkThema: {
+  StarsCollageDarkTheme: {
     filename: './assets/icons/stars-collage-dark-thema.svg',
-    alt: 'Star collage dark thema icon',
+    alt: 'Stars collage dark theme icon',
   },
   UserProfile: {
     filename: './assets/icons/user-profile.svg',
-    alt: 'User profile',
+    alt: 'User profile icon',
   },
   Moon: {
     filename: './assets/icons/moon.svg',
@@ -207,10 +212,14 @@ export const ICONS = {
     filename: './assets/icons/sun.svg',
     alt: 'Sun icon',
   },
-  SunDarkThema: {
+  SunDarkTheme: {
     filename: './assets/icons/sun-dark.svg',
-    alt: 'Sun dark icon',
+    alt: 'Sun dark theme icon',
   },
 } as const;
 
-export type IconData = typeof ICONS[keyof typeof ICONS];
+/**
+ * IconData type represents a single icon's metadata
+ * consisting of filename and alt text.
+ */
+export type IconData = (typeof ICONS)[keyof typeof ICONS];

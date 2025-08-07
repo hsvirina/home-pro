@@ -9,14 +9,13 @@ import {
 } from '@angular/core';
 import { CommonModule, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { forkJoin, Observable } from 'rxjs';
 
 import { Review } from '../../../../core/models/review.model';
 import { ReviewsService } from '../../../../core/services/reviews.service';
 import { Place } from '../../../../core/models/place.model';
 import { ICONS } from '../../../../core/constants/icons.constant';
-import { IconComponent } from '../../../../shared/components/icon.component';
 import { ModalComponent } from '../../../../shared/components/modal.component';
-import { Observable } from 'rxjs';
 import { Theme } from '../../../../core/models/theme.type';
 import { ThemeService } from '../../../../core/services/theme.service';
 import {
@@ -73,20 +72,16 @@ import { TranslateModule } from '@ngx-translate/core';
             <app-review-item
               *ngFor="let review of reviews.slice(0, visibleCount)"
               [review]="review"
-              [badgeType]="userBadgeTypes.get(review.userId) ?? 'neutral'"
+              [badgeType]="userBadgeTypes.get(review.userId) ?? null"
               [currentUserId]="currentUser?.userId ?? null"
-              [likesInfo]="
-                reviewLikesMap.get(review.id) ?? {
-                  likedByCurrentUser: false,
-                  totalLikes: 0,
-                }
-              "
+              [likesInfo]="getLikesInfo(review.id)"
               (toggleLike)="onToggleLike(review, $event)"
               (delete)="confirmDelete($event)"
               [isLoggedIn]="!!currentUser"
             ></app-review-item>
           </ng-container>
         </div>
+
         <app-add-review-form
           *ngIf="currentUser"
           [currentUser]="currentUser"
@@ -104,9 +99,8 @@ import { TranslateModule } from '@ngx-translate/core';
         ></app-add-review-form>
       </div>
 
-      <!-- No reviews placeholder -->
       <ng-template #noReviews>
-        <h5 class="text-[var(--color-gray-100)]' col-span-8 mb-11">
+        <h5 class="col-span-8 mb-11 text-[var(--color-gray-100)]">
           {{ 'reviews.noReviews' | translate }}
         </h5>
       </ng-template>
@@ -137,41 +131,37 @@ import { TranslateModule } from '@ngx-translate/core';
   `,
 })
 export class RatingReviewsSectionComponent implements OnChanges {
-  // Inputs
   @Input() cafeId: number | null = null;
   @Input() place: Place | null = null;
   @Input() currentUser: AuthUser | null = null;
   @Input() isMobile = false;
   @Input() showAddReviewForm = false;
   @Input() alwaysShowFormOnDesktop = false;
+  @Input() publicUserProfile!: PublicUserProfile;
+
+  @Output() reviewAdded = new EventEmitter<void>();
 
   readonly currentTheme$: Observable<Theme>;
+  readonly ICONS = ICONS;
+
+  reviews: Review[] = [];
   reviewLikesMap = new Map<
     number,
     { likedByCurrentUser: boolean; totalLikes: number }
   >();
-
-  ICONS = ICONS;
-
   userProfiles: Map<number, PublicUserProfile> = new Map();
   userBadgeTypes: Map<number, BadgeType> = new Map();
 
-  // Local state
-  reviews: Review[] = [];
   visibleCount = 2;
   newReviewText = '';
   newReviewRating = 0;
-
-  @Input() publicUserProfile!: PublicUserProfile;
 
   reviewToDeleteId: number | null = null;
   showDeleteModal = false;
 
   userName: string = '';
   userEmail: string = '';
-
-  showRatingWarning = false;
-  badgeType: BadgeType = 'neutral';
+  badgeType: BadgeType = null;
 
   constructor(
     private reviewsService: ReviewsService,
@@ -182,7 +172,6 @@ export class RatingReviewsSectionComponent implements OnChanges {
     this.currentTheme$ = this.themeService.theme$;
   }
 
-  /** Detect input changes, reload reviews if cafeId changes */
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['cafeId'] && this.cafeId !== null) {
       this.visibleCount = 2;
@@ -199,14 +188,11 @@ export class RatingReviewsSectionComponent implements OnChanges {
     }
   }
 
-  private loadReviews(cafeId: number) {
+  private loadReviews(cafeId: number): void {
     this.reviewsService.getReviewsByCafeId(cafeId).subscribe({
       next: (reviews) => {
         this.reviews = reviews;
-
-        // Загружаем лайки для каждого отзыва
         this.loadLikesForReviews(reviews);
-
         this.loadProfilesForReviews();
       },
       error: () => {
@@ -215,59 +201,52 @@ export class RatingReviewsSectionComponent implements OnChanges {
     });
   }
 
-  private loadLikesForReviews(reviews: Review[]) {
-    reviews.forEach((review) => {
-      this.authApiService.getReviewLikesInfo(review.id).subscribe({
-        next: (likesInfo) => {
-          this.reviewLikesMap.set(review.id, likesInfo);
-          this.cdr.detectChanges();
-        },
-        error: (err) => {
-          console.warn(
-            `Failed to load likes info for review ${review.id}`,
-            err,
-          );
-        },
-      });
+  private loadLikesForReviews(reviews: Review[]): void {
+    const likesObservables = reviews.map((review) =>
+      this.authApiService.getReviewLikesInfo(review.id),
+    );
+
+    forkJoin(likesObservables).subscribe({
+      next: (likesArray) => {
+        const newMap = new Map<
+          number,
+          { likedByCurrentUser: boolean; totalLikes: number }
+        >();
+        reviews.forEach((review, index) => {
+          newMap.set(review.id, likesArray[index]);
+        });
+        this.reviewLikesMap = newMap;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.warn('Failed to load likes info for some reviews', err);
+      },
     });
   }
 
-  /** Обработчик лайка/удаления лайка от AppReviewItemComponent */
-  onToggleLike(review: Review, liked: boolean) {
-    if (liked) {
-      this.authApiService.likeReview(review.id).subscribe({
-        next: () => {
-          this.updateLikesLocal(review.id, true);
-        },
-      });
-    } else {
-      this.authApiService.unlikeReview(review.id).subscribe({
-        next: () => {
-          this.updateLikesLocal(review.id, false);
-        },
-      });
-    }
-  }
-
-  private updateLikesLocal(reviewId: number, likedByCurrentUser: boolean) {
+  private updateLikesLocal(
+    reviewId: number,
+    likedByCurrentUser: boolean,
+  ): void {
     const likes = this.reviewLikesMap.get(reviewId);
     if (!likes) return;
 
     const totalLikes = likedByCurrentUser
       ? likes.totalLikes + 1
       : likes.totalLikes - 1;
-    this.reviewLikesMap.set(reviewId, {
+    const newMap = new Map(this.reviewLikesMap);
+    newMap.set(reviewId, {
       likedByCurrentUser,
       totalLikes: Math.max(0, totalLikes),
     });
+    this.reviewLikesMap = newMap;
     this.cdr.detectChanges();
   }
 
-  private loadProfilesForReviews() {
+  private loadProfilesForReviews(): void {
     this.reviews.forEach((review) => {
       const userId = review.userId;
 
-      // Проверяем, есть ли профиль уже в кеше
       if (!this.userProfiles.has(userId)) {
         this.authApiService.getPublicUserProfile(userId).subscribe({
           next: (profile) => {
@@ -283,56 +262,33 @@ export class RatingReviewsSectionComponent implements OnChanges {
     });
   }
 
-  private calculateAndSetBadge(userId: number, profile: PublicUserProfile) {
+  private calculateAndSetBadge(
+    userId: number,
+    profile: PublicUserProfile,
+  ): void {
     const unlocked = getUnlockedAchievements(profile);
     const badge = calculateBadgeType(unlocked, ACHIEVEMENTS);
     this.userBadgeTypes.set(userId, badge);
   }
 
-  getBadgeImage(review: Review): string | null {
-    const badgeType = this.userBadgeTypes.get(review.userId) ?? 'neutral';
-
-    switch (badgeType) {
-      case 'gold':
-        return './assets/badges/GoldRate.png';
-      case 'silver':
-        return './assets/badges/SilverRate.png';
-      case 'bronze':
-        return './assets/badges/BronzeRate.png';
-      default:
-        return null;
-    }
-  }
-
-  /** Check if review can be submitted */
-  get canSubmitReview(): boolean {
-    return this.newReviewRating > 0;
-  }
-
-  updateBadgeType() {
+  updateBadgeType(): void {
     const unlocked = getUnlockedAchievements(this.publicUserProfile);
     this.badgeType = calculateBadgeType(unlocked, ACHIEVEMENTS);
   }
 
-  /** Submit a new review */
-  addReview() {
-    if (!this.cafeId) return;
+  get canSubmitReview(): boolean {
+    return this.newReviewRating > 0;
+  }
 
-    if (this.newReviewRating === 0) {
-      this.showRatingWarning = true; // Если хочешь, чтобы пользователь знал
-      return;
-    }
-    this.showRatingWarning = false;
+  addReview(): void {
+    if (!this.cafeId || this.newReviewRating === 0) return;
 
+    const trimmedText = this.newReviewText.trim();
     const reviewData: { cafeId: number; rating: number; text?: string } = {
       cafeId: this.cafeId,
       rating: this.newReviewRating,
+      ...(trimmedText && { text: trimmedText }),
     };
-
-    const trimmedText = this.newReviewText.trim();
-    if (trimmedText.length > 0) {
-      reviewData.text = trimmedText;
-    }
 
     this.reviewsService.addReview(reviewData).subscribe({
       next: (createdReview) => {
@@ -347,12 +303,12 @@ export class RatingReviewsSectionComponent implements OnChanges {
         this.newReviewRating = 0;
         this.visibleCount++;
         this.cdr.detectChanges();
+        this.reviewAdded.emit();
 
         if (this.place) {
           this.place.reviewCount = (this.place.reviewCount || 0) + 1;
         }
 
-        // Reset textarea height after clearing content
         setTimeout(() => {
           const textarea = document.querySelector('textarea');
           if (textarea) textarea.style.height = 'auto';
@@ -360,15 +316,23 @@ export class RatingReviewsSectionComponent implements OnChanges {
       },
       error: (err) => {
         console.error('Failed to add review:', err);
-        if (err.status === 403) {
-          alert('Error 403: Access denied. Please check your authorization.');
-        }
       },
     });
   }
 
-  /** Delete review by id */
-  deleteReview(reviewId: number) {
+  confirmDelete(reviewId: number): void {
+    this.reviewToDeleteId = reviewId;
+    this.showDeleteModal = true;
+  }
+
+  deleteConfirmed(): void {
+    if (this.reviewToDeleteId !== null) {
+      this.deleteReview(this.reviewToDeleteId);
+      this.cancelDelete();
+    }
+  }
+
+  deleteReview(reviewId: number): void {
     this.reviewsService.deleteReview(reviewId).subscribe({
       next: () => {
         this.reviews = this.reviews.filter((r) => r.id !== reviewId);
@@ -385,35 +349,47 @@ export class RatingReviewsSectionComponent implements OnChanges {
       },
       error: (err) => {
         console.error('Failed to delete review:', err);
-        alert('Failed to delete review');
       },
     });
   }
 
-  /** Open delete confirmation modal */
-  confirmDelete(reviewId: number) {
-    this.reviewToDeleteId = reviewId;
-    this.showDeleteModal = true;
-  }
-
-  /** Confirm deletion and delete review */
-  deleteConfirmed() {
-    if (this.reviewToDeleteId !== null) {
-      this.deleteReview(this.reviewToDeleteId);
-      this.cancelDelete();
-    }
-  }
-
-  /** Cancel delete action and close modal */
-  cancelDelete() {
+  cancelDelete(): void {
     this.showDeleteModal = false;
     this.reviewToDeleteId = null;
   }
 
-  /** Show more reviews by increasing visible count */
-  showMore() {
+  showMore(): void {
     if (this.visibleCount < this.reviews.length) {
       this.visibleCount += 2;
     }
+  }
+
+  getLikesInfo(reviewId: number): {
+    likedByCurrentUser: boolean;
+    totalLikes: number;
+  } {
+    const likesInfo = this.reviewLikesMap.get(reviewId);
+    return likesInfo ?? { likedByCurrentUser: false, totalLikes: 0 };
+  }
+
+  // Handles the toggling of likes for reviews.
+  onToggleLike(review: Review, liked: boolean): void {
+    // Call the appropriate API for liking or unliking a review
+    const likeAction = liked
+      ? this.authApiService.likeReview(review.id)
+      : this.authApiService.unlikeReview(review.id);
+
+    // Handle the result of the like/unlike action
+    likeAction.subscribe({
+      next: () => {
+        this.updateLikesLocal(review.id, liked); // Update local likes data
+      },
+      error: (err) => {
+        console.error(
+          `Server like action failed for reviewId=${review.id}`,
+          err,
+        ); // Error handling
+      },
+    });
   }
 }

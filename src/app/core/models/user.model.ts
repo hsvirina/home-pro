@@ -1,6 +1,9 @@
-import { Place } from "./place.model";
-import { PublicReview } from "./review.model";
+import { Place } from './place.model';
+import { PublicReview } from './review.model';
 
+/**
+ * Interface representing the authenticated user's detailed information.
+ */
 export interface AuthUser {
   userId: number;
   firstName: string;
@@ -18,6 +21,10 @@ export interface AuthUser {
   locationSharing: boolean;
 }
 
+/**
+ * Interface representing the public profile of a user,
+ * including summary information and related places and reviews.
+ */
 export interface PublicUserProfile {
   id: number;
   firstName: string;
@@ -34,4 +41,5 @@ export interface PublicUserProfile {
   totalFavoriteCafes: number;
   sharedCafes: Place[];
   totalSharedCafes: number;
+  city: string;
 }

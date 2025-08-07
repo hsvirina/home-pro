@@ -10,6 +10,7 @@ import { AuthUser } from '../../../core/models/user.model';
 import { ThemedIconPipe } from '../../../core/pipes/themed-icon.pipe';
 import { BadgeType } from '../../../core/utils/badge-utils';
 import { BadgeImagePipe } from '../../../core/pipes/badge-image.pipe';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-info-sector',
@@ -20,6 +21,7 @@ import { BadgeImagePipe } from '../../../core/pipes/badge-image.pipe';
     IconComponent,
     ThemedIconPipe,
     BadgeImagePipe,
+    TranslateModule,
   ],
   template: `
     <div
@@ -30,32 +32,39 @@ import { BadgeImagePipe } from '../../../core/pipes/badge-image.pipe';
           : 'border-[var(--color-gray-75)] bg-[var(--color-bg-card)]',
       ]"
     >
-      <!-- Top section: avatar, name and city -->
+      <!-- Top section: user avatar, name, status -->
       <div class="lg:flex lg:justify-between">
         <div class="flex items-start gap-[20px] lg:flex-row">
-          <div class="relative" style="width: 120px; height: 120px;">
-            <!-- Бейдж, покрывающий весь контейнер -->
+          <div
+            class="relative h-[58px] w-[58px] flex-shrink-0 lg:h-[120px] lg:w-[120px]"
+          >
+            <!-- Badge overlay on avatar -->
             <img
-              *ngIf="badgeType && badgeType !== 'neutral'"
+              *ngIf="badgeType"
               [src]="badgeType | badgeImage"
-              alt="{{ badgeType }} badge"
-              class="absolute left-0 top-0 h-[120px] w-[120px] object-contain"
+              [alt]="badgeType + ' badge'"
+              class="absolute left-0 top-0 h-full w-full object-contain"
             />
 
-            <!-- Фото пользователя поверх бейджа, по центру -->
+            <!-- User photo or default icon -->
             <ng-container *ngIf="editableUser.photoUrl; else defaultIcon">
               <img
                 [src]="editableUser.photoUrl"
                 alt="Profile"
-                class="relative h-[100px] w-[100px] rounded-full object-cover"
-                style="top: 50%; left: 50%; transform: translate(-50%, -50%); position: absolute;"
+                class="absolute left-1/2 top-1/2 rounded-full object-cover"
+                [ngClass]="
+                  'translate-middle h-[50px] w-[50px] lg:h-[100px] lg:w-[100px]'
+                "
+                style="transform: translate(-50%, -50%)"
               />
             </ng-container>
-
             <ng-template #defaultIcon>
               <div
-                class="relative flex items-center justify-center rounded-full bg-[var(--color-secondary)]"
-                style="width: 80px; height: 80px; top: 50%; left: 50%; transform: translate(-50%, -50%); position: absolute;"
+                class="absolute left-1/2 top-1/2 flex items-center justify-center rounded-full bg-[var(--color-secondary)]"
+                [ngClass]="
+                  'translate-middle h-[50px] w-[50px] lg:h-[80px] lg:w-[80px]'
+                "
+                style="transform: translate(-50%, -50%)"
               >
                 <app-icon
                   [icon]="ICONS.UserProfile"
@@ -66,29 +75,80 @@ import { BadgeImagePipe } from '../../../core/pipes/badge-image.pipe';
             </ng-template>
           </div>
 
-          <!-- Name and city -->
+          <!-- User name and status -->
           <div
-            class="flex flex-col gap-1"
+            class="flex flex-col gap-3"
             [ngClass]="{
               'text-[var(--color-white)]': (currentTheme$ | async) === 'dark',
             }"
           >
-            <!-- User name display or edit inputs -->
-            <h3 class="flex gap-2">
-              <ng-container *ngIf="!isEditing; else editName">
-                <span>{{ editableUser.firstName }}</span>
-                <span>{{ editableUser.lastName }}</span>
-              </ng-container>
-              <ng-template #editName>
+            <h3 class="flex gap-2 text-[20px] lg:text-[40px]">
+              <span>{{ editableUser.firstName }}</span>
+              <span>{{ editableUser.lastName }}</span>
+            </h3>
+
+            <div class="flex">
+              <span
+                class="body-font-1 rounded-[40px] border border-[var(--color-gray-20)] p-3"
+              >
+                {{ editableUser.status }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Edit/Save button (desktop only) -->
+        <div class="hidden h-12 lg:flex" *ngIf="!public">
+          <button
+            (click)="handleEditToggle()"
+            class="menu-text-font button-bg-transparent px-6 py-3"
+          >
+            {{
+              isEditing
+                ? ('infoSector.save' | translate)
+                : ('infoSector.editProfile' | translate)
+            }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Editable user info fields (hidden in public mode) -->
+      <div *ngIf="!public" class="flex flex-col gap-[20px] lg:flex-row">
+        <!-- Full Name block -->
+        <div
+          class="flex flex-1 gap-3 rounded-[40px] border p-2"
+          [ngClass]="
+            (currentTheme$ | async) === 'light'
+              ? 'border-[var(--color-gray-20)]'
+              : 'border-[var(--color-gray-75)]'
+          "
+        >
+          <div
+            class="flex h-[50px] w-[50px] items-center justify-center rounded-[25px]"
+            [ngClass]="
+              (currentTheme$ | async) === 'light'
+                ? 'bg-[var(--color-white)]'
+                : 'bg-[var(--color-gray-100)]'
+            "
+          >
+            <app-icon
+              [icon]="'IdPass' | themedIcon"
+              class="h-[26px] w-[20px]"
+            ></app-icon>
+          </div>
+
+          <div class="flex w-full flex-col gap-1">
+            <p class="body-font-1">{{ 'infoSector.fullName' | translate }}</p>
+
+            <ng-container *ngIf="isEditing; else fullNameDisplay">
+              <div class="flex gap-2">
                 <input
                   type="text"
                   [(ngModel)]="editableUser.firstName"
                   (ngModelChange)="
                     fieldChange.emit({ field: 'firstName', value: $event })
                   "
-                  [readonly]="!isEditing"
-                  class="input-field"
-                  [ngClass]="{ editable: isEditing }"
+                  class="input-field editable"
                 />
                 <input
                   type="text"
@@ -96,123 +156,67 @@ import { BadgeImagePipe } from '../../../core/pipes/badge-image.pipe';
                   (ngModelChange)="
                     fieldChange.emit({ field: 'lastName', value: $event })
                   "
-                  [readonly]="!isEditing"
-                  class="input-field"
-                  [ngClass]="{ editable: isEditing }"
+                  class="input-field editable"
                 />
-              </ng-template>
-            </h3>
-
-            <!-- City display or edit input -->
-            <span class="body-font-1 flex gap-1">
-              <ng-container *ngIf="!isEditing; else editCity">
-                <span>{{ editableUser.defaultCity }}, Ukraine</span>
-              </ng-container>
-              <ng-template #editCity>
-                <input
-                  type="text"
-                  [(ngModel)]="editableUser.defaultCity"
-                  (ngModelChange)="
-                    fieldChange.emit({ field: 'defaultCity', value: $event })
-                  "
-                  [readonly]="!isEditing"
-                  class="input-field city-input"
-                  [ngClass]="{ editable: isEditing }"
-                />
-                <span>, Ukraine</span>
-              </ng-template>
-            </span>
-          </div>
-        </div>
-
-        <!-- Edit/Save button (desktop only) -->
-        <div class="hidden h-12 lg:flex">
-          <button
-            (click)="handleEditToggle()"
-            class="menu-text-font button-bg-transparent px-6 py-3"
-          >
-            {{ isEditing ? 'Save' : 'Edit Profile' }}
-          </button>
-        </div>
-      </div>
-
-      <!-- Repeated info: full name, location, email -->
-      <div class="flex flex-col gap-[20px] lg:flex-row">
-        <!-- Full Name block -->
-        <div
-          class="flex flex-1 gap-3 rounded-[40px] border p-2"
-          [ngClass]="[
-            (currentTheme$ | async) === 'light'
-              ? 'border-[var(--color-gray-20)]'
-              : 'border-[var(--color-gray-75)]',
-          ]"
-        >
-          <div
-            class="flex h-[50px] w-[50px] items-center justify-center rounded-[25px]"
-            [ngClass]="[
-              (currentTheme$ | async) === 'light'
-                ? 'bg-[var(--color-white)]'
-                : 'bg-[var(--color-gray-100)]',
-            ]"
-          >
-            <app-icon
-              [icon]="'IdPass' | themedIcon"
-              class="h-[26px] w-[20px]"
-            ></app-icon>
-          </div>
-          <div class="flex flex-col gap-1">
-            <p class="body-font-1">Full Name</p>
-            <p
-              class="menu-text-font"
-              [ngClass]="{
-                'text-[var(--color-white)]': (currentTheme$ | async) === 'dark',
-              }"
-            >
-              {{ editableUser.firstName }} {{ editableUser.lastName }}
-            </p>
+              </div>
+            </ng-container>
+            <ng-template #fullNameDisplay>
+              <p class="menu-text-font">
+                {{ editableUser.firstName }} {{ editableUser.lastName }}
+              </p>
+            </ng-template>
           </div>
         </div>
 
         <!-- Location block -->
         <div
           class="flex flex-1 gap-3 rounded-[40px] border p-2"
-          [ngClass]="[
+          [ngClass]="
             (currentTheme$ | async) === 'light'
               ? 'border-[var(--color-gray-20)]'
-              : 'border-[var(--color-gray-75)]',
-          ]"
+              : 'border-[var(--color-gray-75)]'
+          "
         >
           <div
             class="flex h-[50px] w-[50px] items-center justify-center rounded-[25px]"
-            [ngClass]="[
+            [ngClass]="
               (currentTheme$ | async) === 'light'
                 ? 'bg-[var(--color-white)]'
-                : 'bg-[var(--color-gray-100)]',
-            ]"
+                : 'bg-[var(--color-gray-100)]'
+            "
           >
             <app-icon [icon]="'Location' | themedIcon"></app-icon>
           </div>
-          <div class="flex flex-col gap-1">
-            <p class="body-font-1">Location</p>
-            <p
-              class="menu-text-font"
-              [ngClass]="{
-                'text-[var(--color-white)]': (currentTheme$ | async) === 'dark',
-              }"
-            >
-              {{ editableUser.defaultCity }}, Ukraine
-            </p>
+
+          <div class="flex w-full flex-col gap-1">
+            <p class="body-font-1">{{ 'infoSector.location' | translate }}</p>
+
+            <ng-container *ngIf="isEditing; else cityDisplay">
+              <input
+                type="text"
+                [(ngModel)]="editableUser.defaultCity"
+                (ngModelChange)="
+                  fieldChange.emit({ field: 'defaultCity', value: $event })
+                "
+                class="input-field editable city-input"
+              />
+            </ng-container>
+            <ng-template #cityDisplay>
+              <p class="menu-text-font">
+                {{ editableUser.defaultCity }}, Ukraine
+              </p>
+            </ng-template>
           </div>
         </div>
 
         <!-- Email block -->
         <div
           class="flex flex-1 gap-3 rounded-[40px] border p-2"
-          [ngClass]="[
+          [ngClass]="
             (currentTheme$ | async) === 'light'
               ? 'border-[var(--color-gray-20)]'
-              : 'border-[var(--color-gray-75)]',
-          ]"
+              : 'border-[var(--color-gray-75)]'
+          "
         >
           <div
             class="flex h-[50px] w-[50px] items-center justify-center rounded-[25px]"
@@ -221,7 +225,7 @@ import { BadgeImagePipe } from '../../../core/pipes/badge-image.pipe';
             <app-icon [icon]="'Letter' | themedIcon"></app-icon>
           </div>
           <div class="flex flex-col gap-1">
-            <p class="body-font-1">Email</p>
+            <p class="body-font-1">{{ 'infoSector.email' | translate }}</p>
             <p
               class="menu-text-font"
               [ngClass]="{
@@ -234,17 +238,21 @@ import { BadgeImagePipe } from '../../../core/pipes/badge-image.pipe';
         </div>
       </div>
 
-      <!-- Edit/Save button (mobile only) — перемещено вниз -->
-      <div class="button-bg-transparent flex lg:hidden">
+      <!-- Edit/Save button (mobile only) -->
+      <div class="button-bg-transparent flex lg:hidden" *ngIf="!public">
         <button
           (click)="handleEditToggle()"
           class="menu-text-font flex items-center justify-center px-6 py-3"
         >
-          {{ isEditing ? 'Save' : 'Edit Profile' }}
+          {{
+            isEditing
+              ? ('infoSector.save' | translate)
+              : ('infoSector.editProfile' | translate)
+          }}
         </button>
       </div>
 
-      <!-- Modal for unsaved changes warning -->
+      <!-- Unsaved changes warning modal -->
       <div
         *ngIf="showInfoModal"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
@@ -253,17 +261,16 @@ import { BadgeImagePipe } from '../../../core/pipes/badge-image.pipe';
           class="flex w-full max-w-[650px] flex-col items-center justify-between gap-[32px] rounded-[40px] bg-[var(--color-bg-2)] p-[24px] text-center text-[var(--color-gray-100)]"
         >
           <div class="flex flex-col gap-[20px]">
-            <h4>Unsaved Changes</h4>
+            <h4>{{ 'infoSector.unsavedChanges' | translate }}</h4>
             <p class="body-font-1 text-[var(--color-gray-100)]">
-              You have updated your profile. To save changes, please click "Save
-              All Changes" below.
+              {{ 'infoSector.unsavedChangesMessage' | translate }}
             </p>
           </div>
           <button
             (click)="showInfoModal = false"
             class="button-font button-bg-blue h-[48px] w-full px-[32px] py-[12px]"
           >
-            Got it
+            {{ 'infoSector.gotIt' | translate }}
           </button>
         </div>
       </div>
@@ -271,14 +278,14 @@ import { BadgeImagePipe } from '../../../core/pipes/badge-image.pipe';
   `,
   styles: [
     `
-      /* Input styling: base, readonly and editable states */
+      /* Input fields styling */
+
       .input-field {
         border: none;
         border-bottom: 1px solid transparent;
         background: transparent;
         outline: none;
         font-size: 1rem;
-        width: auto;
         max-width: 140px;
         transition:
           border-color 0.2s,
@@ -309,45 +316,44 @@ import { BadgeImagePipe } from '../../../core/pipes/badge-image.pipe';
   ],
 })
 export class InfoSectorComponent {
-  ICONS = ICONS;
-  @Input() badgeType: BadgeType | null = null;
+  // Constants and Inputs/Outputs
 
-  // User data to display and edit
+  ICONS = ICONS;
+
+  @Input() badgeType: BadgeType | null = null;
+  @Input() public = false; // When true, hides editable user info fields
   @Input() editableUser!: AuthUser;
 
-  // Flag indicating if form is in edit mode
-  @Input() isEditing = false;
+  @Input() isEditing = false; // Controls whether the form is in edit mode
+  @Input() hasPendingChanges = false; // Indicates if there are unsaved changes
 
-  // Flag for unsaved changes detection
-  @Input() hasPendingChanges = false;
-
-  // Event emitted when edit mode toggled (edit/save button pressed)
-  @Output() onToggleEdit = new EventEmitter<void>();
-
-  // Event emitted when a field value changes (two-way binding)
+  @Output() onToggleEdit = new EventEmitter<void>(); // Emits on edit/save toggle button click
   @Output() fieldChange = new EventEmitter<{
     field: keyof AuthUser;
     value: any;
-  }>();
+  }>(); // Emits on individual field changes
 
-  // Controls display of unsaved changes modal
-  showInfoModal = false;
+  showInfoModal = false; // Controls display of unsaved changes modal
 
-  readonly currentTheme$: Observable<Theme>;
+  currentTheme$: Observable<Theme>;
 
   constructor(private themeService: ThemeService) {
     this.currentTheme$ = this.themeService.theme$;
   }
 
-  // Shows modal warning about unsaved changes temporarily
+  /**
+   * Show a modal warning about unsaved changes for 5 seconds
+   */
   showTemporaryInfoModal() {
     this.showInfoModal = true;
-    setTimeout(() => {
-      this.showInfoModal = false;
-    }, 5000);
+    setTimeout(() => (this.showInfoModal = false), 5000);
   }
 
-  // Handles Edit/Save button click
+  /**
+   * Handle click on Edit/Save button
+   * Shows unsaved changes warning if editing and changes are pending
+   * Emits onToggleEdit event
+   */
   handleEditToggle() {
     if (this.isEditing && this.hasPendingChanges) {
       this.showTemporaryInfoModal();
@@ -355,6 +361,11 @@ export class InfoSectorComponent {
     this.onToggleEdit.emit();
   }
 
+  /**
+   * Get background CSS class for icon container based on theme
+   * @param theme Current theme ('light' or 'dark')
+   * @returns CSS class string
+   */
   getBackgroundClass(theme: Theme | null): string {
     if (!theme) return 'bg-[var(--color-white)]'; // fallback
 

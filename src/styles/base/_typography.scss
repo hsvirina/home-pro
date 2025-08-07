@@ -1,31 +1,52 @@
 @use '../base/fonts' as *;
 
+// Base body styles
 body {
   font-family: $font-family-unbounded;
   font-weight: $font-weight-medium;
   color: var(--color-gray-100);
 }
 
-
+// Headings and common text elements use Unbounded font family
 h1, h2, h3, h4, h5,
 .menu-text-font,
 .button-font {
   font-family: $font-family-unbounded;
 }
 
+// Body text styles use Manrope font family with regular weight
 .body-font-1,
 .body-font-2 {
   font-family: $font-family-manrope;
   font-weight: $font-weight-regular;
 }
 
+// Headings font sizes and line heights
+h1 {
+  font-size: 80px;
+  line-height: 110%;
+}
 
+h2 {
+  font-size: 64px;
+  line-height: 110%;
+}
 
-h1 { font-size: 80px; line-height: 110%; }
-h2 { font-size: 64px; line-height: 110%; }
-h3 { font-size: 40px; line-height: 120%; }
-h4 { font-size: 32px; line-height: 120%; }
-h5 { font-size: 20px; line-height: 130%; }
+h3 {
+  font-size: 40px;
+  line-height: 120%;
+}
+
+h4 {
+  font-size: 32px;
+  line-height: 120%;
+}
+
+h5 {
+  font-size: 20px;
+  line-height: 130%;
+}
+
 h6 {
   font-size: 17px;
   line-height: 130%;
@@ -33,18 +54,21 @@ h6 {
   font-weight: $font-weight-medium;
 }
 
+// Menu text styling
 .menu-text-font {
   font-size: 17px;
   font-weight: $font-weight-regular;
   line-height: 130%;
 }
 
+// Button text styling
 .button-font {
   font-size: 16px;
   font-weight: $font-weight-regular;
   line-height: 150%;
 }
 
+// Body text variants
 .body-font-1 {
   font-size: 16px;
   line-height: 150%;

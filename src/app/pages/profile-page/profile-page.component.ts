@@ -1,0 +1,406 @@
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+
+import { TranslateModule } from '@ngx-translate/core';
+
+import { PlacesService } from '../../core/services/places.service';
+import { AuthApiService } from '../../core/services/auth-api.service';
+import { AuthStateService } from '../../state/auth/auth-state.service';
+import { LoaderService } from '../../core/services/loader.service';
+import { ThemeService } from '../../core/services/theme.service';
+
+import { InfoSectorComponent } from './components/info-sector.component';
+import { SettingsSectorComponent } from './components/settings-sector.component';
+import { AchievementSectorComponent } from './components/achievement-sector.component';
+import { FavoritesVisitedSectorComponent } from './components/favorites-visited-sector.component';
+import { MyReviewsComponent } from './components/my-reviews.component';
+import { ModalComponent } from '../../shared/components/modal.component';
+
+import { Place } from '../../core/models/place.model';
+import { AuthUser, PublicUserProfile } from '../../core/models/user.model';
+import { Theme } from '../../core/models/theme.type';
+
+import { ACHIEVEMENTS } from '../../core/constants/achievements';
+import { PlaceCardType } from '../../core/constants/place-card-type.enum';
+
+import { getUnlockedAchievements } from '../../core/utils/achievement.utils';
+import { BadgeType, calculateBadgeType } from '../../core/utils/badge-utils';
+
+@Component({
+  selector: 'app-profile-page',
+  standalone: true,
+  imports: [
+    CommonModule,
+    InfoSectorComponent,
+    SettingsSectorComponent,
+    AchievementSectorComponent,
+    FavoritesVisitedSectorComponent,
+    MyReviewsComponent,
+    TranslateModule,
+    ModalComponent,
+  ],
+  template: `
+    <div
+      *ngIf="user"
+      class="mx-auto max-w-[1320px] px-[20px] lg:px-[40px] xxl:px-0"
+    >
+      <div class="flex flex-col gap-[60px] xxl:gap-[80px]">
+        <!-- User Info Section -->
+        <app-info-sector
+          [editableUser]="editedUser || user"
+          [isEditing]="isEditing"
+          (onToggleEdit)="handleToggleEdit()"
+          (fieldChange)="onFieldChange($event.field, $event.value)"
+          [hasPendingChanges]="hasPendingChanges"
+          [badgeType]="badgeType"
+        ></app-info-sector>
+
+        <!-- Achievements Section -->
+        <app-achievement-sector
+          [achievements]="achievements"
+          [unlockedTitles]="unlockedAchievementTitles"
+        />
+
+        <!-- Favorites & Visited Places Section -->
+        <!-- <app-favorites-visited-sector
+          [favoritePlaces]="favorites"
+          [visitedPlaces]="visited"
+        /> -->
+        <app-favorites-visited-sector
+          [favoritePlaces]="favorites"
+          [visitedPlaces]="visited"
+          (favoritePlacesChanged)="onFavoritePlacesChanged($event)"
+          (visitedPlacesChanged)="onVisitedPlacesChanged($event)"
+        ></app-favorites-visited-sector>
+
+        <!-- My Reviews Section -->
+        <app-my-reviews
+          [userId]="currentUserId"
+          [userPhotoUrl]="publicProfile?.photoUrl ?? null"
+          [places]="allPlaces"
+          [badgeType]="badgeType"
+        ></app-my-reviews>
+
+        <!-- User Settings Section -->
+        <app-settings-sector
+          *ngIf="editedUser"
+          class="col-span-4 lg:col-span-8"
+          [user]="editedUser"
+          [places]="allPlaces"
+          (settingsChanged)="onSettingsChanged()"
+        ></app-settings-sector>
+
+        <!-- Save Changes Button -->
+        <div
+          class="col-span-4 mb-[144px] mt-[32px] flex justify-center lg:col-span-8"
+        >
+          <button
+            class="button-font button-bg-blue h-[48px] w-full lg:w-[482px]"
+            [disabled]="!hasPendingChanges"
+            (click)="saveChanges()"
+          >
+            {{ 'profile.saveButton' | translate }}
+          </button>
+        </div>
+
+        <!-- Save Success Modal -->
+        <div
+          *ngIf="showModal"
+          class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+        >
+          <div
+            class="flex w-full max-w-[650px] flex-col items-center justify-between gap-[32px] rounded-[40px] bg-[var(--color-bg-2)] p-[24px] text-center text-[var(--color-gray-100)]"
+          >
+            <div class="flex flex-col gap-[20px]">
+              <h4>{{ 'profile.modal.title' | translate }}</h4>
+              <p class="body-font-1 text-[var(--color-gray-100)]">
+                {{ 'profile.modal.message' | translate }}
+              </p>
+            </div>
+            <button
+              (click)="closeModal()"
+              class="button-font button-bg-blue h-[48px] w-full px-[32px] py-[12px]"
+            >
+              {{ 'profile.modal.close' | translate }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- New Achievement Modal -->
+      <app-modal
+        [isOpen]="showNewAchievementModal"
+        (close)="closeNewAchievementModal()"
+        [width]="'80vh'"
+      >
+        <div class="flex flex-col items-center p-4 text-center">
+          <h3 class="mb-4">
+            {{ 'profile.achievementModal.congrats' | translate }}
+          </h3>
+          <p class="body-font-1 mb-4">
+            {{ 'profile.achievementModal.unlocked' | translate }}
+          </p>
+
+          <div class="mb-6 flex justify-center">
+            <p
+              class="rounded-2xl border border-[var(--color-gray-20)] bg-[var(--color-white)] p-4 text-[var(--color-primary)]"
+            >
+              {{ newAchievementToShow }}
+            </p>
+          </div>
+
+          <img
+            *ngIf="newAchievementData?.iconPath"
+            [src]="newAchievementData?.iconPath"
+            [alt]="newAchievementToShow"
+            class="mx-auto mb-6 h-40 object-contain"
+          />
+
+          <button class="btn btn-primary" (click)="closeNewAchievementModal()">
+            {{ 'profile.achievementModal.close' | translate }}
+          </button>
+        </div>
+      </app-modal>
+    </div>
+  `,
+})
+export class ProfilePageComponent implements OnInit, OnDestroy {
+  readonly PlaceCardType = PlaceCardType;
+
+  achievements = ACHIEVEMENTS;
+  publicProfile: PublicUserProfile | null = null;
+  favorites: Place[] = [];
+  visited: Place[] = [];
+  allPlaces: Place[] = [];
+
+  user: AuthUser | null = null;
+  editedUser: AuthUser | null = null;
+
+  badgeType: BadgeType = null;
+  unlockedAchievementTitles = new Set<string>();
+
+  isEditing = false;
+  hasPendingChanges = false;
+
+  showModal = false;
+  showNewAchievementModal = false;
+  newAchievementToShow: string | null = null;
+
+  private subs = new Subscription();
+
+  constructor(
+    private router: Router,
+    private authService: AuthStateService,
+    private placesService: PlacesService,
+    private loaderService: LoaderService,
+    private themeService: ThemeService,
+    private authApiService: AuthApiService,
+  ) {}
+
+  ngOnInit(): void {
+    this.loaderService.show();
+
+    // Load all places
+    this.placesService.getPlaces().subscribe({
+      next: (places) => {
+        this.allPlaces = places;
+        this.updateFavoritesAndVisited();
+        this.loaderService.hide();
+      },
+      error: (err) => {
+        console.error('❌ Failed to load places:', err);
+        this.loaderService.hide();
+      },
+    });
+
+    // Subscribe to auth user changes
+    this.subs.add(
+      this.authService.user$.subscribe((user) => {
+        this.user = user;
+        this.editedUser = user ? { ...user } : null;
+
+        if (user) {
+          const theme = (user.theme ?? 'light').toLowerCase() as Theme;
+          this.themeService.setTheme(theme);
+
+          this.subs.add(
+            this.authApiService.getPublicUserProfile(user.userId).subscribe({
+              next: (profile) => {
+                this.publicProfile = profile;
+                this.updateUnlockedAchievements(profile);
+                this.updateFavoritesAndVisited();
+                this.calculateUserBadge(profile);
+              },
+              error: (err) => console.error('❌ Failed to load profile:', err),
+            }),
+          );
+        } else {
+          this.resetProfileData();
+        }
+      }),
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
+  }
+
+  onFavoritePlacesChanged(updatedFavorites: Place[]): void {
+    console.log('Favorite places changed:', updatedFavorites);
+    this.favorites = updatedFavorites;
+    // обновляем данные на сервере или в store
+  }
+
+  onVisitedPlacesChanged(updatedVisited: Place[]): void {
+    console.log('Visited places changed:', updatedVisited);
+    //   // this.visited = updatedVisited;
+    //   // Здесь обновляем данные на сервере или в store
+  }
+
+  get currentUserId(): number | null {
+    return this.user?.userId ?? null;
+  }
+
+  get newAchievementData() {
+    if (!this.newAchievementToShow) return null;
+
+    for (const section of this.achievements) {
+      const achievement = section.achievements.find(
+        (a) => a.key === this.newAchievementToShow,
+      );
+      if (achievement) return achievement;
+    }
+    return null;
+  }
+
+  handleToggleEdit(): void {
+    this.isEditing = !this.isEditing;
+  }
+
+  onFieldChange(field: keyof AuthUser, value: AuthUser[keyof AuthUser]): void {
+    if (!this.editedUser) return;
+    (this.editedUser as any)[field] = value;
+    this.hasPendingChanges = true;
+  }
+
+  onSettingsChanged(): void {
+    this.hasPendingChanges = true;
+  }
+
+  saveChanges(): void {
+    if (!this.user || !this.editedUser) return;
+
+    const payload: Partial<AuthUser> = {
+      ...this.editedUser,
+      email: this.user.email,
+    };
+
+    this.authService.updateUserProfile(payload).subscribe({
+      next: (updatedUser) => {
+        this.user = updatedUser;
+        this.editedUser = { ...updatedUser };
+        this.isEditing = false;
+        this.hasPendingChanges = false;
+        this.showModal = true;
+      },
+      error: (err) => console.error('❌ Failed to update profile:', err),
+    });
+  }
+
+  closeModal(): void {
+    this.showModal = false;
+  }
+
+  onLogout(): void {
+    this.authService.logout();
+    localStorage.clear();
+    this.router.navigate(['/auth']);
+  }
+
+  closeNewAchievementModal(): void {
+    this.showNewAchievementModal = false;
+    this.newAchievementToShow = null;
+  }
+
+  // private updateFavoritesAndVisited(): void {
+  //   if (!this.user || !this.allPlaces.length) {
+  //     this.favorites = [];
+  //     this.visited = [];
+  //     return;
+  //   }
+
+  //   this.favorites = this.allPlaces.filter((place) =>
+  //     this.user!.favoriteCafeIds.includes(place.id),
+  //   );
+
+  //   if (this.publicProfile) {
+  //     const visitedIds = this.publicProfile.checkInCafes.map((c) => c.id);
+  //     this.visited = this.allPlaces.filter((place) =>
+  //       visitedIds.includes(place.id),
+  //     );
+  //   } else {
+  //     this.visited = [];
+  //   }
+  // }
+
+  private updateFavoritesAndVisited(): void {
+  if (!this.user || !this.allPlaces.length) {
+    this.favorites = [];
+    this.visited = [];
+    console.log('Favorites and visited places have been reset due to no user or places');
+    return;
+  }
+
+  console.log('Updating favorite and visited places...');
+
+  const favoritePlaceIds = new Set(this.user.favoriteCafeIds);
+  const visitedPlaceIds = new Set(this.publicProfile?.checkInCafes.map(c => c.id) || []);
+
+  this.favorites = this.allPlaces.filter(place => favoritePlaceIds.has(place.id));
+  this.visited = this.allPlaces.filter(place => visitedPlaceIds.has(place.id));
+
+  console.log('Favorites:', this.favorites);
+  console.log('Visited:', this.visited);
+}
+
+  private updateUnlockedAchievements(profile: PublicUserProfile): void {
+    const unlocked = getUnlockedAchievements(profile);
+    const current = new Set(
+      unlocked.flatMap((s) => s.achievements.map((a) => a.key)),
+    );
+
+    const prev = localStorage.getItem('unlockedAchievements');
+    const prevSet = prev ? new Set(JSON.parse(prev)) : null;
+
+    const newAchievements = prevSet
+      ? Array.from(current).filter((key) => !prevSet.has(key))
+      : [];
+
+    localStorage.setItem(
+      'unlockedAchievements',
+      JSON.stringify(Array.from(current)),
+    );
+
+    this.unlockedAchievementTitles = current;
+    this.achievements = ACHIEVEMENTS;
+
+    if (prevSet && newAchievements.length > 0) {
+      this.newAchievementToShow = newAchievements[0];
+      this.showNewAchievementModal = true;
+    }
+  }
+
+  private calculateUserBadge(profile: PublicUserProfile): void {
+    const unlocked = getUnlockedAchievements(profile);
+    this.badgeType = calculateBadgeType(unlocked, ACHIEVEMENTS);
+  }
+
+  private resetProfileData(): void {
+    this.publicProfile = null;
+    this.favorites = [];
+    this.visited = [];
+    this.badgeType = null;
+  }
+}

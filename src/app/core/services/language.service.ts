@@ -5,10 +5,33 @@ import { AuthUser } from '../models/user.model';
 
 export type LangCode = 'en' | 'uk';
 
+/**
+ * LanguageService manages application language state,
+ * synchronizes with user preferences and persists the selection.
+ * Integrates with ngx-translate for runtime language switching.
+ */
 @Injectable({ providedIn: 'root' })
 export class LanguageService {
+  // Supported language codes
   private readonly allowedLangs: LangCode[] = ['en', 'uk'];
 
+  // RxJS subject to emit current language changes
+  private langSubject = new BehaviorSubject<LangCode>(this.getInitialLang());
+
+  // Observable for language changes
+  lang$ = this.langSubject.asObservable();
+
+  constructor(private translate: TranslateService) {
+    // Set default fallback language in translation service
+    this.translate.setFallbackLang('en');
+    // Initialize translation language with persisted or default language
+    this.translate.use(this.getInitialLang());
+  }
+
+  /**
+   * Retrieves the initial language from localStorage or defaults to 'en'.
+   * @returns LangCode initial language code
+   */
   private getInitialLang(): LangCode {
     const stored = localStorage.getItem('lang');
     if (stored && this.allowedLangs.includes(stored as LangCode)) {
@@ -17,27 +40,32 @@ export class LanguageService {
     return 'en';
   }
 
+  /**
+   * Updates the language based on the authenticated user's preference.
+   * Ignores if user's language is unsupported.
+   * @param user AuthUser object containing language preference
+   */
   syncFromUser(user: AuthUser): void {
-  const userLang = user.language?.toLowerCase();
-  if (userLang === 'en' || userLang === 'uk') {
-    this.setLang(userLang);
+    const userLang = user.language?.toLowerCase() as LangCode | undefined;
+    if (userLang && this.allowedLangs.includes(userLang)) {
+      this.setLang(userLang);
+    }
   }
-}
 
-  private langSubject = new BehaviorSubject<LangCode>(this.getInitialLang());
-  lang$ = this.langSubject.asObservable();
-
+  /**
+   * Current active language getter.
+   */
   get currentLang(): LangCode {
     return this.langSubject.value;
   }
 
-  constructor(private translate: TranslateService) {
-    this.translate.setFallbackLang('en');
-
-    this.translate.use(this.getInitialLang());
-  }
-
-  setLang(lang: LangCode) {
+  /**
+   * Sets the application language.
+   * Throws error if language code is unsupported.
+   * Updates localStorage, BehaviorSubject, and ngx-translate language.
+   * @param lang LangCode to set
+   */
+  setLang(lang: LangCode): void {
     if (!this.allowedLangs.includes(lang)) {
       throw new Error(`Unsupported language code: ${lang}`);
     }

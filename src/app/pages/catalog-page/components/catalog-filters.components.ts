@@ -22,7 +22,7 @@ import { TranslateModule } from '@ngx-translate/core';
   imports: [CommonModule, FormsModule, TranslateModule],
   template: `
     <div
-      class="flex flex-col gap-6 rounded-[40px] p-6 xxl:w-full"
+      class="flex flex-col gap-6 rounded-[24px] p-6 xxl:w-full"
       [ngClass]="{
         'border border-[var(--color-white)] bg-[var(--color-white)] text-[var(--color-gray-100)]':
           (currentTheme$ | async) === 'light',
@@ -83,49 +83,49 @@ import { TranslateModule } from '@ngx-translate/core';
   `,
 })
 export class CatalogFiltersComponent {
-  // Событие, эмитит выбранные фильтры наружу
+  /** Emits updated filters to parent */
   @Output() filtersChange = new EventEmitter<CatalogFilters>();
 
-  // Входящий список категорий фильтров
   private _filterCategories: FilterCategory[] = [];
+
+  /** Sets filter categories and initializes internal filter state */
   @Input()
   set filterCategories(value: FilterCategory[]) {
     this._filterCategories = value;
-    // Инициализируем внутренние фильтры при обновлении категорий
     this.internalFilters = this.initializeFilters(this._filters);
   }
   get filterCategories(): FilterCategory[] {
     return this._filterCategories;
   }
 
-  // Входящие текущие фильтры (выбранные опции)
   private _filters: CatalogFilters = {};
+
+  /** Sets selected filters and syncs internal filter state */
   @Input()
   set filters(value: CatalogFilters) {
     this._filters = value;
-    // Инициализируем внутренние фильтры при обновлении внешних фильтров
     this.internalFilters = this.initializeFilters(value);
   }
   get filters(): CatalogFilters {
     return this._filters;
   }
 
-  // Внутреннее состояние выбранных фильтров (для биндинга в шаблоне)
+  /** Internal filters bound to checkboxes */
   internalFilters: CatalogFilters = {};
 
-  // Текущая тема из сервиса (для стилизации)
+  /** Current app theme for styling */
   readonly currentTheme$: Observable<Theme>;
 
   constructor(private themeService: ThemeService) {
     this.currentTheme$ = this.themeService.theme$;
   }
 
-  // Эмитит выбранные фильтры наружу (например, в родительский компонент)
+  /** Emits current filters to parent */
   applyFilters(): void {
     this.filtersChange.emit(this.deepClone(this.internalFilters));
   }
 
-  // Сброс всех фильтров (снимает все галочки)
+  /** Clears all filters and emits reset */
   clearAll(): void {
     for (const categoryKey in this.internalFilters) {
       for (const optionKey in this.internalFilters[categoryKey]) {
@@ -135,22 +135,20 @@ export class CatalogFiltersComponent {
     this.applyFilters();
   }
 
-  // Глубокое копирование объекта фильтров (чтобы не мутировать внутренние данные)
-  private deepClone(obj: CatalogFilters): CatalogFilters {
-    return JSON.parse(JSON.stringify(obj));
-  }
-
-  // Инициализация внутреннего объекта фильтров на основе категорий и входящих фильтров
+  /** Initializes internal filter state based on categories and current filters */
   private initializeFilters(source: CatalogFilters): CatalogFilters {
     const result: CatalogFilters = {};
-
     for (const category of this._filterCategories) {
       result[category.key] = {};
       for (const option of category.options) {
         result[category.key][option.key] = source?.[category.key]?.[option.key] ?? false;
       }
     }
-
     return result;
+  }
+
+  /** Deep clones the filter object to avoid reference mutations */
+  private deepClone(obj: CatalogFilters): CatalogFilters {
+    return JSON.parse(JSON.stringify(obj));
   }
 }

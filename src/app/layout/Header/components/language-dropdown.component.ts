@@ -60,7 +60,7 @@ export class LanguageDropdownComponent {
   readonly ICONS = ICONS;
   readonly languages: LangCode[] = ['en', 'uk'];
 
-  @Input() opened = false; // <-- добавлено свойство opened
+  @Input() opened = false;
 
   currentLang$: Observable<LangCode>;
   currentTheme$: Observable<'light' | 'dark'>;

@@ -27,10 +27,9 @@ import { CommonModule } from '@angular/common';
         height: 14px;
         width: 14px;
         overflow: hidden;
-        align-items: flex-end; /* выравнивание по нижнему краю */
+        align-items: flex-end;
         justify-content: center;
-        /* Дополнительно для подстройки */
-        padding-bottom: 2px; /* можно варьировать */
+        padding-bottom: 2px;
       }
 
       .flip-digit {
@@ -49,7 +48,6 @@ import { CommonModule } from '@angular/common';
         position: absolute;
         height: 100%;
         width: 100%;
-
         display: flex;
         justify-content: center;
         align-items: center;
@@ -63,21 +61,30 @@ import { CommonModule } from '@angular/common';
   ],
 })
 export class FlipNumberComponent implements OnChanges {
+  /** Current number to display */
   @Input() value: number = 0;
 
+  /** Stores the previous number for animation */
   previousValue: number = 0;
+
+  /** Controls whether the flip animation should trigger */
   shouldAnimate = false;
 
-  ngOnChanges(changes: SimpleChanges) {
-    if (
-      changes['value'] &&
-      changes['value'].currentValue !== changes['value'].previousValue
-    ) {
-      this.previousValue = changes['value'].previousValue ?? 0;
+  /**
+   * Detect changes to the value input and trigger flip animation
+   */
+  ngOnChanges(changes: SimpleChanges): void {
+    const current = changes['value']?.currentValue;
+    const previous = changes['value']?.previousValue;
+
+    if (current !== previous) {
+      this.previousValue = previous ?? 0;
       this.shouldAnimate = true;
+
+      // Reset animation flag after transition ends
       setTimeout(() => {
         this.shouldAnimate = false;
-      }, 400);
+      }, 400); // Matches CSS transition duration
     }
   }
 }

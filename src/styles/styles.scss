@@ -1,9 +1,22 @@
+// Import color variables, fonts, and typography settings
 @use './variables/colors';
 @use './base/fonts';
 @use './base/typography';
 
+// Import compiled Tailwind CSS utilities and components
 @import './tailwind/tailwind.css';
 
-html, body, #root, main, header, footer, div.flex {
+/*
+  Smooth transition for background and text colors
+  Applies to main structural elements and common flex containers,
+  enabling seamless theme or color scheme changes with animation.
+*/
+html,
+body,
+#root,
+main,
+header,
+footer,
+div.flex {
   transition: background-color 0.3s ease, color 0.3s ease;
 }

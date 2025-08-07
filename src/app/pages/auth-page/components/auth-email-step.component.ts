@@ -2,9 +2,10 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
+
 import { ThemeService } from '../../../core/services/theme.service';
 import { Theme } from '../../../core/models/theme.type';
-import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-auth-email-step',
@@ -12,12 +13,12 @@ import { TranslateModule } from '@ngx-translate/core';
   imports: [CommonModule, FormsModule, TranslateModule],
   template: `
     <div class="flex flex-col gap-8">
-      <!-- Header and toggle to login form -->
+      <!-- Header with registration title and toggle to login form -->
       <div class="flex flex-col gap-5">
         <h4 class="text-center">{{ 'AUTH.REGISTER_TITLE' | translate }}</h4>
         <span class="body-font-1 text-center">
-           {{ 'AUTH.ALREADY_HAVE_ACCOUNT' | translate }}
-          <button class="underline" (click)="toggleForm.emit()">
+          {{ 'AUTH.ALREADY_HAVE_ACCOUNT' | translate }}
+          <button class="underline" (click)="toggleForm.emit()" type="button">
             <h6>{{ 'BUTTON.LOG_IN' | translate }}</h6>
           </button>
         </span>
@@ -25,48 +26,44 @@ import { TranslateModule } from '@ngx-translate/core';
 
       <!-- Email input form -->
       <form class="flex flex-col gap-[12px]" (ngSubmit)="submitEmail()">
-        <div class="flex flex-col gap-[4px]">
-          <span class="body-font-2 "
-          [ngClass]="[
-              (currentTheme$ | async) === 'light'
-                ? 'text-[var(--color-gray-75)]'
-                : 'text-[var(--color-gray-55)]',
-            ]">
+        <label class="flex flex-col gap-[4px]">
+          <span
+            class="body-font-2"
+            [ngClass]="{
+              'text-[var(--color-gray-75)]': (currentTheme$ | async) === 'light',
+              'text-[var(--color-gray-55)]': (currentTheme$ | async) === 'dark'
+            }"
+          >
             {{ 'AUTH.EMAIL_PROMPT_1' | translate }}
           </span>
           <input
             type="email"
-            [placeholder]="'AUTH.EMAIL_PLACEHOLDER' | translate"
-            [(ngModel)]="email"
             name="email"
-            [ngClass]="[
-              (currentTheme$ | async) === 'light'
-                ? 'border-[var(--color-gray-20)] placeholder-[var(--color-gray-75)]'
-                : 'border-[var(--color-gray-100)] placeholder-[var(--color-gray-55)]',
-            ]"
-            class="body-font-1 rounded-[40px] border bg-[var(--color-bg)] px-6 py-3  focus:outline-none"
+            [(ngModel)]="email"
+            [placeholder]="'AUTH.EMAIL_PLACEHOLDER' | translate"
             required
             email
+            class="body-font-1 rounded-[40px] border bg-[var(--color-bg)] px-6 py-3 focus:outline-none"
+            [ngClass]="{
+              'border-[var(--color-gray-20)] placeholder-[var(--color-gray-75)]':
+                (currentTheme$ | async) === 'light',
+              'border-[var(--color-gray-100)] placeholder-[var(--color-gray-55)]':
+                (currentTheme$ | async) === 'dark'
+            }"
           />
-        </div>
+        </label>
 
-        <!-- Submit button is enabled only if email is valid -->
+        <!-- Submit button enabled only when email is valid -->
         <button
           type="submit"
           [disabled]="!isValidEmail"
-          [ngClass]="[
-            'rounded-[40px]',
-            'px-[32px]',
-            'py-[12px]',
-            'button-font',
-            isValidEmail ? 'button-bg-blue' : 'text-[var(--color-gray-55)]',
-            (currentTheme$ | async) === 'light' && !isValidEmail
-              ? 'bg-[var(--color-gray-20)]'
-              : '',
-            (currentTheme$ | async) === 'dark' && !isValidEmail
-              ? 'bg-[var(--color-gray-100)]'
-              : '',
-          ]"
+          class="rounded-[40px] px-[32px] py-[12px] button-font"
+          [ngClass]="{
+            'button-bg-blue': isValidEmail,
+            'text-[var(--color-gray-55)]': !isValidEmail,
+            'bg-[var(--color-gray-20)]': (currentTheme$ | async) === 'light' && !isValidEmail,
+            'bg-[var(--color-gray-100)]': (currentTheme$ | async) === 'dark' && !isValidEmail
+          }"
         >
           {{ 'AUTH.NEXT' | translate }}
         </button>
@@ -75,21 +72,45 @@ import { TranslateModule } from '@ngx-translate/core';
   `,
 })
 export class AuthEmailStepComponent {
+  /**
+   * Input email value bound to the form input.
+   */
   @Input() email = '';
+
+  /**
+   * Emits the submitted email string when the form is valid and submitted.
+   */
   @Output() emailSubmit = new EventEmitter<string>();
+
+  /**
+   * Emits an event to toggle between registration and login forms.
+   */
   @Output() toggleForm = new EventEmitter<void>();
 
+  /**
+   * Observable of current theme ('light' or 'dark') to adjust UI styles dynamically.
+   */
   readonly currentTheme$: Observable<Theme>;
 
   constructor(private themeService: ThemeService) {
+    // Subscribe to theme changes from ThemeService
     this.currentTheme$ = this.themeService.theme$;
   }
 
+  /**
+   * Validates the email format using a simple regular expression.
+   * Returns true if the email matches the pattern.
+   */
   get isValidEmail(): boolean {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email);
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(this.email);
   }
 
-  submitEmail() {
+  /**
+   * Handles form submission.
+   * Emits the email if valid; otherwise does nothing.
+   */
+  submitEmail(): void {
     if (this.isValidEmail) {
       this.emailSubmit.emit(this.email);
     }

@@ -22,8 +22,9 @@
             "browser": "src/main.ts",
             "baseHref": "/home-pro/",
             "polyfills": [
-              "zone.js"
-            ],
+  "zone.js",
+  "src/polyfills.ts"
+],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
@@ -89,8 +90,9 @@
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "polyfills": [
-              "src/polyfills.ts"
-            ],
+  "zone.js",
+  "src/polyfills.ts"
+],
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
             "assets": [

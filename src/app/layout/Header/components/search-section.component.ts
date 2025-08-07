@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -99,6 +99,8 @@ import { TranslateModule } from '@ngx-translate/core';
 export class SearchSectionComponent {
   readonly ICONS = ICONS;
 
+    @Input() closeDropdowns!: () => void;
+
   searchTerm = '';
   allPlaces: Place[] = [];
   filteredPlaces: Place[] = [];
@@ -122,8 +124,25 @@ export class SearchSectionComponent {
     });
   }
 
-  onSearchChange(): void {
+  // onSearchChange(): void {
+  //   const term = this.searchTerm.trim().toLowerCase();
+
+  //   this.filteredPlaces = term.length
+  //     ? this.allPlaces
+  //         .filter(
+  //           (place) =>
+  //             place.name.toLowerCase().includes(term) ||
+  //             place.city?.toLowerCase().includes(term) ||
+  //             place.address?.toLowerCase().includes(term),
+  //         )
+  //         .slice(0, 5)
+  //     : [];
+  // }
+onSearchChange(): void {
     const term = this.searchTerm.trim().toLowerCase();
+
+    // Закрытие всех дропдаунов при изменении поиска
+    this.closeDropdowns();
 
     this.filteredPlaces = term.length
       ? this.allPlaces
@@ -136,6 +155,8 @@ export class SearchSectionComponent {
           .slice(0, 5)
       : [];
   }
+
+
 
   selectPlace(place: Place): void {
     this.searchTerm = '';

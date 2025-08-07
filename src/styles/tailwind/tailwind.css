@@ -2,7 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  Custom button component styles
+  These extend Tailwind with reusable button styles using CSS variables for colors.
+*/
 @layer components {
+  /* Primary blue button with background color */
   .button-bg-blue {
     @apply transition-colors duration-300 cursor-pointer rounded-[40px]
            font-medium text-white bg-[var(--color-primary)]
@@ -15,6 +20,7 @@
     @apply bg-[var(--color-pressed-primary)];
   }
 
+  /* Transparent button with border and primary color text */
   .button-bg-transparent {
     @apply transition-colors duration-300 cursor-pointer rounded-[40px]
            font-medium text-[var(--color-primary)] border border-[var(--color-primary)]

@@ -1,21 +1,24 @@
 import { FilterCategory } from '../models/catalog-filter.model';
 
-// Array of filter categories for catalog filtering
+/**
+ * Array of filter categories used for catalog filtering.
+ * Each category groups related filter options.
+ */
 export const FILTER_CATEGORIES: FilterCategory[] = [
   {
-    title: 'Location',       // Category name shown in UI
-    key: 'location',        // Unique key for filtering logic
-    description: 'Look for options',  // Short info about this category
+    title: 'Location', // Display name for UI
+    key: 'location', // Unique key for filtering logic
+    description: 'Look for options', // Brief category description
     options: [
       {
         id: 35,
-        key: 'kyiv',        // Filter key used in data matching
-        label: 'Kyiv',      // User-friendly label
+        key: 'kyiv', // Identifier used in filtering
+        label: 'Kyiv', // User-friendly name
         description: 'Local picks',
         imageURL: './assets/filter/kyiv.jpg',
       },
       {
-        id: 0,              // 0 used as fallback id if not in list (commented)
+        id: 0, // 0 used as fallback id if needed
         key: 'lviv',
         label: 'Lviv',
         description: 'Explore Lviv',
@@ -35,7 +38,7 @@ export const FILTER_CATEGORIES: FilterCategory[] = [
         description: 'Calm, focused, with Wi-Fi',
         imageURL: './assets/filter/workFriendly.jpg',
         iconURL: './assets/icons/workFriendly.svg',
-        iconURLDarkThema: './assets/icons/workFriendlyDarkThema.svg',
+        iconURLDarkTheme: './assets/icons/workFriendlyDarkTheme.svg',
       },
       {
         id: 48,
@@ -44,7 +47,7 @@ export const FILTER_CATEGORIES: FilterCategory[] = [
         description: 'Quick stop, takeout friendly',
         imageURL: './assets/filter/grabAndGo.jpg',
         iconURL: './assets/icons/grabAndGo.svg',
-        iconURLDarkThema: './assets/icons/grabAndGoDarkThema.svg',
+        iconURLDarkTheme: './assets/icons/grabAndGoDarkTheme.svg',
       },
       {
         id: 49,
@@ -53,7 +56,7 @@ export const FILTER_CATEGORIES: FilterCategory[] = [
         description: 'Morning meals, tasty snacks',
         imageURL: './assets/filter/brunch.jpg',
         iconURL: './assets/icons/brunch.svg',
-        iconURLDarkThema: './assets/icons/brunchDarkThema.svg',
+        iconURLDarkTheme: './assets/icons/brunchDarkTheme.svg',
       },
       {
         id: 52,
@@ -62,7 +65,7 @@ export const FILTER_CATEGORIES: FilterCategory[] = [
         description: 'Slow pace, cozy vibe',
         imageURL: './assets/filter/chill.jpg',
         iconURL: './assets/icons/chill.svg',
-        iconURLDarkThema: './assets/icons/chillDarkThema.svg',
+        iconURLDarkTheme: './assets/icons/chillDarkTheme.svg',
       },
       {
         id: 55,
@@ -71,7 +74,7 @@ export const FILTER_CATEGORIES: FilterCategory[] = [
         description: 'Romantic, intimate feel',
         imageURL: './assets/filter/date.jpg',
         iconURL: './assets/icons/date.svg',
-        iconURLDarkThema: './assets/icons/dateDarkThema.svg',
+        iconURLDarkTheme: './assets/icons/dateDarkTheme.svg',
       },
     ],
   },
@@ -87,7 +90,7 @@ export const FILTER_CATEGORIES: FilterCategory[] = [
         description: 'Fast and stable connection',
         imageURL: './assets/filter/freeWifi.jpg',
         iconURL: './assets/icons/freeWifi.svg',
-        iconURLDarkThema: './assets/icons/freeWifiDarkThema.svg',
+        iconURLDarkTheme: './assets/icons/freeWifiDarkTheme.svg',
       },
       {
         id: 8,
@@ -96,7 +99,7 @@ export const FILTER_CATEGORIES: FilterCategory[] = [
         description: 'Pets are welcome',
         imageURL: './assets/filter/petFriendly.jpg',
         iconURL: './assets/icons/petFriendly.svg',
-        iconURLDarkThema: './assets/icons/petFriendlyDarkThema.svg',
+        iconURLDarkTheme: './assets/icons/petFriendlyDarkTheme.svg',
       },
       {
         id: 7,
@@ -105,7 +108,7 @@ export const FILTER_CATEGORIES: FilterCategory[] = [
         description: 'Plant-based food & drinks',
         imageURL: './assets/filter/veganOptions.jpg',
         iconURL: './assets/icons/veganOptions.svg',
-        iconURLDarkThema: './assets/icons/veganOptionsDarkThema.svg',
+        iconURLDarkTheme: './assets/icons/veganOptionsDarkTheme.svg',
       },
       {
         id: 54,
@@ -114,7 +117,7 @@ export const FILTER_CATEGORIES: FilterCategory[] = [
         description: 'Low-noise, focus-friendly',
         imageURL: './assets/filter/quietZone.jpg',
         iconURL: './assets/icons/quietZone.svg',
-        iconURLDarkThema: './assets/icons/quietZoneDarkThema.svg',
+        iconURLDarkTheme: './assets/icons/quietZoneDarkTheme.svg',
       },
       {
         id: 50,
@@ -123,7 +126,7 @@ export const FILTER_CATEGORIES: FilterCategory[] = [
         description: 'Terrace or street tables',
         imageURL: './assets/filter/outdoorSeating.jpg',
         iconURL: './assets/icons/outdoorSeating.svg',
-        iconURLDarkThema: './assets/icons/outdoorSeatingDarkThema.svg',
+        iconURLDarkTheme: './assets/icons/outdoorSeatingDarkTheme.svg',
       },
     ],
   },
@@ -139,7 +142,7 @@ export const FILTER_CATEGORIES: FilterCategory[] = [
         description: 'Clean, calm, spacious look',
         imageURL: './assets/filter/minimalist.jpg',
         iconURL: './assets/icons/minimalist.svg',
-        iconURLDarkThema: './assets/icons/minimalistDarkThema.svg',
+        iconURLDarkTheme: './assets/icons/minimalistDarkTheme.svg',
       },
       {
         id: 51,
@@ -148,16 +151,16 @@ export const FILTER_CATEGORIES: FilterCategory[] = [
         description: 'Old-school, unique pieces',
         imageURL: './assets/filter/vintageRetro.jpg',
         iconURL: './assets/icons/vintageRetro.svg',
-        iconURLDarkThema: './assets/icons/vintageRetroDarkThema.svg',
+        iconURLDarkTheme: './assets/icons/vintageRetroDarkTheme.svg',
       },
       {
-        id: 58, // last in list (lively social vibe)
+        id: 58, 
         key: 'livelySocial',
         label: 'Lively & social',
         description: 'Busy vibe, loud music',
         imageURL: './assets/filter/livelySocial.jpg',
         iconURL: './assets/icons/livelySocial.svg',
-        iconURLDarkThema: './assets/icons/livelySocialDarkThema.svg',
+        iconURLDarkTheme: './assets/icons/livelySocialDarkTheme.svg',
       },
       {
         id: 53,
@@ -166,7 +169,7 @@ export const FILTER_CATEGORIES: FilterCategory[] = [
         description: 'Plants, wood, eco-friendly',
         imageURL: './assets/filter/greenNatural.jpg',
         iconURL: './assets/icons/greenNatural.svg',
-        iconURLDarkThema: './assets/icons/greenNaturalDarkThema.svg',
+        iconURLDarkTheme: './assets/icons/greenNaturalDarkTheme.svg',
       },
       {
         id: 56,
@@ -175,7 +178,7 @@ export const FILTER_CATEGORIES: FilterCategory[] = [
         description: 'Low light, deep tones',
         imageURL: './assets/filter/darkMoody.jpg',
         iconURL: './assets/icons/darkMoody.svg',
-        iconURLDarkThema: './assets/icons/darkMoodyDarkThema.svg',
+        iconURLDarkTheme: './assets/icons/darkMoodyDarkTheme.svg',
       },
     ],
   },
