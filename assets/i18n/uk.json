@@ -1,29 +1,50 @@
 {
-  "BUTTON": {
-    "SEARCH": "Пошук",
-    "CLEAR_ALL": "Очистити все",
-    "APPLY_FILTERS": "Застосувати фільтри",
-    "LOG_IN": "Увійти",
-    "CLOSE": "Закрити",
-    "SEND": "Надіслати",
-    "ADD_TO_FAVORITES": "Додати до обраного",
-    "LEARN_MORE": "Дізнатися більше"
+  "button": {
+    "search": "Пошук",
+    "clear_all": "Очистити все",
+    "apply_filters": "Застосувати фільтри",
+    "log_in": "Увійти",
+    "close": "Закрити",
+    "send": "Надіслати",
+    "learn_more": "Дізнатися більше"
   },
-  "NAV": {
-    "HOME": "Головна",
-    "CATALOG": "Каталог",
-    "CONTACT": "Контакти"
+  "nav": {
+    "catalog": "Каталог"
   },
-  "HOME": {
-    "TITLE": "Твоє нове улюблене кафе — всього в",
-    "CLICK": "один клік",
-    "AWAY": "від тебе",
-    "SUBTITLE": "Відкривай приховані перлини, затишні куточки та найкращі заклади — усе відповідно до твого настрою."
+  "home_page": {
+    "title": "Твоє нове улюблене кафе — всього в",
+    "click": "один клік",
+    "away": "від тебе",
+    "subtitle": "Відкривай приховані перлини, затишні куточки та найкращі заклади — усе відповідно до твого настрою.",
+    "slider": {
+      "for_you": "Спеціально для тебе",
+      "popular": "Найпопулярніші"
+    }
   },
-  "SLIDER": {
-    "FOR_YOU": "Спеціально для тебе",
-    "POPULAR": "Найпопулярніші"
+
+  "footer": {
+    "subscribe_title": "Підписка",
+    "subscribe_description": "Підпишись на нашу розсилку, щоб бути в курсі новин і оновлень.",
+    "email_placeholder": "Ваша електронна адреса",
+    "email_error": "Будь ласка, введіть коректну електронну адресу.",
+    "privace_notice": "Підписуючись, ви погоджуєтесь з нашою Політикою конфіденційності та даєте згоду на отримання оновлень.",
+
+    "links": {
+      "title_company": "Компанія",
+      "title_resources": "Ресурси",
+      "about_us": "Про нас",
+      "faqs": "Часті питання",
+      "contact_us": "Зв'язатися з нами",
+      "social_media": "Соцмережі",
+      "feedback": "Зворотній зв’язок",
+      "newsletter": "Розсилка",
+      "updates": "Оновлення",
+      "events": "Події",
+      "blog_posts": "Блог",
+      "community": "Спільнота"
+    }
   },
+
   "MODAL": {
     "LOGIN_TITLE": "Будь ласка, увійдіть",
     "LOGIN_TEXT": "Щоб додати кафе до обраного, потрібно увійти в акаунт.",
@@ -34,26 +55,7 @@
     "MODAL_TITLE": "Дякуємо за підписку!",
     "MODAL_TEXT": "Ви успішно підписалися. Слідкуйте за оновленнями та новими можливостями!"
   },
-  "FOOTER": {
-    "SUBSCRIBE_TITLE": "Підписка",
-    "SUBSCRIBE_DESCRIPTION": "Підпишись на нашу розсилку, щоб бути в курсі новин і оновлень.",
-    "EMAIL_PLACEHOLDER": "Ваша електронна адреса",
-    "EMAIL_ERROR": "Будь ласка, введіть коректну електронну адресу.",
-    "PRIVACY_NOTICE": "Підписуючись, ви погоджуєтесь з нашою Політикою конфіденційності та даєте згоду на отримання оновлень.",
-    "SEND_BUTTON": "Надіслати",
-    "LINKS": {
-      "ABOUT_US": "Про нас",
-      "FAQS": "Часті питання",
-      "CONTACT_US": "Зв'язатися з нами",
-      "SOCIAL_MEDIA": "Соцмережі",
-      "FEEDBACK": "Зворотній зв’язок",
-      "NEWSLETTER": "Розсилка",
-      "UPDATES": "Оновлення",
-      "EVENTS": "Події",
-      "BLOG_POSTS": "Блог",
-      "COMMUNITY": "Спільнота"
-    }
-  },
+
   "THEME": {
     "LIGHT": "Переключити на світлу тему",
     "DARK": "Переключити на темну тему"
@@ -66,8 +68,8 @@
     "KHARKIV": "Харків"
   },
   "LANGUAGE": {
-    "EN": "Англійська",
-    "UK": "Українська"
+    "EN": "EN",
+    "UK": "UA"
   },
   "CHECK_IN": {
     "CHECK_IN": "Відмітитися",
@@ -125,27 +127,27 @@
     "BUTTON": "Знайди улюблене місце"
   },
   "AUTH": {
-  "REGISTER_TITLE": "Створіть акаунт Beanly",
-  "PASSWORD_LABEL": "Пароль",
-  "PASSWORD_PLACEHOLDER": "Введіть пароль",
-  "CONFIRM_PASSWORD_LABEL": "Підтвердження пароля",
-  "CONFIRM_PASSWORD_PLACEHOLDER": "Введіть пароль повторно",
-  "PASSWORD_TOO_WEAK": "Пароль занадто слабкий",
-  "PASSWORD_MISMATCH": "Паролі не співпадають",
-  "FIRST_NAME_LABEL": "Ім'я",
-  "FIRST_NAME_PLACEHOLDER": "Введіть ваше ім'я",
-  "LAST_NAME_LABEL": "Прізвище",
-  "LAST_NAME_PLACEHOLDER": "Введіть ваше прізвище",
-  "CREATE_ACCOUNT": "Створити акаунт",
-  "EMAIL_PROMPT": "Придумайте пароль для електронної пошти",
-  "BACK_BUTTON_LABEL": "Назад",
-  "ALREADY_HAVE_ACCOUNT": "Вже маєте акаунт?",
-  "EMAIL_PLACEHOLDER": "email@gmail.com",
-  "NEXT": "ДАЛІ",
-  "LOG_IN_TITLE": "Раді бачити вас знову!",
-"EMAIL_PROMPT_1": "Введіть вашу електронну пошту",
-"PASSWORD_PROMPT": "Введіть ваш пароль"
-},
+    "REGISTER_TITLE": "Створіть акаунт Beanly",
+    "PASSWORD_LABEL": "Пароль",
+    "PASSWORD_PLACEHOLDER": "Введіть пароль",
+    "CONFIRM_PASSWORD_LABEL": "Підтвердження пароля",
+    "CONFIRM_PASSWORD_PLACEHOLDER": "Введіть пароль повторно",
+    "PASSWORD_TOO_WEAK": "Пароль занадто слабкий",
+    "PASSWORD_MISMATCH": "Паролі не співпадають",
+    "FIRST_NAME_LABEL": "Ім'я",
+    "FIRST_NAME_PLACEHOLDER": "Введіть ваше ім'я",
+    "LAST_NAME_LABEL": "Прізвище",
+    "LAST_NAME_PLACEHOLDER": "Введіть ваше прізвище",
+    "CREATE_ACCOUNT": "Створити акаунт",
+    "EMAIL_PROMPT": "Придумайте пароль для електронної пошти",
+    "BACK_BUTTON_LABEL": "Назад",
+    "ALREADY_HAVE_ACCOUNT": "Вже маєте акаунт?",
+    "EMAIL_PLACEHOLDER": "email@gmail.com",
+    "NEXT": "ДАЛІ",
+    "LOG_IN_TITLE": "Раді бачити вас знову!",
+    "EMAIL_PROMPT_1": "Введіть вашу електронну пошту",
+    "PASSWORD_PROMPT": "Введіть ваш пароль"
+  },
   "SOCIAL_LOGIN": {
     "OR_SIGN_IN_WITH": "Або увійдіть через",
     "GOOGLE": "Google",
@@ -157,7 +159,7 @@
     "PRIVACY_POLICY": "Політику конфіденційності",
     "PLEASE_USE_EMAIL": "Будь ласка, використовуйте свою електронну пошту"
   },
-    "WELCOME_MODAL": {
+  "WELCOME_MODAL": {
     "TITLE": "Ласкаво просимо до Beanly!",
     "DESCRIPTION": "Від затишних куточків для читання до стильних місць для вашого наступного кавового побачення — відкривайте місця, які ідеально вам підходять.",
     "FEATURES": {
@@ -179,12 +181,12 @@
       "SKIP": "Пропустити"
     }
   },
-   "breadcrumb": {
+  "breadcrumb": {
     "home": "Головна",
     "catalog": "Каталог",
     "details": "Деталі"
   },
-    "carousel": {
+  "carousel": {
     "addToFavorites": "Додати до улюблених",
     "shareThisPlace": "Поділитися цим місцем"
   },
@@ -198,28 +200,29 @@
     "logInToCheckIn": "Увійдіть, щоб зареєструватися"
   },
   "reviews": {
-  "title": "Оцінки та відгуки",
-  "subtitle": "Чесні думки справжніх любителів кави",
-  "showMore": "Показати більше відгуків",
-  "noReviews": "Поки немає відгуків про це кафе",
-  "deleteConfirmTitle": "Підтвердження видалення",
-  "deleteConfirmMessage": "Ви впевнені, що хочете видалити цей відгук?",
-  "deleteYes": "Так, видалити",
-  "deleteCancel": "Скасувати"
-},
-"places": {
-  "moreCafes": "Більше кавʼярень, які вам сподобаються"
-},
-"modals": {
-  "loginTitle": "Будь ласка, увійдіть",
-  "loginMessage": "Ви повинні увійти, щоб додати кавʼярні до обраного.",
-  "loginBtn": "Увійти",
-  "closeBtn": "Закрити",
+    "title": "Оцінки та відгуки",
+    "subtitle": "Чесні думки справжніх любителів кави",
+    "showMore": "Показати більше відгуків",
+    "noReviews": "Поки немає відгуків про це кафе",
+    "deleteConfirmTitle": "Підтвердження видалення",
+    "deleteConfirmMessage": "Ви впевнені, що хочете видалити цей відгук?",
+    "deleteYes": "Так, видалити",
+    "deleteCancel": "Скасувати"
+  },
+  "places": {
+    "moreCafes": "Більше кавʼярень, які вам сподобаються"
+  },
+  "modals": {
+    "loginTitle": "Будь ласка, увійдіть",
+    "loginMessage": "Ви повинні увійти, щоб додати кавʼярні до обраного.",
+    "loginBtn": "Увійти",
+    "closeBtn": "Закрити",
     "shareTitle": "Поділитися кавʼярнею",
-  "copied": "Скопійовано!",
-  "copyLink": "Скопіювати посилання"
-},
- "date": {
+    "copied": "Скопійовано!",
+    "copyLink": "Скопіювати посилання",
+    "loginMessageForLike": "Ви повинні увійти в акаунт, щоб поставити лайк цьому відгуку."
+  },
+  "date": {
     "today": "Сьогодні",
     "yesterday": "Вчора",
     "at": "о"
@@ -232,12 +235,12 @@
     "removeFromFavorites": "Видалити з обраного",
     "share": "Поділитися місцем"
   },
-   "checkIns": {
+  "checkIns": {
     "title": "Останні відвідування",
     "subtitle": "Подивись, хто нещодавно відвідав цю кав’ярню",
     "noRecent": "Немає недавніх відвідувань"
   },
-   "profile": {
+  "profile": {
     "saveButton": "Зберегти всі зміни",
     "modal": {
       "title": "Зміни успішно збережено",
@@ -248,10 +251,11 @@
       "congrats": "Вітаємо!",
       "unlocked": "Ви відкрили нове досягнення:",
       "close": "Закрити"
-    }, "achievements": {
-    "title": "Досягнення",
-    "subtitle": "Відкривай, досліджуй і здобувай значки, насолоджуючись кавою по місту"
-  }
+    },
+    "achievements": {
+      "title": "Досягнення",
+      "subtitle": "Відкривай, досліджуй і здобувай значки, насолоджуючись кавою по місту"
+    }
   },
 
   "achievements": {
@@ -327,9 +331,9 @@
     "favoriteCafesDescription": "Збережені кавові локації ({{count}})",
     "alreadyVisited": "Вже відвідані",
     "alreadyVisitedDescription": "Ще одне місце на вашій особистій кавовій карті",
-     "noVisitedPlaces": "Ще немає відвіданих закладів."
+    "noVisitedPlaces": "Ще немає відвіданих закладів."
   },
-   "myReviews": {
+  "myReviews": {
     "title": "Ваші відгуки",
     "description": "Деталі про улюблені кав'ярні",
     "noReviewText": "Відгук не надано.",
@@ -339,7 +343,7 @@
     "ariaNext": "Наступний слайд",
     "ratingStars": "Зірковий рейтинг"
   },
-   "settings": {
+  "settings": {
     "title": "Налаштування",
     "description": "Керуйте налаштуваннями свого облікового запису",
     "appearance": "Зовнішній вигляд",
@@ -363,7 +367,7 @@
     "deleteAccountModalTitle": "Видалення облікового запису",
     "deleteAccountModalDesc": "Ця функція наразі у розробці.",
     "close": "Закрити",
-        "themeLight": "Світла",
+    "themeLight": "Світла",
     "themeDark": "Темна"
   },
   "languages": {

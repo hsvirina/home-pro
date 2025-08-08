@@ -1,0 +1,1 @@
+import{db as o,eb as n,w as a,yb as s,z as i}from"./chunk-2Z55U5GN.js";var p=class t{constructor(r){this.http=r}baseUrl=s.places.list;getPlaces(r="en"){let e=new o().set("lang",r);return this.http.get(this.baseUrl,{params:e})}static \u0275fac=function(e){return new(e||t)(i(n))};static \u0275prov=a({token:t,factory:t.\u0275fac,providedIn:"root"})};export{p as a};

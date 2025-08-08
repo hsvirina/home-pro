@@ -1,29 +1,51 @@
 {
-  "BUTTON": {
-    "SEARCH": "Search",
-    "CLEAR_ALL": "Clear All",
-    "APPLY_FILTERS": "Apply Filters",
-    "LOG_IN": "Log in",
-    "CLOSE": "Close",
-    "SEND": "Send",
-    "ADD_TO_FAVORITES": "Add to favorites",
-    "LEARN_MORE": "Learn more"
+  "button": {
+    "search": "Search",
+    "clear_all": "Clear All",
+    "apply_filters": "Apply Filters",
+    "log_in": "Log in",
+    "close": "Close",
+    "send": "Send",
+    "learn_more": "Learn more"
   },
-  "NAV": {
-    "HOME": "Home",
-    "CATALOG": "Catalog",
-    "CONTACT": "Contact Us"
+  "nav": {
+    "catalog": "Catalog"
   },
-  "HOME": {
-    "TITLE": "Your next favorite café is just a",
-    "CLICK": "click",
-    "AWAY": "away",
-    "SUBTITLE": "Discover hidden gems, cozy corners, and top-rated spots — all matched to your vibe."
+  "home_page": {
+    "title": "Your next favorite café is just a",
+    "click": "click",
+    "away": "away",
+    "subtitle": "Discover hidden gems, cozy corners, and top-rated spots — all matched to your vibe.",
+    "slider": {
+      "for_you": "Specially for you",
+      "popular": "Most Popular"
+    }
   },
-  "SLIDER": {
-    "FOR_YOU": "Specially for you",
-    "POPULAR": "Most Popular"
+
+  "footer": {
+    "subscribe_title": "Subscribe",
+    "subscribe_description": "Join our newsletter to stay updated on features and releases.",
+    "email_placeholder": "Your Email Here",
+    "email_error": "Please enter a valid email address.",
+
+    "privace_notice": "By subscribing, you agree to our Privacy Policy and consent to receive updates.",
+
+    "links": {
+      "title_company": "Company",
+      "title_resources": "Resources",
+      "about_us": "About Us",
+      "faqs": "FAQs",
+      "contact_us": "Contact Us",
+      "social_media": "Social Media",
+      "feedback": "Feedback",
+      "newsletter": "Newsletter",
+      "updates": "Updates",
+      "events": "Events",
+      "blog_posts": "Blog Posts",
+      "community": "Community"
+    }
   },
+
   "MODAL": {
     "LOGIN_TITLE": "Please log in",
     "LOGIN_TEXT": "You must be logged in to add cafés to your favorites.",
@@ -32,26 +54,7 @@
     "MODAL_TITLE": "Thank you for subscribing!",
     "MODAL_TEXT": "You have successfully joined our newsletter. Stay tuned for updates and exciting features!"
   },
-  "FOOTER": {
-    "SUBSCRIBE_TITLE": "Subscribe",
-    "SUBSCRIBE_DESCRIPTION": "Join our newsletter to stay updated on features and releases.",
-    "EMAIL_PLACEHOLDER": "Your Email Here",
-    "EMAIL_ERROR": "Please enter a valid email address.",
-    "SEND_BUTTON": "Send",
-    "PRIVACY_NOTICE": "By subscribing, you agree to our Privacy Policy and consent to receive updates.",
-    "LINKS": {
-      "ABOUT_US": "About Us",
-      "FAQS": "FAQs",
-      "CONTACT_US": "Contact Us",
-      "SOCIAL_MEDIA": "Social Media",
-      "FEEDBACK": "Feedback",
-      "NEWSLETTER": "Newsletter",
-      "UPDATES": "Updates",
-      "EVENTS": "Events",
-      "BLOG_POSTS": "Blog Posts",
-      "COMMUNITY": "Community"
-    }
-  },
+
   "THEME": {
     "LIGHT": "Switch to light theme",
     "DARK": "Switch to dark theme"
@@ -64,8 +67,8 @@
     "KHARKIV": "Kharkiv"
   },
   "LANGUAGE": {
-    "EN": "English",
-    "UK": "Ukrainian"
+    "EN": "EN",
+    "UK": "UA"
   },
   "CHECK_IN": {
     "CHECK_IN": "Check in",
@@ -153,7 +156,6 @@
     "LOG_IN_TITLE": "Good to see you again!",
     "EMAIL_PROMPT_1": "Enter your email",
     "PASSWORD_PROMPT": "Enter your password"
-
   },
 
   "WELCOME_MODAL": {
@@ -178,12 +180,12 @@
       "SKIP": "Skip this"
     }
   },
-    "breadcrumb": {
+  "breadcrumb": {
     "home": "Home",
     "catalog": "Catalog",
     "details": "Details"
   },
-    "carousel": {
+  "carousel": {
     "addToFavorites": "Add to favorites",
     "shareThisPlace": "Share this place"
   },
@@ -197,27 +199,29 @@
     "logInToCheckIn": "Log in to check in"
   },
   "reviews": {
-  "title": "Rating & Reviews",
-  "subtitle": "Honest opinions from real coffee lovers",
-  "showMore": "Click to see more reviews",
-  "noReviews": "No reviews yet for this cafe",
-  "deleteConfirmTitle": "Confirm Deletion",
-  "deleteConfirmMessage": "Are you sure you want to delete this review?",
-  "deleteYes": "Yes, Delete",
-  "deleteCancel": "Cancel"
-},
-"places": {
-  "moreCafes": "More cafés you’ll love"
-},
-"modals": {
-  "loginTitle": "Please log in",
-  "loginMessage": "You must be logged in to add cafés to your favorites.",
-  "loginBtn": "Log In",
-  "closeBtn": "Close",
+    "title": "Rating & Reviews",
+    "subtitle": "Honest opinions from real coffee lovers",
+    "showMore": "Click to see more reviews",
+    "noReviews": "No reviews yet for this cafe",
+    "deleteConfirmTitle": "Confirm Deletion",
+    "deleteConfirmMessage": "Are you sure you want to delete this review?",
+    "deleteYes": "Yes, Delete",
+    "deleteCancel": "Cancel"
+  },
+  "places": {
+    "moreCafes": "More cafés you’ll love"
+  },
+  "modals": {
+    "loginTitle": "Please log in",
+    "loginMessage": "You must be logged in to add cafés to your favorites.",
+    "loginBtn": "Log In",
+    "closeBtn": "Close",
     "shareTitle": "Share this café",
-  "copied": "Copied!",
-  "copyLink": "Copy Link"
-},
+    "copied": "Copied!",
+    "copyLink": "Copy Link",
+
+    "loginMessageForLike": "You must be logged in to like this review."
+  },
   "date": {
     "today": "Today",
     "yesterday": "Yesterday",
@@ -248,10 +252,10 @@
       "unlocked": "You have unlocked a new achievement:",
       "close": "Close"
     },
-      "achievements": {
-    "title": "Achievements",
-    "subtitle": "Discover, explore, and unlock badges as you sip your way through the city"
-  }
+    "achievements": {
+      "title": "Achievements",
+      "subtitle": "Discover, explore, and unlock badges as you sip your way through the city"
+    }
   },
   "achievements": {
     "title": "Achievements",
@@ -326,7 +330,7 @@
     "favoriteCafesDescription": "Saved coffee spots ({{count}})",
     "alreadyVisited": "Already visited",
     "alreadyVisitedDescription": "One more place on your personal coffee map",
-     "noVisitedPlaces": "No visited places yet."
+    "noVisitedPlaces": "No visited places yet."
   },
   "myReviews": {
     "title": "Your Reviews",
@@ -362,13 +366,11 @@
     "deleteAccountModalTitle": "Delete Account",
     "deleteAccountModalDesc": "This feature is currently under development.",
     "close": "Close",
-        "themeLight": "Light",
+    "themeLight": "Light",
     "themeDark": "Dark"
   },
   "languages": {
     "en": "English",
     "uk": "Ukrainian"
   }
-
 }
-
