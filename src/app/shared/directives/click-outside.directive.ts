@@ -31,7 +31,7 @@ export class ClickOutsideDirective {
    *
    * @param event Mouse event triggered on document click
    */
-  @HostListener('document:click', ['$event'])
+  @HostListener('document:mousedown', ['$event'])
   onDocumentClick(event: Event): void {
     const target = event.target as HTMLElement;
 

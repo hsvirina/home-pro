@@ -2,7 +2,6 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-
 import { TranslateModule } from '@ngx-translate/core';
 
 import { PlacesService } from '../../core/services/places.service';
@@ -21,7 +20,6 @@ import { ModalComponent } from '../../shared/components/modal.component';
 import { Place } from '../../core/models/place.model';
 import { AuthUser, PublicUserProfile } from '../../core/models/user.model';
 import { Theme } from '../../core/models/theme.type';
-
 import { ACHIEVEMENTS } from '../../core/constants/achievements';
 import { PlaceCardType } from '../../core/constants/place-card-type.enum';
 
@@ -171,6 +169,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
 
   achievements = ACHIEVEMENTS;
   publicProfile: PublicUserProfile | null = null;
+
   favorites: Place[] = [];
   visited: Place[] = [];
   allPlaces: Place[] = [];
@@ -196,193 +195,181 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     private placesService: PlacesService,
     private loaderService: LoaderService,
     private themeService: ThemeService,
-    private authApiService: AuthApiService,
+    private authApiService: AuthApiService
   ) {}
 
+  /** Lifecycle hook - Initialize component data */
   ngOnInit(): void {
     this.loaderService.show();
-
-    // Load all places
-    this.placesService.getPlaces().subscribe({
-      next: (places) => {
-        this.allPlaces = places;
-        this.updateFavoritesAndVisited();
-        this.loaderService.hide();
-      },
-      error: (err) => {
-        console.error('❌ Failed to load places:', err);
-        this.loaderService.hide();
-      },
-    });
-
-    // Subscribe to auth user changes
-    this.subs.add(
-      this.authService.user$.subscribe((user) => {
-        this.user = user;
-        this.editedUser = user ? { ...user } : null;
-
-        if (user) {
-          const theme = (user.theme ?? 'light').toLowerCase() as Theme;
-          this.themeService.setTheme(theme);
-
-          this.subs.add(
-            this.authApiService.getPublicUserProfile(user.userId).subscribe({
-              next: (profile) => {
-                this.publicProfile = profile;
-                this.updateUnlockedAchievements(profile);
-                this.updateFavoritesAndVisited();
-                this.calculateUserBadge(profile);
-              },
-              error: (err) => console.error('❌ Failed to load profile:', err),
-            }),
-          );
-        } else {
-          this.resetProfileData();
-        }
-      }),
-    );
+    this.loadPlaces();
+    this.subscribeToAuthUser();
   }
 
+  /** Lifecycle hook - Cleanup subscriptions */
   ngOnDestroy(): void {
     this.subs.unsubscribe();
   }
 
-  onFavoritePlacesChanged(updatedFavorites: Place[]): void {
-    console.log('Favorite places changed:', updatedFavorites);
-    this.favorites = updatedFavorites;
-    // обновляем данные на сервере или в store
-  }
-
-  onVisitedPlacesChanged(updatedVisited: Place[]): void {
-    console.log('Visited places changed:', updatedVisited);
-    //   // this.visited = updatedVisited;
-    //   // Здесь обновляем данные на сервере или в store
-  }
-
+  /** Returns current logged-in user ID */
   get currentUserId(): number | null {
     return this.user?.userId ?? null;
   }
 
+  /** Returns full achievement data for currently unlocked achievement */
   get newAchievementData() {
     if (!this.newAchievementToShow) return null;
-
     for (const section of this.achievements) {
-      const achievement = section.achievements.find(
-        (a) => a.key === this.newAchievementToShow,
-      );
+      const achievement = section.achievements.find(a => a.key === this.newAchievementToShow);
       if (achievement) return achievement;
     }
     return null;
   }
 
+  /** Handler: Favorites changed in child component */
+  onFavoritePlacesChanged(updatedFavorites: Place[]): void {
+    this.favorites = updatedFavorites;
+    // TODO: Persist updated favorites to backend or state store
+  }
+
+  /** Handler: Visited places changed in child component */
+  onVisitedPlacesChanged(updatedVisited: Place[]): void {
+    this.visited = updatedVisited;
+    // TODO: Persist updated visited list to backend or state store
+  }
+
+  /** Toggles editing mode for user info */
   handleToggleEdit(): void {
     this.isEditing = !this.isEditing;
   }
 
+  /** Handler: Field change in edit mode */
   onFieldChange(field: keyof AuthUser, value: AuthUser[keyof AuthUser]): void {
     if (!this.editedUser) return;
     (this.editedUser as any)[field] = value;
     this.hasPendingChanges = true;
   }
 
+  /** Handler: Settings changed in child settings component */
   onSettingsChanged(): void {
     this.hasPendingChanges = true;
   }
 
+  /** Save changes to user profile */
   saveChanges(): void {
     if (!this.user || !this.editedUser) return;
 
     const payload: Partial<AuthUser> = {
       ...this.editedUser,
-      email: this.user.email,
+      email: this.user.email, // Prevent overwriting email
     };
 
     this.authService.updateUserProfile(payload).subscribe({
-      next: (updatedUser) => {
+      next: updatedUser => {
         this.user = updatedUser;
         this.editedUser = { ...updatedUser };
         this.isEditing = false;
         this.hasPendingChanges = false;
         this.showModal = true;
       },
-      error: (err) => console.error('❌ Failed to update profile:', err),
+      error: err => console.error('❌ Failed to update profile:', err),
     });
   }
 
+  /** Closes profile save confirmation modal */
   closeModal(): void {
     this.showModal = false;
   }
 
+  /** Logs out current user */
   onLogout(): void {
     this.authService.logout();
     localStorage.clear();
     this.router.navigate(['/auth']);
   }
 
+  /** Closes new achievement modal */
   closeNewAchievementModal(): void {
     this.showNewAchievementModal = false;
     this.newAchievementToShow = null;
   }
 
-  // private updateFavoritesAndVisited(): void {
-  //   if (!this.user || !this.allPlaces.length) {
-  //     this.favorites = [];
-  //     this.visited = [];
-  //     return;
-  //   }
+  // ------------------- PRIVATE METHODS -------------------
 
-  //   this.favorites = this.allPlaces.filter((place) =>
-  //     this.user!.favoriteCafeIds.includes(place.id),
-  //   );
-
-  //   if (this.publicProfile) {
-  //     const visitedIds = this.publicProfile.checkInCafes.map((c) => c.id);
-  //     this.visited = this.allPlaces.filter((place) =>
-  //       visitedIds.includes(place.id),
-  //     );
-  //   } else {
-  //     this.visited = [];
-  //   }
-  // }
-
-  private updateFavoritesAndVisited(): void {
-  if (!this.user || !this.allPlaces.length) {
-    this.favorites = [];
-    this.visited = [];
-    console.log('Favorites and visited places have been reset due to no user or places');
-    return;
+  /** Loads all places from backend */
+  private loadPlaces(): void {
+    this.placesService.getPlaces().subscribe({
+      next: places => {
+        this.allPlaces = places;
+        this.updateFavoritesAndVisited();
+        this.loaderService.hide();
+      },
+      error: err => {
+        console.error('❌ Failed to load places:', err);
+        this.loaderService.hide();
+      },
+    });
   }
 
-  console.log('Updating favorite and visited places...');
+  /** Subscribes to authentication state changes */
+  private subscribeToAuthUser(): void {
+    this.subs.add(
+      this.authService.user$.subscribe(user => {
+        this.user = user;
+        this.editedUser = user ? { ...user } : null;
 
-  const favoritePlaceIds = new Set(this.user.favoriteCafeIds);
-  const visitedPlaceIds = new Set(this.publicProfile?.checkInCafes.map(c => c.id) || []);
+        if (user) {
+          this.themeService.setTheme((user.theme ?? 'light').toLowerCase() as Theme);
+          this.loadPublicUserProfile(user.userId);
+        } else {
+          this.resetProfileData();
+        }
+      })
+    );
+  }
 
-  this.favorites = this.allPlaces.filter(place => favoritePlaceIds.has(place.id));
-  this.visited = this.allPlaces.filter(place => visitedPlaceIds.has(place.id));
+  /** Loads public profile for the authenticated user */
+  private loadPublicUserProfile(userId: number): void {
+    this.subs.add(
+      this.authApiService.getPublicUserProfile(userId).subscribe({
+        next: profile => {
+          this.publicProfile = profile;
+          this.updateUnlockedAchievements(profile);
+          this.updateFavoritesAndVisited();
+          this.calculateUserBadge(profile);
+        },
+        error: err => console.error('❌ Failed to load profile:', err),
+      })
+    );
+  }
 
-  console.log('Favorites:', this.favorites);
-  console.log('Visited:', this.visited);
-}
+  /** Updates favorites and visited places based on user profile */
+  private updateFavoritesAndVisited(): void {
+    if (!this.user || !this.allPlaces.length) {
+      this.favorites = [];
+      this.visited = [];
+      return;
+    }
 
+    const favoritePlaceIds = new Set(this.user.favoriteCafeIds);
+    const visitedPlaceIds = new Set(this.publicProfile?.checkInCafes.map(c => c.id) || []);
+
+    this.favorites = this.allPlaces.filter(place => favoritePlaceIds.has(place.id));
+    this.visited = this.allPlaces.filter(place => visitedPlaceIds.has(place.id));
+  }
+
+  /** Updates unlocked achievements and detects new ones */
   private updateUnlockedAchievements(profile: PublicUserProfile): void {
     const unlocked = getUnlockedAchievements(profile);
-    const current = new Set(
-      unlocked.flatMap((s) => s.achievements.map((a) => a.key)),
-    );
+    const current = new Set(unlocked.flatMap(s => s.achievements.map(a => a.key)));
 
     const prev = localStorage.getItem('unlockedAchievements');
     const prevSet = prev ? new Set(JSON.parse(prev)) : null;
 
     const newAchievements = prevSet
-      ? Array.from(current).filter((key) => !prevSet.has(key))
+      ? Array.from(current).filter(key => !prevSet.has(key))
       : [];
 
-    localStorage.setItem(
-      'unlockedAchievements',
-      JSON.stringify(Array.from(current)),
-    );
-
+    localStorage.setItem('unlockedAchievements', JSON.stringify(Array.from(current)));
     this.unlockedAchievementTitles = current;
     this.achievements = ACHIEVEMENTS;
 
@@ -392,11 +379,13 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Calculates the user's badge type */
   private calculateUserBadge(profile: PublicUserProfile): void {
     const unlocked = getUnlockedAchievements(profile);
     this.badgeType = calculateBadgeType(unlocked, ACHIEVEMENTS);
   }
 
+  /** Resets profile-related data */
   private resetProfileData(): void {
     this.publicProfile = null;
     this.favorites = [];

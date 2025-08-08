@@ -125,7 +125,7 @@ export class MobileMenuComponent {
   // Inputs
   @Input() cityKey: string | null = null;
   @Input() cityLabel = 'City';
-  @Input() language: 'ENG' | 'UKR' = 'ENG';
+  @Input() language: 'EN' | 'UK' = 'EN';
   @Input() user: AuthUser | null = null;
 
   // Outputs
@@ -134,7 +134,7 @@ export class MobileMenuComponent {
   @Output() navigateToAuth = new EventEmitter<void>();
   @Output() logout = new EventEmitter<void>();
   @Output() cityChange = new EventEmitter<string>();
-  @Output() languageChange = new EventEmitter<'ENG' | 'UKR'>();
+  @Output() languageChange = new EventEmitter<'EN' | 'UK'>();
 
   // Dropdown state
   activeDropdown: 'city' | 'lang' | null = null;

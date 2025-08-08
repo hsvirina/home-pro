@@ -35,10 +35,10 @@ import { TranslateModule } from '@ngx-translate/core';
   ],
   template: `
     <div
-      class="flex min-h-screen min-w-[375px] flex-col transition-colors duration-300"
+      class="flex min-h-screen min-w-[375px] w-full flex-col transition-colors duration-300"
       [ngClass]="{
         'text-[var(--color-gray-100)]': (currentTheme$ | async) === 'light',
-        'text-[var(--color-gray-20)]': (currentTheme$ | async) === 'dark'
+        'text-[var(--color-gray-20)]': (currentTheme$ | async) === 'dark',
       }"
     >
       <!-- Global loader shown on all pages except home and auth -->
@@ -51,7 +51,7 @@ import { TranslateModule } from '@ngx-translate/core';
         class="fixed left-0 right-0 top-0 z-20 border-b bg-[var(--color-bg)] transition-colors duration-300"
         [ngClass]="{
           'border-[var(--color-gray-20)]': (currentTheme$ | async) === 'light',
-          'border-[var(--color-border)]': (currentTheme$ | async) === 'dark'
+          'border-[var(--color-border)]': (currentTheme$ | async) === 'dark',
         }"
       >
         <div class="mx-auto h-full max-w-[1320px]">
@@ -71,7 +71,7 @@ import { TranslateModule } from '@ngx-translate/core';
         class="w-full transition-colors duration-300"
         [ngClass]="{
           'bg-[var(--color-secondary)]': (currentTheme$ | async) === 'light',
-          'bg-[var(--color-bg-footer)]': (currentTheme$ | async) === 'dark'
+          'bg-[var(--color-bg-footer)]': (currentTheme$ | async) === 'dark',
         }"
       >
         <div class="mx-auto max-w-[1320px]">
@@ -81,14 +81,14 @@ import { TranslateModule } from '@ngx-translate/core';
 
       <!-- Bottom padding block for mobile screens -->
       <div
-        class="pt-[20px] block h-[34px] w-full lg:hidden"
+        class="block h-[34px] w-full pt-[20px] lg:hidden"
         style="max-width: 1320px; margin: 0 auto; padding-left: 120px; padding-right: 120px;"
         [ngClass]="{
           'bg-[var(--color-secondary)]': (currentTheme$ | async) === 'light',
-          'bg-[var(--color-bg-footer)]': (currentTheme$ | async) === 'dark'
+          'bg-[var(--color-bg-footer)]': (currentTheme$ | async) === 'dark',
         }"
       >
-        <div class="h-[5px] w-full bg-black rounded-[100px]"></div>
+        <div class="h-[5px] w-full rounded-[100px] bg-black"></div>
       </div>
     </div>
   `,
@@ -107,7 +107,7 @@ export class AppComponent implements OnDestroy {
   constructor(
     private router: Router,
     public loaderService: LoaderService,
-    private themeService: ThemeService
+    private themeService: ThemeService,
   ) {
     this.currentTheme$ = this.themeService.theme$;
     this.initRouterEvents();
@@ -121,28 +121,26 @@ export class AppComponent implements OnDestroy {
    * Uses takeUntil for automatic unsubscription.
    */
   private initRouterEvents(): void {
-    this.router.events
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((event) => {
-        if (event instanceof NavigationStart) {
-          this.isHomePage = event.url === '/';
-          this.isAuthPage = event.url.startsWith('/auth');
+    this.router.events.pipe(takeUntil(this.destroy$)).subscribe((event) => {
+      if (event instanceof NavigationStart) {
+        this.isHomePage = event.url === '/';
+        this.isAuthPage = event.url.startsWith('/auth');
 
-          if (!this.isHomePage && !this.isAuthPage) {
-            this.loaderService.show();
-          }
+        if (!this.isHomePage && !this.isAuthPage) {
+          this.loaderService.show();
         }
+      }
 
-        if (
-          event instanceof NavigationEnd ||
-          event instanceof NavigationCancel ||
-          event instanceof NavigationError
-        ) {
-          if (this.isHomePage || this.isAuthPage) {
-            this.loaderService.hide();
-          }
+      if (
+        event instanceof NavigationEnd ||
+        event instanceof NavigationCancel ||
+        event instanceof NavigationError
+      ) {
+        if (this.isHomePage || this.isAuthPage) {
+          this.loaderService.hide();
         }
-      });
+      }
+    });
   }
 
   /** Clean up subscriptions when component is destroyed */

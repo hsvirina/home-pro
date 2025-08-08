@@ -147,7 +147,7 @@ import { ThemedIconPipe } from '../../../core/pipes/themed-icon.pipe';
           class="button-font button-bg-blue px-[32px] py-[12px]"
           [disabled]="loginError && (!email || !password)"
         >
-          {{ 'BUTTON.LOG_IN' | translate }}
+          {{ 'button.log_in' | translate }}
         </button>
       </form>
     </div>

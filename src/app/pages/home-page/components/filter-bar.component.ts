@@ -48,18 +48,7 @@ import {
       transition('closed <=> open', animate('300ms ease')),
     ]),
   ],
-  styles: [
-    `
-      /* Scrollable container for mobile dropdown options */
-      .dropdown-mobile-options {
-        max-height: 60vh;
-        overflow-y: auto;
-        overflow-x: hidden;
-        -webkit-overflow-scrolling: touch;
-        box-sizing: border-box;
-      }
-    `,
-  ],
+
   template: `
     <!-- Filter bar wrapper -->
     <div
@@ -83,7 +72,7 @@ import {
         }"
       >
         <div
-          class="relative flex w-[688px] items-center justify-between gap-[4px] rounded-[40px] border lg:h-[72px] xxl:h-[84px]"
+          class="relative flex w-[335px] lg:w-[688px] items-center justify-between gap-[4px] rounded-[40px] border lg:h-[72px] xxl:h-[84px]"
           [ngClass]="{
             'border-[var(--color-gray-20)]': (currentTheme$ | async) === 'light',
             'border-[var(--color-gray-75)]': (currentTheme$ | async) === 'dark'
@@ -164,7 +153,7 @@ import {
         (click)="onSearchClick()"
       >
         <app-icon [icon]="ICONS.SearchWhite" />
-        <span class="button-font">{{ 'BUTTON.SEARCH' | translate }}</span>
+        <span class="button-font">{{ 'button.search' | translate }}</span>
       </button>
 
       <!-- Backdrop overlay for mobile filter -->
@@ -178,7 +167,7 @@ import {
       <div
         *ngIf="isMobileFilterOpen"
         @slideUpModal
-        class="fixed inset-0 z-40 flex max-w-full flex-col justify-between overflow-x-hidden overflow-y-scroll overscroll-contain px-5 pt-3 lg:hidden"
+        class="mobile-filter-modal fixed inset-0 z-40 flex w-full max-w-full flex-col justify-between overflow-x-hidden overflow-y-scroll overscroll-contain px-5 pt-3 lg:hidden"
         #mobileFilterModal
       >
         <!-- Close button -->
@@ -262,19 +251,41 @@ import {
             class="button-bg-blue mb-4 mt-4 h-12 flex-1"
             (click)="applyFilters(); toggleMobileFilter()"
           >
-            Apply Filters
+            {{ 'button.apply_filters' | translate }}
           </button>
 
           <button
             class="button-bg-transparent mb-4 mt-4 h-12 flex-1 text-[var(--color-primary)]"
             (click)="clearAllFilters()"
           >
-            Clear All
+            {{ 'button.clear_all' | translate }}
           </button>
         </div>
       </div>
     </div>
   `,
+
+    styles: [
+    `
+      /* Scrollable container for mobile dropdown options */
+      .dropdown-mobile-options {
+        max-height: 60vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        box-sizing: border-box;
+      }
+       .mobile-filter-modal {
+        width: 100%;
+        max-width: 100%;
+        left: 0;
+        right: 0;
+        box-sizing: border-box;
+      }
+    `,
+  ],
+
+
 })
 export class FilterBarComponent implements OnDestroy, AfterViewInit {
   @ViewChild('mobileFilterModal', { static: false }) mobileFilterModal?: ElementRef;

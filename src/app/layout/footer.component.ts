@@ -77,10 +77,10 @@ import { TranslateModule } from '@ngx-translate/core';
               'text-[var(--color-white)]': (currentTheme$ | async) === 'dark',
             }"
           >
-            {{ 'FOOTER.SUBSCRIBE_TITLE' | translate }}
+            {{ 'footer.subscribe_title' | translate }}
           </h5>
           <span class="body-font-1">
-            {{ 'FOOTER.SUBSCRIBE_DESCRIPTION' | translate }}.
+            {{ 'footer.subscribe_description' | translate }}.
           </span>
         </div>
 
@@ -89,7 +89,7 @@ import { TranslateModule } from '@ngx-translate/core';
           [(ngModel)]="email"
           name="email"
           type="email"
-          [placeholder]="'FOOTER.EMAIL_PLACEHOLDER' | translate"
+          [placeholder]="'footer.email_placeholder' | translate"
           required
           email
           #emailInput="ngModel"
@@ -105,7 +105,7 @@ import { TranslateModule } from '@ngx-translate/core';
 
         <!-- Ошибка валидации email -->
         <div *ngIf="showError" class="body-font-2 text-[var(--color-primary)]">
-          {{ 'FOOTER.EMAIL_ERROR' | translate }}
+          {{ 'footer.email_error' | translate }}
         </div>
 
         <!-- Кнопка отправки и подпись -->
@@ -115,11 +115,11 @@ import { TranslateModule } from '@ngx-translate/core';
             (click)="onSubmit()"
             class="button-bg-transparent px-[24px] py-[12px] text-center lg:w-full lg:px-[24px]"
           >
-            {{ 'FOOTER.SEND_BUTTON' | translate }}
+            {{ 'button.send' | translate }}
           </button>
 
           <span class="body-font-2">
-            {{ 'FOOTER.PRIVACY_NOTICE' | translate }}
+            {{ 'footer.privace_notice' | translate }}
           </span>
         </div>
       </div>
@@ -131,16 +131,16 @@ import { TranslateModule } from '@ngx-translate/core';
         class="flex w-full flex-col items-center justify-between gap-[32px] text-center text-[var(--color-gray-100)]"
       >
         <div class="flex flex-col gap-[20px]">
-          <h4>{{ 'FOOTER.MODAL_TITLE' | translate }}</h4>
+          <h4>{{ 'MODAL.MODAL_TITLE' | translate }}</h4>
           <p class="body-font-1">
-            {{ 'FOOTER.MODAL_TEXT' | translate }}
+            {{ 'MODAL.MODAL_TEXT' | translate }}
           </p>
         </div>
         <button
           (click)="closeModal()"
           class="button-font h-[48px] w-full rounded-[40px] bg-[var(--color-primary)] px-[32px] py-[12px] text-[var(--color-white)]"
         >
-          {{ 'BUTTON.CLOSE' | translate }}
+          {{ 'button.close' | translate }}
         </button>
       </div>
     </app-modal>
@@ -162,23 +162,23 @@ export class FooterComponent {
   /** Навигационные ссылки в футере */
   navigationLinks = [
     {
-      title: 'FOOTER.LINKS_TITLE_COMPANY',
+      title: 'footer.links.title_company',
       links: [
-        { label: 'FOOTER.LINKS.ABOUT_US', route: '/about' },
-        { label: 'FOOTER.LINKS.FAQS', route: '/faqs' },
-        { label: 'FOOTER.LINKS.CONTACT_US', route: '/contact' },
-        { label: 'FOOTER.LINKS.SOCIAL_MEDIA', route: '/social-media' },
-        { label: 'FOOTER.LINKS.FEEDBACK', route: '/feedback' },
+        { label: 'footer.links.about_us', route: '/about' },
+        { label: 'footer.links.faqs', route: '/faqs' },
+        { label: 'footer.links.contact_us', route: '/contact' },
+        { label: 'footer.links.social_media', route: '/social-media' },
+        { label: 'footer.links.feedback', route: '/feedback' },
       ],
     },
     {
-      title: 'FOOTER.LINKS_TITLE_RESOURCES',
+      title: 'footer.links.title_resources',
       links: [
-        { label: 'FOOTER.LINKS.NEWSLETTER', route: '/newsletter' },
-        { label: 'FOOTER.LINKS.UPDATES', route: '/updates' },
-        { label: 'FOOTER.LINKS.EVENTS', route: '/events' },
-        { label: 'FOOTER.LINKS.BLOG_POSTS', route: '/blog-posts' },
-        { label: 'FOOTER.LINKS.COMMUNITY', route: '/community' },
+        { label: 'footer.links.newsletter', route: '/newsletter' },
+        { label: 'footer.links.updates', route: '/updates' },
+        { label: 'footer.links.events', route: '/events' },
+        { label: 'footer.links.blog_posts', route: '/blog-posts' },
+        { label: 'footer.links.community', route: '/community' },
       ],
     },
   ];

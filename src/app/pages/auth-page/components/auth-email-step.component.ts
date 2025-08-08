@@ -19,7 +19,7 @@ import { Theme } from '../../../core/models/theme.type';
         <span class="body-font-1 text-center">
           {{ 'AUTH.ALREADY_HAVE_ACCOUNT' | translate }}
           <button class="underline" (click)="toggleForm.emit()" type="button">
-            <h6>{{ 'BUTTON.LOG_IN' | translate }}</h6>
+            <h6>{{ 'button.log_in' | translate }}</h6>
           </button>
         </span>
       </div>

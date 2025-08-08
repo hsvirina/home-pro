@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  OnInit,
+  ElementRef,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Theme, ThemeValues } from '../../../core/models/theme.type';
 import { Place } from '../../../core/models/place.model';
@@ -22,7 +30,6 @@ import { LanguageService } from '../../../core/services/language.service';
     CommonModule,
     IconComponent,
     ToggleSwitchComponent,
-    ClickOutsideDirective,
     TranslateModule,
   ],
   animations: [slideDownAnimation],
@@ -61,7 +68,7 @@ import { LanguageService } from '../../../core/services/language.service';
                 'settings.themeDescription' | translate
               }}</span>
             </div>
-            <div class="relative w-full lg:w-auto">
+            <div #themeDropdown class="relative w-full lg:w-auto ">
               <button
                 type="button"
                 class="flex w-full cursor-pointer items-center justify-between rounded-3xl border px-6 py-3 lg:w-auto lg:gap-3"
@@ -70,9 +77,7 @@ import { LanguageService } from '../../../core/services/language.service';
                 [attr.aria-expanded]="isThemeDropdownOpen"
                 (click)="toggleThemeDropdown($event)"
               >
-                <span class="capitalize">{{
-                  'settings.theme' + capitalize(user.theme) | translate
-                }}</span>
+                <span class="capitalize">{{ 'settings.theme' + capitalize(user.theme) | translate }}</span>
                 <app-icon
                   [icon]="ICONS.ChevronDown"
                   class="transition-transform"
@@ -83,8 +88,6 @@ import { LanguageService } from '../../../core/services/language.service';
               <ul
                 *ngIf="isThemeDropdownOpen"
                 @slideDownAnimation
-                appClickOutside
-                (appClickOutside)="closeDropdowns()"
                 class="absolute left-0 top-full z-10 mt-2 w-full rounded-[16px] border p-2"
                 [ngClass]="themeDropdownListClasses"
                 role="listbox"
@@ -113,7 +116,7 @@ import { LanguageService } from '../../../core/services/language.service';
                 'settings.languageDescription' | translate
               }}</span>
             </div>
-            <div class="relative w-full lg:w-auto">
+            <div #languageDropdown class="relative w-full lg:w-auto ">
               <button
                 type="button"
                 class="flex w-full cursor-pointer items-center justify-between rounded-[40px] border px-6 py-3 lg:w-auto lg:gap-3"
@@ -135,8 +138,6 @@ import { LanguageService } from '../../../core/services/language.service';
               <ul
                 *ngIf="isLanguageDropdownOpen"
                 @slideDownAnimation
-                appClickOutside
-                (appClickOutside)="closeDropdowns()"
                 class="absolute left-0 top-full z-10 mt-2 w-full rounded-[16px] border p-2"
                 [ngClass]="themeDropdownListClasses"
                 role="listbox"
@@ -296,6 +297,8 @@ import { LanguageService } from '../../../core/services/language.service';
   `,
 })
 export class SettingsSectorComponent implements OnInit {
+  @ViewChild('themeDropdown', { static: false }) themeDropdownRef!: ElementRef;
+@ViewChild('languageDropdown', { static: false }) languageDropdownRef!: ElementRef;
   /** Authenticated user whose settings are being displayed */
   @Input() user!: AuthUser;
 
@@ -337,6 +340,7 @@ export class SettingsSectorComponent implements OnInit {
     private authService: AuthStateService,
     private router: Router,
     public languageService: LanguageService,
+    private elementRef: ElementRef,
   ) {
     this.currentTheme$ = this.themeService.theme$;
   }
@@ -351,8 +355,11 @@ export class SettingsSectorComponent implements OnInit {
       this.themeService.setTheme(this.user.theme as Theme);
     }
 
-    // Sync language from user preference
+    // Sync language
     this.languageService.syncFromUser(this.user);
+
+    // 👇 Слушаем клики вне компонента
+    document.addEventListener('mousedown', this.onDocumentClick, true);
   }
 
   /** Returns dropdown button style classes depending on the theme */
@@ -377,14 +384,17 @@ export class SettingsSectorComponent implements OnInit {
 
   /** Toggles theme dropdown visibility */
   toggleThemeDropdown(event: MouseEvent): void {
+    event.preventDefault();
     event.stopPropagation();
+
     this.isThemeDropdownOpen = !this.isThemeDropdownOpen;
     if (this.isThemeDropdownOpen) this.isLanguageDropdownOpen = false;
   }
-
   /** Toggles language dropdown visibility */
   toggleLanguageDropdown(event: MouseEvent): void {
+    event.preventDefault();
     event.stopPropagation();
+
     this.isLanguageDropdownOpen = !this.isLanguageDropdownOpen;
     if (this.isLanguageDropdownOpen) this.isThemeDropdownOpen = false;
   }
@@ -414,6 +424,17 @@ export class SettingsSectorComponent implements OnInit {
     }
     this.isLanguageDropdownOpen = false;
   }
+
+onDocumentClick = (event: MouseEvent) => {
+  const target = event.target as HTMLElement;
+
+  const clickedInsideTheme = this.themeDropdownRef?.nativeElement.contains(target);
+  const clickedInsideLang = this.languageDropdownRef?.nativeElement.contains(target);
+
+  if (!clickedInsideTheme && !clickedInsideLang) {
+    this.closeDropdowns();
+  }
+};
 
   /** Toggles email notifications on/off */
   toggleEmailNotifications(): void {
@@ -454,4 +475,8 @@ export class SettingsSectorComponent implements OnInit {
     this.authService.logout();
     this.router.navigate(['/']);
   }
+
+  ngOnDestroy(): void {
+  document.removeEventListener('mousedown', this.onDocumentClick, true);
+}
 }

@@ -65,12 +65,14 @@ export class LanguageService {
    * Updates localStorage, BehaviorSubject, and ngx-translate language.
    * @param lang LangCode to set
    */
-  setLang(lang: LangCode): void {
-    if (!this.allowedLangs.includes(lang)) {
-      throw new Error(`Unsupported language code: ${lang}`);
-    }
-    localStorage.setItem('lang', lang);
-    this.langSubject.next(lang);
-    this.translate.use(lang);
+setLang(lang: LangCode): void {
+  console.log('LanguageService.setLang called with', lang);
+  if (!this.allowedLangs.includes(lang)) {
+    throw new Error(`Unsupported language code: ${lang}`);
   }
+
+  localStorage.setItem('lang', lang);
+  this.langSubject.next(lang);
+  this.translate.use(lang);
+}
 }

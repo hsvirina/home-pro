@@ -206,7 +206,7 @@ import { TranslateModule } from '@ngx-translate/core';
               }}
             </ng-container>
             <ng-template #learnMore>
-              {{ 'BUTTON.LEARN_MORE' | translate }}
+              {{ 'button.learn_more' | translate }}
             </ng-template>
           </button>
         </div>
@@ -377,10 +377,7 @@ export class PlaceCardComponent implements AfterViewInit {
           placeId: this.place.id,
           isFavorite: newFavoriteStatus,
         });
-        console.log('Favorite toggled:', {
-          placeId: this.place.id,
-          isFavorite: newFavoriteStatus,
-        });
+
       },
       error: (err) => {
         if (err.message === 'NOT_AUTHENTICATED') {

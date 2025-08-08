@@ -25,7 +25,7 @@ import { TranslateModule } from '@ngx-translate/core';
   ],
   template: `
     <div
-      class="flex flex-col gap-[32px] rounded-[24px] border p-[16px] lg:gap-[48px] lg:p-[24px] xxl:gap-[48px]"
+      class="px-5 lg:px-0 flex flex-col gap-[32px] rounded-[24px] border p-[16px] lg:gap-[48px] lg:p-[24px] xxl:gap-[48px]"
       [ngClass]="[
         (currentTheme$ | async) === 'light'
           ? 'border-[var(--color-gray-20)]'
@@ -33,7 +33,7 @@ import { TranslateModule } from '@ngx-translate/core';
       ]"
     >
       <!-- Top section: user avatar, name, status -->
-      <div class="lg:flex lg:justify-between">
+      <div class="lg:flex lg:justify-between lg:p-6">
         <div class="flex items-start gap-[20px] lg:flex-row">
           <div
             class="relative h-[58px] w-[58px] flex-shrink-0 lg:h-[120px] lg:w-[120px]"

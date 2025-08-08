@@ -110,7 +110,7 @@ export class AuthStateService {
    * @param lang Language code ('ENG' or 'UKR')
    * @returns Observable emitting updated AuthUser
    */
-  updateUserLanguage(lang: 'ENG' | 'UKR'): Observable<AuthUser> {
+  updateUserLanguage(lang: 'EN' | 'UK'): Observable<AuthUser> {
     return this.updateUserProfile({ language: lang });
   }
 

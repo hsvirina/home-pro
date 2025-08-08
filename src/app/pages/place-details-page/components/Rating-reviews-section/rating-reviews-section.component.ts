@@ -100,7 +100,7 @@ import { TranslateModule } from '@ngx-translate/core';
       </div>
 
       <ng-template #noReviews>
-        <h5 class="col-span-8 mb-11 text-[var(--color-gray-100)]">
+        <h5 class="col-span-8 mb-11">
           {{ 'reviews.noReviews' | translate }}
         </h5>
       </ng-template>

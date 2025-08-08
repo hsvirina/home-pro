@@ -360,12 +360,12 @@ openShareModal(): void {
   // }
 
   handleShare(): void {
-  console.log('Share button clicked');
+
   if (!this.place?.id) return;
 
   // Копирование ссылки в буфер обмена
   navigator.clipboard.writeText(this.currentShareLink).then(() => {
-    console.log('Cafe URL copied to clipboard');
+
     // После успешного копирования, меняем текст кнопки
     this.copied = true;
     setTimeout(() => {

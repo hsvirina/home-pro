@@ -41,11 +41,15 @@ import { TranslateModule } from '@ngx-translate/core';
           [ngClass]="{ 'text-[var(--color-white)]': theme === 'dark' }"
         >
           <h2 class="max-w-[1172px] text-[36px] lg:text-[64px] xxl:text-[80px]">
-            {{ 'HOME.TITLE' | translate }}
-            <span class="text-[var(--color-primary)]">{{ 'HOME.CLICK' | translate }}</span>
-            {{ 'HOME.AWAY' | translate }}
+            {{ 'home_page.title' | translate }}
+            <span class="text-[var(--color-primary)]">{{
+              'home_page.click' | translate
+            }}</span>
+            {{ 'home_page.away' | translate }}
           </h2>
-          <span class="body-font-1">{{ 'HOME.SUBTITLE' | translate }}</span>
+          <span class="body-font-1">{{
+            'home_page.subtitle' | translate
+          }}</span>
         </div>
 
         <!-- Filter Bar -->
@@ -58,7 +62,7 @@ import { TranslateModule } from '@ngx-translate/core';
 
       <!-- Slider: Recommended for you -->
       <app-slider-places
-        [title]="'SLIDER.FOR_YOU' | translate"
+        [title]="'home_page.slider.for_you' | translate"
         [places]="(places$ | async) ?? []"
         (unauthorizedFavoriteClick)="handleUnauthorizedFavoriteClick()"
         class="my-[64px] w-full max-w-[1320px] lg:mb-[150px] lg:mt-[150px] lg:px-10 xxl:px-0"
@@ -70,7 +74,7 @@ import { TranslateModule } from '@ngx-translate/core';
         *ngIf="currentTheme$ | async as theme"
         [ngClass]="{
           'bg-[var(--color-gray-100)]': theme === 'dark',
-          'bg-[var(--color-white)]': theme === 'light'
+          'bg-[var(--color-white)]': theme === 'light',
         }"
       >
         <div class="mx-auto w-full max-w-[1320px]">
@@ -80,7 +84,7 @@ import { TranslateModule } from '@ngx-translate/core';
 
       <!-- Slider: Popular places -->
       <app-slider-places
-        [title]="'SLIDER.POPULAR' | translate"
+        [title]="'home_page.slider.popular' | translate"
         [places]="(popularPlaces$ | async) ?? []"
         (unauthorizedFavoriteClick)="handleUnauthorizedFavoriteClick()"
         class="my-[64px] w-full max-w-[1320px] lg:mb-[150px] lg:mt-[150px] lg:px-10 xxl:px-0"
@@ -98,13 +102,13 @@ import { TranslateModule } from '@ngx-translate/core';
           (click)="navigateToAuth()"
           class="button-font button-bg-blue px-6 py-2"
         >
-          {{ 'BUTTON.LOG_IN' | translate }}
+          {{ 'button.log_in' | translate }}
         </button>
         <button
           (click)="showLoginModal = false"
           class="button-font button-bg-transparent px-6 py-2"
         >
-          {{ 'BUTTON.CLOSE' | translate }}
+          {{ 'button.close' | translate }}
         </button>
       </div>
     </app-modal>
@@ -119,7 +123,7 @@ export class HomePageComponent implements OnInit {
   constructor(
     private placesStore: PlacesStoreService,
     private router: Router,
-    private themeService: ThemeService
+    private themeService: ThemeService,
   ) {
     this.places$ = this.placesStore.places$;
     this.popularPlaces$ = this.placesStore.popularPlaces$;
