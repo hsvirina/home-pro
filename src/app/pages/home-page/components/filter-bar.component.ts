@@ -50,93 +50,100 @@ import {
   ],
 
   template: `
-    <!-- Filter bar wrapper -->
+    <!-- Обёртка фильтр-бара -->
     <div
-      class="flex w-full flex-col gap-[16px] px-[20px] lg:h-[72px] lg:flex-row lg:gap-[20px] lg:px-0 xxl:h-[84px] xxl:max-w-[896px] xxl:gap-[24px]"
+      class="flex w-full flex-col gap-4 px-5 lg:h-[72px] lg:flex-row lg:gap-5 lg:px-0 xxl:h-[84px] xxl:max-w-[896px] xxl:gap-6"
     >
-      <!-- Mobile filter toggle button -->
+      <!-- Кнопка открытия фильтров на мобилке -->
       <button
-        class="button-bg-transparent flex h-[48px] w-full lg:hidden"
+        class="button-bg-transparent flex h-12 w-full lg:hidden"
         type="button"
         (click)="toggleMobileFilter()"
       >
         Filters
       </button>
 
-      <!-- Filters container: hidden on mobile unless open -->
+      <!-- Контейнер фильтров (скрыт на мобилке, если не открыт) -->
       <div
-        class="gap-[24px]"
+        class="gap-6"
         [ngClass]="{
-          'hidden h-[100%] lg:flex': !isMobileFilterOpen,
-          'flex flex-col': isMobileFilterOpen
+          'hidden h-full lg:flex': !isMobileFilterOpen,
+          'flex flex-col': isMobileFilterOpen,
         }"
       >
         <div
-          class="relative flex w-[335px] lg:w-[688px] items-center justify-between gap-[4px] rounded-[40px] border lg:h-[72px] xxl:h-[84px]"
+          class="relative flex w-[335px] items-center justify-between gap-1 rounded-[40px] border lg:h-[72px] lg:w-[688px] xxl:h-[84px]"
           [ngClass]="{
-            'border-[var(--color-gray-20)]': (currentTheme$ | async) === 'light',
-            'border-[var(--color-gray-75)]': (currentTheme$ | async) === 'dark'
+            'border-[var(--color-gray-20)]':
+              (currentTheme$ | async) === 'light',
+            'border-[var(--color-gray-75)]': (currentTheme$ | async) === 'dark',
           }"
         >
-          <!-- Filter categories -->
+          <!-- Категории фильтров -->
           <div
             *ngFor="let category of filterCategories; let i = index"
-            class="relative flex h-full flex-1 cursor-pointer flex-col items-center justify-center gap-[4px] whitespace-nowrap rounded-[40px] text-center transition-colors duration-300"
+            class="relative flex h-full flex-1 cursor-pointer flex-col items-center justify-center gap-1 whitespace-nowrap rounded-[40px] text-center transition-colors duration-300"
             [ngClass]="{
               'text-[var(--color-primary)]': selectedOptions[category.key],
               'bg-[var(--color-white)]':
-                selectedOptions[category.key] && (currentTheme$ | async) === 'light',
+                selectedOptions[category.key] &&
+                (currentTheme$ | async) === 'light',
               'bg-[var(--color-bg-card)]':
-                selectedOptions[category.key] && (currentTheme$ | async) === 'dark',
-              'hover:bg-[var(--color-white)]': !selectedOptions[category.key]
+                selectedOptions[category.key] &&
+                (currentTheme$ | async) === 'dark',
+              'hover:bg-[var(--color-white)]': !selectedOptions[category.key],
             }"
             (click)="toggleDropdown(i)"
             (mouseenter)="handleMouseEnter(i)"
           >
-            <!-- Category title -->
+            <!-- Заголовок категории -->
             <span
               class="menu-text-font"
               [ngClass]="{
-                'text-[var(--color-gray-100)]': (currentTheme$ | async) === 'light',
-                'text-[var(--color-gray-10)]': (currentTheme$ | async) === 'dark'
+                'text-[var(--color-gray-100)]':
+                  (currentTheme$ | async) === 'light',
+                'text-[var(--color-gray-10)]':
+                  (currentTheme$ | async) === 'dark',
               }"
             >
               {{ category.title }}
             </span>
 
-            <!-- Selected option or default description -->
+            <!-- Выбранный вариант или описание -->
             <span
               class="body-font-1"
               [ngClass]="{
-                'text-[var(--color-gray-75)]': (currentTheme$ | async) === 'light',
-                'text-[var(--color-gray-20)]': (currentTheme$ | async) === 'dark'
+                'text-[var(--color-gray-75)]':
+                  (currentTheme$ | async) === 'light',
+                'text-[var(--color-gray-20)]':
+                  (currentTheme$ | async) === 'dark',
               }"
             >
               {{ selectedOptions[category.key] || category.description }}
             </span>
 
-            <!-- Dropdown options (desktop) -->
+            <!-- Выпадающий список опций (десктоп) -->
             <ul
               *ngIf="openedDropdownIndex === i"
               @slideDownAnimation
               class="absolute left-0 top-full z-50 mt-2 w-max rounded-[40px] border border-[var(--color-white)] p-2"
               [ngClass]="{
                 'bg-[var(--color-white)]': (currentTheme$ | async) === 'light',
-                'bg-[var(--color-bg-card)]': (currentTheme$ | async) === 'dark'
+                'bg-[var(--color-bg-card)]': (currentTheme$ | async) === 'dark',
               }"
               (click)="$event.stopPropagation()"
             >
               <li
                 *ngFor="let option of category.options"
-                class="flex cursor-pointer gap-[12px] rounded-[40px] p-2 hover:bg-[var(--color-bg)]"
+                class="flex cursor-pointer gap-3 rounded-[40px] p-2 hover:bg-[var(--color-bg)]"
                 (click)="selectOption(category.key, option.label, $event)"
               >
                 <img
                   [src]="option.imageURL"
                   alt="image"
-                  class="h-[56px] w-[56px] rounded-full"
+                  class="h-14 w-14 rounded-full"
                 />
-                <div class="flex flex-col gap-[4px] text-left">
+                <div class="flex flex-col gap-1 text-left">
                   <span class="menu-text-font">{{ option.label }}</span>
                   <span class="body-font-2">{{ option.description }}</span>
                 </div>
@@ -146,9 +153,9 @@ import {
         </div>
       </div>
 
-      <!-- Search button -->
+      <!-- Кнопка поиска -->
       <button
-        class="button-bg-blue flex h-[48px] w-full gap-3 lg:h-[72px] lg:w-[168px] xxl:h-[84px] xxl:w-[184px]"
+        class="button-bg-blue flex h-12 w-full gap-3 lg:h-[72px] lg:w-[168px] xxl:h-[84px] xxl:w-[184px]"
         type="button"
         (click)="onSearchClick()"
       >
@@ -156,97 +163,99 @@ import {
         <span class="button-font">{{ 'button.search' | translate }}</span>
       </button>
 
-      <!-- Backdrop overlay for mobile filter -->
+      <!-- Подложка при открытом фильтре на мобилке -->
       <div
         *ngIf="isMobileFilterOpen"
         @fadeInBackdrop
         class="bg-[var(--color-bg)]/90 fixed inset-0 z-40 backdrop-blur-3xl lg:hidden"
       ></div>
 
-      <!-- Mobile filter modal -->
+      <!-- Модальное окно фильтров на мобилке -->
       <div
         *ngIf="isMobileFilterOpen"
         @slideUpModal
-        class="mobile-filter-modal fixed inset-0 z-40 flex w-full max-w-full flex-col justify-between overflow-x-hidden overflow-y-scroll overscroll-contain px-5 pt-3 lg:hidden"
+        class="mobile-filter-modal fixed inset-0 z-40 flex flex-col px-5 pb-6 pt-3 lg:hidden"
         #mobileFilterModal
       >
-        <!-- Close button -->
-        <div class="flex justify-end">
+        <!-- Кнопка закрытия -->
+        <div class="mb-6 flex justify-end">
           <button
             (click)="toggleMobileFilter()"
-            class="mb-[25px] flex h-10 w-10 items-center justify-center rounded-[40px] bg-[var(--color-white)]"
+            class="flex h-10 w-10 items-center justify-center rounded-[40px] bg-[var(--color-white)]"
             aria-label="Close"
           >
             <app-icon [icon]="ICONS.Close" [width]="20" [height]="20" />
           </button>
         </div>
 
-        <!-- Mobile filter categories -->
-        <div class="flex-grow" (click)="onMobileModalClick($event)">
-          <div class="flex-grow">
-            <div class="relative flex h-full flex-col">
-              <div class="flex flex-col">
-                <div
-                  *ngFor="let category of filterCategories; let i = index"
-                  class="category-filter-block col-span-4"
-                  style="max-width: 100%; overflow-x: hidden"
-                >
-                  <!-- Category header -->
-                  <div
-                    class="flex cursor-pointer rounded-[24px] px-4 py-6 transition-all duration-300"
-                    (click)="toggleMobileFilterCategory(i)"
-                    (mouseenter)="onMobileCategoryHover(i)"
-                    [ngClass]="{
-                      'flex-row items-center justify-between gap-2': mobileOpenedIndex !== i,
-                      'flex-col': mobileOpenedIndex === i,
-                      'bg-[var(--color-white)] text-[var(--color-gray-100)]': (currentTheme$ | async) === 'light',
-                      'border border-[var(--color-gray-75)] bg-[var(--color-bg-card)] text-[var(--color-white)]': (currentTheme$ | async) === 'dark',
-                      'hover:bg-[var(--color-bg)]': true
-                    }"
-                  >
-                    <div class="menu-text-font">{{ category.title }}</div>
-                    <div
-                      class="body-font-1 text-[var(--color-gray-75)]"
-                      [ngClass]="{ 'text-[var(--color-white)]': (currentTheme$ | async) === 'dark' }"
-                    >
-                      {{ selectedOptions[category.key] || category.description }}
-                    </div>
-                  </div>
+        <!-- Контент с фильтрами -->
+        <div class="flex-grow overflow-y-auto">
+          <div
+            *ngFor="let category of filterCategories; let i = index"
+            class="category-filter-block"
+            style="max-width: 100%; overflow-x: hidden;"
+          >
+            <!-- Заголовок категории -->
+            <div
+              class="menu-text-font flex cursor-pointer rounded-[24px] px-4 py-6 transition-all duration-300"
+              (click)="toggleMobileFilterCategory(i)"
+              (mouseenter)="onMobileCategoryHover(i)"
+              [ngClass]="{
+                'flex-row items-center justify-between gap-2':
+                  mobileOpenedIndex !== i,
+                'flex-col': mobileOpenedIndex === i,
+                'bg-[var(--color-white)] text-[var(--color-gray-100)]':
+                  (currentTheme$ | async) === 'light',
+                'border border-[var(--color-gray-75)] bg-[var(--color-bg-card)] text-[var(--color-white)]':
+                  (currentTheme$ | async) === 'dark',
+                'hover:bg-[var(--color-bg)]': true,
+              }"
+            >
+              <div>{{ category.title }}</div>
+              <div
+                class="body-font-1 text-[var(--color-gray-75)]"
+                [ngClass]="{
+                  'text-[var(--color-white)]':
+                    (currentTheme$ | async) === 'dark',
+                }"
+              >
+                {{ selectedOptions[category.key] || category.description }}
+              </div>
+            </div>
 
-                  <!-- Mobile dropdown options -->
-                  <div
-                    #dropdownOptions
-                    [@slideDownMobile]="isMobileFilterOpenAt(i) ? 'open' : 'closed'"
-                    class="dropdown-mobile-options mt-1 mb-4 flex flex-col gap-1 rounded-[24px] border p-4"
-                    [ngClass]="{
-                      'border-[var(--color-white)] bg-[var(--color-white)]': (currentTheme$ | async) === 'light',
-                      'border-[var(--color-gray-75)] bg-[var(--color-bg)]': (currentTheme$ | async) === 'dark'
-                    }"
-                  >
-                    <div
-                      *ngFor="let option of category.options"
-                      (click)="selectOption(category.key, option.label)"
-                      class="flex cursor-pointer items-center gap-2 p-2 transition-colors duration-300 hover:rounded-[24px] hover:bg-[var(--color-bg-card)]"
-                    >
-                      <img
-                        [src]="option.imageURL"
-                        alt="icon"
-                        class="h-[40px] w-[40px] rounded-full"
-                      />
-                      <div class="flex flex-col">
-                        <span class="menu-text-font">{{ option.label }}</span>
-                        <span class="body-font-2">{{ option.description }}</span>
-                      </div>
-                    </div>
-                  </div>
+            <!-- Опции категории (мобилка) -->
+            <div
+              #dropdownOptions
+              [@slideDownMobile]="isMobileFilterOpenAt(i) ? 'open' : 'closed'"
+              class="dropdown-mobile-options mb-4 mt-1 flex flex-col gap-1 overflow-hidden rounded-[24px] border"
+              [ngClass]="{
+                'border-[var(--color-white)] bg-[var(--color-white)]':
+                  (currentTheme$ | async) === 'light',
+                'border-[var(--color-gray-75)] bg-[var(--color-bg)]':
+                  (currentTheme$ | async) === 'dark',
+              }"
+            >
+              <div
+                *ngFor="let option of category.options"
+                (click)="selectOption(category.key, option.label)"
+                class="flex cursor-pointer items-center gap-2 p-2 transition-colors duration-300 hover:rounded-[24px] hover:bg-[var(--color-bg-card)]"
+              >
+                <img
+                  [src]="option.imageURL"
+                  alt="icon"
+                  class="h-10 w-10 rounded-full"
+                />
+                <div class="flex flex-col">
+                  <span class="menu-text-font">{{ option.label }}</span>
+                  <span class="body-font-2">{{ option.description }}</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Mobile action buttons -->
-        <div class="flex w-full gap-4">
+        <!-- Кнопки действия (Применить, Очистить) -->
+        <div class="flex w-full flex-shrink-0 gap-4">
           <button
             class="button-bg-blue mb-4 mt-4 h-12 flex-1"
             (click)="applyFilters(); toggleMobileFilter()"
@@ -265,30 +274,38 @@ import {
     </div>
   `,
 
-    styles: [
+  styles: [
     `
       /* Scrollable container for mobile dropdown options */
-      .dropdown-mobile-options {
-        max-height: 60vh;
-        overflow-y: auto;
+      .mobile-filter-modal {
+        max-width: 100vw;
         overflow-x: hidden;
-        -webkit-overflow-scrolling: touch;
         box-sizing: border-box;
+        height: 100vh;
+        box-sizing: border-box; /* чтобы padding учитывался внутри */
+        display: flex;
+        flex-direction: column;
       }
-       .mobile-filter-modal {
-        width: 100%;
+
+      .category-filter-block {
         max-width: 100%;
-        left: 0;
-        right: 0;
-        box-sizing: border-box;
+        overflow-x: hidden;
+        word-break: break-word;
+        overflow-wrap: break-word;
+      }
+
+      .dropdown-mobile-options {
+        max-width: 100%;
+        overflow-x: hidden;
+        word-break: break-word;
+        overflow-wrap: break-word;
       }
     `,
   ],
-
-
 })
 export class FilterBarComponent implements OnDestroy, AfterViewInit {
-  @ViewChild('mobileFilterModal', { static: false }) mobileFilterModal?: ElementRef;
+  @ViewChild('mobileFilterModal', { static: false })
+  mobileFilterModal?: ElementRef;
   @ViewChildren('dropdownOptions') dropdownOptions!: QueryList<ElementRef>;
 
   ICONS = ICONS;
@@ -421,12 +438,16 @@ export class FilterBarComponent implements OnDestroy, AfterViewInit {
 
   /** Toggle desktop dropdown open/close */
   toggleDropdown(index: number): void {
-    this.openedDropdownIndex = this.openedDropdownIndex === index ? null : index;
+    this.openedDropdownIndex =
+      this.openedDropdownIndex === index ? null : index;
   }
 
   /** Handle mouse enter for desktop dropdown hover */
   handleMouseEnter(index: number): void {
-    if (this.openedDropdownIndex !== null && this.openedDropdownIndex !== index) {
+    if (
+      this.openedDropdownIndex !== null &&
+      this.openedDropdownIndex !== index
+    ) {
       this.openedDropdownIndex = index;
     }
   }
@@ -440,7 +461,9 @@ export class FilterBarComponent implements OnDestroy, AfterViewInit {
       const selectedLabel = this.selectedOptions[key];
 
       if (selectedLabel) {
-        const matched = category.options.find(opt => opt.label === selectedLabel);
+        const matched = category.options.find(
+          (opt) => opt.label === selectedLabel,
+        );
         if (matched) {
           queryParams[key] = matched.key;
         }
@@ -462,7 +485,11 @@ export class FilterBarComponent implements OnDestroy, AfterViewInit {
     const clickedInsideComponent = path.includes(this.elementRef.nativeElement);
 
     // Close mobile filter modal if clicked outside
-    if (!clickedInsideModal && !clickedInsideComponent && this.isMobileFilterOpen) {
+    if (
+      !clickedInsideModal &&
+      !clickedInsideComponent &&
+      this.isMobileFilterOpen
+    ) {
       this.isMobileFilterOpen = false;
       this.enableBodyScroll();
       this.mobileOpenedIndex = null;
@@ -471,7 +498,11 @@ export class FilterBarComponent implements OnDestroy, AfterViewInit {
     }
 
     // Close desktop dropdown if clicked outside
-    if (!clickedInsideComponent && this.openedDropdownIndex !== null && !this.isMobileFilterOpen) {
+    if (
+      !clickedInsideComponent &&
+      this.openedDropdownIndex !== null &&
+      !this.isMobileFilterOpen
+    ) {
       this.openedDropdownIndex = null;
       this.cdr.detectChanges();
     }

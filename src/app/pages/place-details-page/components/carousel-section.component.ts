@@ -59,7 +59,9 @@ import { TranslateModule } from '@ngx-translate/core';
             aria-label="Toggle favorite"
           >
             <app-icon
-              [icon]="isFavorite ? ICONS.HeartBlueFill : ('HeartBlue' | themedIcon)"
+              [icon]="
+                isFavorite ? ICONS.HeartBlueFill : ('HeartBlue' | themedIcon)
+              "
             />
           </button>
 
@@ -124,7 +126,7 @@ export class CarouselSectionComponent implements OnDestroy {
   @Output() onToggleFavorite = new EventEmitter<void>();
 
   /** Event emitted when user shares the place */
-  @Output() onShare = new EventEmitter<void>();
+  @Output() onShare = new EventEmitter<string>();
 
   currentIndex = 0; // Currently shown image index
   prevIndex: number | null = null; // Previously shown image index for animation
@@ -217,22 +219,22 @@ export class CarouselSectionComponent implements OnDestroy {
    * Calls share API, refreshes user profile, then emits onShare event.
    */
   handleShare(): void {
-    // Check if user is authenticated
+    const shareUrl = `${window.location.origin}/home-pro/catalog/${this.place.id}`;
+
     if (!this.storageService.isAuthenticated()) {
-      this.onShare.emit(); // This event will trigger the modal on parent component
-      return; // Stop further execution as user needs to log in
+      this.onShare.emit(shareUrl); // передаём строку, чтобы тип совпадал
+      return;
     }
 
-    if (!this.place?.id) return; // Ensure the place ID exists
+    if (!this.place?.id) return;
 
-    // If the user is authenticated, proceed with sharing
     this.sharedCafesService.shareCafe(this.place.id).subscribe({
       next: () => {
         const userId = this.storageService.getUser()?.userId || 0;
         this.userService.getPublicUserProfile(userId).subscribe({
           next: (profile) => {
             this.storageService.setPublicUserProfile(profile);
-            this.onShare.emit(); // Emit event after successful sharing
+            this.onShare.emit(shareUrl);
           },
           error: (err) => {
             console.error('Error updating public profile:', err);
@@ -244,7 +246,6 @@ export class CarouselSectionComponent implements OnDestroy {
       },
     });
   }
-
   /** Returns button background classes depending on theme */
   getButtonBgClass(): Record<string, boolean> {
     return {

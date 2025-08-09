@@ -72,7 +72,7 @@ import { Observable } from 'rxjs';
         <nav class="flex gap-8" aria-label="Welcome modal actions">
           <button
             (click)="goToCatalog()"
-            class="button-font button-bg-blue h-[48px] w-full whitespace-nowrap px-[32px] py-[12px]"
+            class="button-font button-bg-blue h-[48px] w-full lg:whitespace-nowrap  px-[32px] py-[12px]"
             type="button"
           >
             {{ 'WELCOME_MODAL.BUTTON.EXPLORE_CATALOG' | translate }}

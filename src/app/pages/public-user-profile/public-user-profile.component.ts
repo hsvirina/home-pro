@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 
 import { PublicUserProfile, AuthUser } from '../../core/models/user.model';
 import { AuthApiService } from '../../core/services/auth-api.service';
@@ -17,6 +17,7 @@ import { FavoritesVisitedSectorComponent } from '../profile-page/components/favo
 import { MyReviewsComponent } from '../profile-page/components/my-reviews.component';
 
 import { Place } from '../../core/models/place.model';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-public-user-profile',
@@ -46,6 +47,7 @@ import { Place } from '../../core/models/place.model';
       <app-favorites-visited-sector
         [favoritePlaces]="favoritePlaces"
         [visitedPlaces]="visitedPlaces"
+        [isPublic] = "true"
       ></app-favorites-visited-sector>
 
       <app-my-reviews

@@ -164,21 +164,21 @@ export class FooterComponent {
     {
       title: 'footer.links.title_company',
       links: [
-        { label: 'footer.links.about_us', route: '/about' },
-        { label: 'footer.links.faqs', route: '/faqs' },
-        { label: 'footer.links.contact_us', route: '/contact' },
-        { label: 'footer.links.social_media', route: '/social-media' },
-        { label: 'footer.links.feedback', route: '/feedback' },
+        { label: 'footer.links.about_us', route: '/' },
+        { label: 'footer.links.faqs', route: '/' },
+        { label: 'footer.links.contact_us', route: '/' },
+        { label: 'footer.links.social_media', route: '/' },
+        { label: 'footer.links.feedback', route: '/' },
       ],
     },
     {
       title: 'footer.links.title_resources',
       links: [
-        { label: 'footer.links.newsletter', route: '/newsletter' },
-        { label: 'footer.links.updates', route: '/updates' },
-        { label: 'footer.links.events', route: '/events' },
-        { label: 'footer.links.blog_posts', route: '/blog-posts' },
-        { label: 'footer.links.community', route: '/community' },
+        { label: 'footer.links.newsletter', route: '/' },
+        { label: 'footer.links.updates', route: '/' },
+        { label: 'footer.links.events', route: '/' },
+        { label: 'footer.links.blog_posts', route: '/' },
+        { label: 'footer.links.community', route: '/' },
       ],
     },
   ];

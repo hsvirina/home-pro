@@ -25,7 +25,7 @@ import { TranslateModule } from '@ngx-translate/core';
   ],
   template: `
     <div
-      class="px-5 lg:px-0 flex flex-col gap-[32px] rounded-[24px] border p-[16px] lg:gap-[48px] lg:p-[24px] xxl:gap-[48px]"
+      class="flex flex-col gap-[32px] rounded-[24px] border p-[16px] px-5 lg:gap-[48px] lg:p-[24px] lg:px-0 xxl:gap-[48px]"
       [ngClass]="[
         (currentTheme$ | async) === 'light'
           ? 'border-[var(--color-gray-20)]'
@@ -87,12 +87,23 @@ import { TranslateModule } from '@ngx-translate/core';
               <span>{{ editableUser.lastName }}</span>
             </h3>
 
-            <div class="flex">
+            <div class="flex w-full">
               <span
                 class="body-font-1 rounded-[40px] border border-[var(--color-gray-20)] p-3"
+                *ngIf="!isEditing; else statusEdit"
               >
                 {{ editableUser.status }}
               </span>
+
+              <ng-template #statusEdit>
+                <textarea
+                  [(ngModel)]="editableUser.status"
+                  (ngModelChange)="
+                    fieldChange.emit({ field: 'status', value: $event })
+                  "
+                  class="input-field editable h-[100px] w-full max-w-[600px] resize-none"
+                ></textarea>
+              </ng-template>
             </div>
           </div>
         </div>
@@ -113,7 +124,7 @@ import { TranslateModule } from '@ngx-translate/core';
       </div>
 
       <!-- Editable user info fields (hidden in public mode) -->
-      <div *ngIf="!public" class="flex flex-col gap-[20px] lg:flex-row">
+      <div *ngIf="!public" class="flex flex-col lg:px-6 gap-[20px] lg:flex-row">
         <!-- Full Name block -->
         <div
           class="flex flex-1 gap-3 rounded-[40px] border p-2"

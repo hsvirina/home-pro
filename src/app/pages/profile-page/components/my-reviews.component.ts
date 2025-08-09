@@ -39,7 +39,9 @@ import { Theme } from '../../../core/models/theme.type';
   ],
   providers: [DatePipe],
   template: `
-    <div class="mx-auto px-5 flex w-full max-w-[1320px] flex-col gap-6 lg:px-10 xxl:px-0 ">
+    <div
+      class="mx-auto flex w-full max-w-[1320px] flex-col gap-6 px-5 lg:px-10 xxl:px-0"
+    >
       <!-- Title and description -->
       <header class="flex flex-col gap-2">
         <h5>{{ 'myReviews.title' | translate }}</h5>
@@ -120,7 +122,6 @@ import { Theme } from '../../../core/models/theme.type';
       </section>
 
       <!-- Desktop view: custom carousel -->
-      <!-- Desktop view: custom carousel -->
       <section
         *ngIf="!isMobile && reviews.length > 0"
         class="flex flex-col items-center"
@@ -136,7 +137,11 @@ import { Theme } from '../../../core/models/theme.type';
               'bg-[var(--color-gray-100)]': (currentTheme$ | async) === 'dark',
             }"
           >
-            <app-icon [icon]="'ArrowLeft' | themedIcon" [width]="32" [height]="32"></app-icon>
+            <app-icon
+              [icon]="'ArrowLeft' | themedIcon"
+              [width]="32"
+              [height]="32"
+            ></app-icon>
           </button>
 
           <!-- Slides container -->
@@ -189,6 +194,7 @@ import { Theme } from '../../../core/models/theme.type';
 
                   <!-- Review text with ellipsis -->
                   <div
+
                     *ngIf="review.text; else noText"
                     class="body-font-1 overflow-hidden text-ellipsis"
                     style="
@@ -250,16 +256,20 @@ import { Theme } from '../../../core/models/theme.type';
 
           <!-- Next button -->
           <button
-  class="flex h-[52px] w-[52px] cursor-pointer select-none items-center justify-center rounded-full border-none p-2 text-2xl transition"
-  (click)="nextSlide()"
-  [attr.aria-label]="'myReviews.ariaNext' | translate"
-  [ngClass]="{
-    'bg-[var(--color-white)]': (currentTheme$ | async) === 'light',
-    'bg-[var(--color-gray-100)]': (currentTheme$ | async) === 'dark'
-  }"
->
-  <app-icon [icon]="'ArrowRight' | themedIcon" [width]="32" [height]="32"></app-icon>
-</button>
+            class="flex h-[52px] w-[52px] cursor-pointer select-none items-center justify-center rounded-full border-none p-2 text-2xl transition"
+            (click)="nextSlide()"
+            [attr.aria-label]="'myReviews.ariaNext' | translate"
+            [ngClass]="{
+              'bg-[var(--color-white)]': (currentTheme$ | async) === 'light',
+              'bg-[var(--color-gray-100)]': (currentTheme$ | async) === 'dark',
+            }"
+          >
+            <app-icon
+              [icon]="'ArrowRight' | themedIcon"
+              [width]="32"
+              [height]="32"
+            ></app-icon>
+          </button>
         </div>
       </section>
 
@@ -293,7 +303,7 @@ export class MyReviewsComponent implements OnInit {
   @ViewChildren('slideRef') slideRefs!: QueryList<ElementRef<HTMLDivElement>>;
   slideWidthPx = 0;
   slidesContainerWidthPx = 0;
-    currentTheme$: Observable<Theme>;
+  currentTheme$: Observable<Theme>;
 
   constructor(
     private authApiService: AuthApiService,

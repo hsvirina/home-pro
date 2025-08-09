@@ -143,7 +143,7 @@ import { BadgeType, calculateBadgeType } from '../../core/utils/badge-utils';
 
           <div class="mb-6 flex justify-center">
             <p
-              class="rounded-2xl border border-[var(--color-gray-20)] bg-[var(--color-white)] p-4 text-[var(--color-primary)]"
+              class="rounded-2xl border border-[var(--color-gray-20)] bg-[var(--color-white)] p-4"
             >
               {{ newAchievementToShow }}
             </p>

@@ -79,10 +79,7 @@ import { LastCheckInsComponent } from './components/last-check-ins.components';
         (closeAddReviewForm)="showAddReviewForm = false"
       />
 
-      <app-last-check-ins
-        *ngIf="place"
-        [cafeId]="place.id"
-      />
+      <app-last-check-ins *ngIf="place" [cafeId]="place.id" />
 
       <app-slider-places
         [title]="'places.moreCafes' | translate"
@@ -339,15 +336,15 @@ export class PlaceDetailsPageComponent implements OnInit, AfterViewChecked {
   }
 
   /** Opens share modal and resets copy state */
-openShareModal(): void {
-  if (!this.isLoggedIn) {
-    this.showLoginModal = true;
-    return;
-  }
+  openShareModal(): void {
+    if (!this.isLoggedIn) {
+      this.showLoginModal = true;
+      return;
+    }
 
-  this.showShareModal = true;
-  this.copied = false;
-}
+    this.showShareModal = true;
+    this.copied = false;
+  }
 
   /**
    * Copies current share URL to clipboard and temporarily shows feedback
@@ -360,21 +357,22 @@ openShareModal(): void {
   // }
 
   handleShare(): void {
+    if (!this.place?.id) return;
 
-  if (!this.place?.id) return;
-
-  // Копирование ссылки в буфер обмена
-  navigator.clipboard.writeText(this.currentShareLink).then(() => {
-
-    // После успешного копирования, меняем текст кнопки
-    this.copied = true;
-    setTimeout(() => {
-      this.copied = false;
-    }, 3000);  // Ожидаем 3 секунды, чтобы вернуть текст кнопки
-  }).catch((err) => {
-    console.error('Failed to copy URL: ', err);
-  });
-}
+    // Копирование ссылки в буфер обмена
+    navigator.clipboard
+      .writeText(this.currentShareLink)
+      .then(() => {
+        // После успешного копирования, меняем текст кнопки
+        this.copied = true;
+        setTimeout(() => {
+          this.copied = false;
+        }, 3000); // Ожидаем 3 секунды, чтобы вернуть текст кнопки
+      })
+      .catch((err) => {
+        console.error('Failed to copy URL: ', err);
+      });
+  }
 
   /** Retrieves current authenticated user */
   get currentUser() {
@@ -391,6 +389,6 @@ openShareModal(): void {
   //   return `${window.location.origin}/places/${this.place?.id}`;
   // }
   get currentShareLink(): string {
-  return `${window.location.origin}/places/${this.place?.id}`;
-}
+    return `${window.location.origin}/home-pro/catalog/${this.place?.id}`;
+  }
 }

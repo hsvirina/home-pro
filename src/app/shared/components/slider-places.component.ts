@@ -53,11 +53,8 @@ import { Place } from '../../core/models/place.model';
         <div class="flex flex-col justify-center">
           <h3
             *ngIf="title"
-            class="left-1/2 -translate-x-1/2 text-center text-[20px] lg:absolute lg:text-[32px] xxl:text-[40px]"
-            [ngClass]="{
-              'left-1/2 -translate-x-1/2 lg:absolute': cardType !== PlaceCardType.Favourites,
-              static: cardType === PlaceCardType.Favourites
-            }"
+            class="text-center text-[20px] lg:text-[32px] xxl:text-[40px]"
+
           >
             {{ title }}
           </h3>

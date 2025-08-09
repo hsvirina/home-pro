@@ -24,8 +24,7 @@ import { TranslateModule } from '@ngx-translate/core';
     TranslateModule,
   ],
   template: `
-    <div class="flex px-5 flex-col lg:px-10 xxl:px-0 gap-12">
-
+    <div class="flex flex-col gap-12 px-5 lg:px-10 xxl:px-0">
       <!-- Favorite Cafés Section -->
       <section class="flex flex-col">
         <!-- Mobile header & description - only when no favorites -->
@@ -46,7 +45,7 @@ import { TranslateModule } from '@ngx-translate/core';
           <h4 class="mb-2 text-[32px] xxl:text-[40px]">
             {{ 'favoritesVisited.favoriteCafes' | translate }}
           </h4>
-          <span class="body-font-1 mb-4 block">
+          <span class="body-font-1 mb-4 block" *ngIf="!isPublic">
             {{
               'favoritesVisited.favoriteCafesDescription'
                 | translate: { count: favoritePlaces.length }
@@ -61,8 +60,10 @@ import { TranslateModule } from '@ngx-translate/core';
             [cardType]="PlaceCardType.Favourites"
             [title]="'favoritesVisited.favoriteCafes' | translate"
             [subtitle]="
-              'favoritesVisited.favoriteCafesDescription'
-                | translate: { count: favoritePlaces.length }
+              !isPublic
+                ? ('favoritesVisited.favoriteCafesDescription'
+                  | translate: { count: favoritePlaces.length })
+                : null
             "
           ></app-slider-places>
         </div>
@@ -99,7 +100,7 @@ import { TranslateModule } from '@ngx-translate/core';
           <h4 class="mb-2 text-[32px] xxl:text-[40px]">
             {{ 'favoritesVisited.alreadyVisited' | translate }}
           </h4>
-          <span class="body-font-1 mb-4 block">
+          <span class="body-font-1 mb-4 block"  *ngIf="!isPublic">
             {{ 'favoritesVisited.alreadyVisitedDescription' | translate }}
           </span>
         </div>
@@ -110,12 +111,18 @@ import { TranslateModule } from '@ngx-translate/core';
             [places]="visitedPlaces"
             [cardType]="PlaceCardType.Favourites"
             [title]="'favoritesVisited.alreadyVisited' | translate"
-            [subtitle]="'favoritesVisited.alreadyVisitedDescription' | translate"
+            [subtitle]="
+              !isPublic
+                ? ('favoritesVisited.alreadyVisitedDescription' | translate)
+                : null
+            "
           ></app-slider-places>
         </div>
 
         <!-- Desktop grid for visited places -->
-        <ng-container *ngIf="visitedPlaces.length > 0; else noVisitedPlacesTemplate">
+        <ng-container
+          *ngIf="visitedPlaces.length > 0; else noVisitedPlacesTemplate"
+        >
           <div
             class="hidden w-full gap-x-[20px] gap-y-[12px] lg:grid lg:grid-cols-6 xxl:grid-cols-8"
           >
@@ -142,6 +149,7 @@ import { TranslateModule } from '@ngx-translate/core';
 export class FavoritesVisitedSectorComponent {
   /** List of user's favorite places */
   @Input() favoritePlaces: Place[] = [];
+  @Input() isPublic?: boolean;
 
   /** Event emitted when favorite places are updated */
   @Output() favoritePlacesChanged = new EventEmitter<Place[]>();
@@ -196,7 +204,10 @@ export class FavoritesVisitedSectorComponent {
    * Removes the place from favorites if unfavorited.
    * @param event - Object with placeId and isFavorite flag
    */
-  onFavoriteToggledVisited(event: { placeId: number; isFavorite: boolean }): void {
+  onFavoriteToggledVisited(event: {
+    placeId: number;
+    isFavorite: boolean;
+  }): void {
     if (!event.isFavorite) {
       this.favoritePlaces = this.favoritePlaces.filter(
         (place) => place.id !== event.placeId,

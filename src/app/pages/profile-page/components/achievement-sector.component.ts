@@ -29,7 +29,7 @@ export interface AchievementSection {
   standalone: true,
   imports: [CommonModule, TranslateModule],
   template: `
-    <div class="flex min-w-[335px] px-5 lg:px-0 flex-col gap-6">
+    <div class="flex min-w-[335px] lg:px-0 flex-col gap-6">
       <!-- Header Section -->
       <div class="flex flex-col gap-2">
         <h4>{{ 'achievements.title' | translate }}</h4>
@@ -114,7 +114,7 @@ export interface AchievementSection {
               <!-- Achievement Texts -->
               <div class="flex flex-col gap-2">
                 <h6
-                  class="menu-text-font"
+                  class="lg:menu-text-font"
                   [ngClass]="{
                     'text-[var(--color-gray-55)]': !unlockedTitles.has(
                       achievement.key
@@ -127,7 +127,7 @@ export interface AchievementSection {
                   }}
                 </h6>
                 <p
-                  class="body-font-1"
+                  class="body-font-1 lg:text-[12px]"
                   [ngClass]="{
                     'text-[var(--color-gray-55)]': !unlockedTitles.has(
                       achievement.key

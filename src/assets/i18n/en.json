@@ -281,7 +281,7 @@
       },
       "beanPirate": {
         "title": "The Bean Pirate",
-        "description": "For the first rating of the coffee shop (1–5)"
+        "description": "For the first rating of the coffee shop"
       },
       "hatRater": {
         "title": "The Hat Rater",
@@ -333,7 +333,7 @@
     "noVisitedPlaces": "No visited places yet."
   },
   "myReviews": {
-    "title": "Your Reviews",
+    "title": "Reviews",
     "description": "Details shared about favorite coffee spots",
     "noReviewText": "No review text provided.",
     "goToCafe": "Go to the cafe",
