@@ -8,6 +8,10 @@
     "send": "Send",
     "learn_more": "Learn more"
   },
+  "users_menu": {
+    "profile": "Profile",
+    "logout": "Logout"
+  },
   "nav": {
     "catalog": "Catalog"
   },

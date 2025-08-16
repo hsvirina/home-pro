@@ -8,6 +8,10 @@
     "send": "Надіслати",
     "learn_more": "Дізнатися більше"
   },
+  "users_menu": {
+    "profile": "Профіль",
+    "logout": "Вийти"
+  },
   "nav": {
     "catalog": "Каталог"
   },
@@ -323,7 +327,7 @@
     "unsavedChanges": "Є незбережені зміни",
     "unsavedChangesMessage": "Ви оновили свій профіль. Щоб зберегти зміни, натисніть кнопку «Зберегти всі зміни» нижче.",
     "gotIt": "Зрозуміло",
-    "cityCountry": "{{city}}Україна",
+    "cityCountry": "{{city}}, Україна",
     "country": "Україна"
   },
   "favoritesVisited": {

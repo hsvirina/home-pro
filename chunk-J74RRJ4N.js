@@ -1,0 +1,1 @@
+import{g as t,x as o}from"./chunk-WDYIKGVT.js";var i=class e{loadingSubject=new t(!1);isLoading$=this.loadingSubject.asObservable();show(){this.loadingSubject.next(!0)}hide(){this.loadingSubject.next(!1)}static \u0275fac=function(a){return new(a||e)};static \u0275prov=o({token:e,factory:e.\u0275fac,providedIn:"root"})};export{i as a};
