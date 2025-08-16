@@ -140,9 +140,17 @@ export const ICONS = {
     filename: './assets/icons/like.svg',
     alt: 'Like icon',
   },
+  LikeDarkTheme: {
+    filename: './assets/icons/likeDarkTheme.svg',
+    alt: 'Like DarkTheme icon',
+  },
   LikeFill: {
     filename: './assets/icons/like-fill.svg',
     alt: 'Like fill icon',
+  },
+  LikeFillDarkTheme: {
+    filename: './assets/icons/like-fillDarkTheme.svg',
+    alt: 'Like fill DarkTheme icon',
   },
   Location: {
     filename: './assets/icons/location.svg',

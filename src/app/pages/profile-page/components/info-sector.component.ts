@@ -201,22 +201,10 @@ import { TranslateModule } from '@ngx-translate/core';
 
           <div class="flex w-full flex-col gap-1">
             <p class="body-font-1">{{ 'infoSector.location' | translate }}</p>
-
-            <ng-container *ngIf="isEditing; else cityDisplay">
-              <input
-                type="text"
-                [(ngModel)]="editableUser.defaultCity"
-                (ngModelChange)="
-                  fieldChange.emit({ field: 'defaultCity', value: $event })
-                "
-                class="input-field editable city-input"
-              />
-            </ng-container>
-            <ng-template #cityDisplay>
               <p class="menu-text-font">
                 {{ editableUser.defaultCity }}, Ukraine
               </p>
-            </ng-template>
+
           </div>
         </div>
 

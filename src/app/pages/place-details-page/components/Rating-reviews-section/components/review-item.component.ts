@@ -25,6 +25,12 @@ import { UserMenuComponent } from '../../../../../layout/Header/components/user-
 import { ModalComponent } from '../../../../../shared/components/modal.component';
 
 import { FlexibleIcon } from '../../main-info-section.component';
+import { ThemeService } from '../../../../../core/services/theme.service';
+import { Theme } from '../../../../../core/models/theme.type';
+import { Observable } from 'rxjs';
+import { ThemedIconPipe } from '../../../../../core/pipes/themed-icon.pipe';
+
+type IconName = keyof typeof ICONS;
 
 @Component({
   selector: 'app-review-item',
@@ -38,6 +44,7 @@ import { FlexibleIcon } from '../../main-info-section.component';
     UserMenuComponent,
     ModalComponent,
     TranslateModule,
+    ThemedIconPipe
   ],
   providers: [DatePipe],
   template: `
@@ -130,7 +137,7 @@ import { FlexibleIcon } from '../../main-info-section.component';
                 aria-label="Like review"
                 class="flex cursor-pointer items-end border-none"
               >
-                <app-icon [icon]="getLikeIcon()" />
+                <app-icon [icon]="getLikeIcon() | themedIcon" />
               </button>
             </div>
           </div>
@@ -176,6 +183,8 @@ export class AppReviewItemComponent implements OnDestroy, OnChanges {
   @Input() isLoggedIn = false; // Flag indicating if user is logged in
   @Output() delete = new EventEmitter<number>(); // Emits when the delete button is clicked
   @Output() toggleLike = new EventEmitter<boolean>(); // Emits when the like toggle button is clicked
+    // Observables
+    currentTheme$: Observable<Theme>;
 
   animatedLikesCount = 0; // Current animated likes count for flip number display
   readonly ICONS = ICONS; // Icons constant
@@ -189,8 +198,10 @@ export class AppReviewItemComponent implements OnDestroy, OnChanges {
     private translate: TranslateService,
     private router: Router,
     private cdr: ChangeDetectorRef,
+    private themeService: ThemeService,
   ) {
     this.checkScreenSize(); // Initialize screen size check
+    this.currentTheme$ = this.themeService.theme$;
   }
 
   /** Lifecycle hook: cleanup interval on destroy */
@@ -256,17 +267,15 @@ export class AppReviewItemComponent implements OnDestroy, OnChanges {
     this.router.navigate(['/auth']);
   }
 
+
+
   /** Returns the icon for the like button based on the like status */
-  getLikeIcon(): FlexibleIcon {
-    if (!this.isLoggedIn) {
-      return this.likesInfo.totalLikes > 0
-        ? this.ICONS.LikeFill
-        : this.ICONS.Like;
-    }
-    return this.likesInfo.likedByCurrentUser
-      ? this.ICONS.LikeFill
-      : this.ICONS.Like;
+getLikeIcon(): IconName {
+  if (!this.isLoggedIn) {
+    return this.likesInfo.totalLikes > 0 ? 'LikeFill' : 'Like';
   }
+  return this.likesInfo.likedByCurrentUser ? 'LikeFill' : 'Like';
+}
 
   /** Creates an array of stars for rating display */
   getStarsArray(rating: number): number[] {

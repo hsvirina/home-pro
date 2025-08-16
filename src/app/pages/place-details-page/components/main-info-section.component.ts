@@ -1,9 +1,4 @@
-import {
-  Component,
-  Input,
-  OnInit,
-  ChangeDetectorRef,
-} from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Place } from '../../../core/models/place.model';
 import { IconComponent } from '../../../shared/components/icon.component';
@@ -35,19 +30,21 @@ export type FlexibleIcon =
     <div
       [ngClass]="{
         'text-[var(--color-gray-20)]': (currentTheme$ | async) === 'dark',
-        'text-[var(--color-gray-75)]': (currentTheme$ | async) === 'light'
+        'text-[var(--color-gray-75)]': (currentTheme$ | async) === 'light',
       }"
       class="flex flex-col gap-6"
     >
       <h3>{{ place.name }}</h3>
 
-      <div class="body-font-1 flex flex-col justify-between gap-[32px] lg:flex-row">
+      <div
+        class="body-font-1 flex flex-col justify-between gap-[32px] lg:flex-row"
+      >
         <!-- Rating and Reviews -->
         <div
           class="flex flex-1 flex-col gap-2"
           [ngClass]="{
             'text-[var(--color-gray-75)]': (currentTheme$ | async) === 'light',
-            'text-[var(--color-gray-20)]': (currentTheme$ | async) === 'dark'
+            'text-[var(--color-gray-20)]': (currentTheme$ | async) === 'dark',
           }"
         >
           <div class="flex gap-2">
@@ -81,12 +78,14 @@ export type FlexibleIcon =
                 'bg-[var(--color-bg-2)] text-[var(--color-gray-100)]':
                   (currentTheme$ | async) === 'light',
                 'bg-[var(--color-bg-card)] text-[var(--color-gray-20)]':
-                  (currentTheme$ | async) === 'dark'
+                  (currentTheme$ | async) === 'dark',
               }"
             >
               <app-icon [icon]="'Clock' | themedIcon"></app-icon>
               <div class="flex flex-col justify-center gap-1 text-center">
-                <span class="menu-text-font">{{ 'mainInfo.openingHours' | translate }}</span>
+                <span class="menu-text-font">{{
+                  'mainInfo.openingHours' | translate
+                }}</span>
                 <span class="body-font-1">{{ place.workingHours }}</span>
               </div>
             </div>
@@ -105,8 +104,9 @@ export type FlexibleIcon =
             *ngFor="let tag of place.tags"
             class="tag-item flex items-center justify-center gap-2 rounded-[40px] px-4 py-2"
             [ngClass]="{
-              'bg-[var(--color-secondary)]': (currentTheme$ | async) === 'light',
-              'bg-[var(--color-bg-card)]': (currentTheme$ | async) === 'dark'
+              'bg-[var(--color-secondary)]':
+                (currentTheme$ | async) === 'light',
+              'bg-[var(--color-bg-card)]': (currentTheme$ | async) === 'dark',
             }"
           >
             <ng-container *ngIf="TAG_ICON_MAP[tag.id.toString()] as icon">
@@ -124,13 +124,16 @@ export type FlexibleIcon =
 
       <!-- Check-in button -->
       <button
-        class="button-bg-transparent w-full gap-2 px-4 py-3 lg:w-1/2"
+        class="w-full gap-2 px-4 py-3 disabled:cursor-not-allowed lg:w-1/2"
         (click)="onCheckInClick($event)"
         [disabled]="isCheckedIn"
         [title]="checkInTitle"
+        [ngClass]="isCheckedIn ? 'button-bg-transparent' : 'button-bg-blue'"
       >
         <ng-container *ngIf="isAuthenticated; else notAuth">
-          <app-icon [icon]="isCheckedIn ? ICONS.CheckCircle : ICONS.AddCircle"></app-icon>
+          <app-icon
+            [icon]="isCheckedIn ? ICONS.CheckCircle : ICONS.AddCircle"
+          ></app-icon>
           {{
             isCheckedIn
               ? ('mainInfo.checkedIn' | translate)
@@ -192,7 +195,9 @@ export class MainInfoSectionComponent implements OnInit {
 
   /** Returns Google Maps search URL for place's address */
   get googleMapsUrl(): string {
-    const query = encodeURIComponent(`${this.place.address}, ${this.place.city}`);
+    const query = encodeURIComponent(
+      `${this.place.address}, ${this.place.city}`,
+    );
     return `https://www.google.com/maps/search/?api=1&query=${query}`;
   }
 
@@ -232,7 +237,8 @@ export class MainInfoSectionComponent implements OnInit {
 
     const publicProfile = this.storageService.getPublicUserProfile();
     this.isCheckedIn =
-      publicProfile?.checkInCafes?.some((cafe) => cafe.id === this.place.id) ?? false;
+      publicProfile?.checkInCafes?.some((cafe) => cafe.id === this.place.id) ??
+      false;
 
     this.cdr.detectChanges();
   }

@@ -227,7 +227,7 @@ export class LastCheckInsComponent implements OnInit, OnDestroy {
    * @returns formatted date string
    */
   formatCheckInDate(dateStr: string): string {
-    const checkInDateUTC = this.parseDateInTimeZone(dateStr, 'Europe/Zurich');
+    const checkInDateUTC = this.parseDateInTimeZone(dateStr, 'Europe/Kiev');
 
     const now = new Date();
     const lang = this.languageService.currentLang === 'uk' ? 'uk-UA' : 'en-US';
@@ -272,7 +272,7 @@ export class LastCheckInsComponent implements OnInit, OnDestroy {
    * Parses a date string and converts it to a Date object
    * adjusted to the specified timezone, using Intl API.
    * @param dateStr - ISO date string to parse
-   * @param timeZone - IANA timezone identifier (e.g. 'Europe/Zurich')
+   * @param timeZone - IANA timezone identifier (e.g. 'Europe/Kiev')
    * @returns Date object in UTC corresponding to local time in given timezone
    */
   private parseDateInTimeZone(dateStr: string, timeZone: string): Date {

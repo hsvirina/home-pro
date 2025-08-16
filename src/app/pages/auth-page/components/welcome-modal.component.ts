@@ -69,7 +69,7 @@ import { Observable } from 'rxjs';
         </section>
 
         <!-- Action buttons -->
-        <nav class="flex gap-8" aria-label="Welcome modal actions">
+        <nav class="flex-col w-full lg:w-auto lg:flex-row flex gap-8" aria-label="Welcome modal actions">
           <button
             (click)="goToCatalog()"
             class="button-font button-bg-blue h-[48px] w-full lg:whitespace-nowrap  px-[32px] py-[12px]"

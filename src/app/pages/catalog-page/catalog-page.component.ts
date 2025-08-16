@@ -362,6 +362,9 @@ export class CatalogPageComponent implements OnInit, OnDestroy {
       queryParamsHandling: '',
     });
     // Loader hide will be handled by queryParams subscription
+      if (this.showFilters) {
+    this.toggleFilters();
+  }
   }
 
   /**
