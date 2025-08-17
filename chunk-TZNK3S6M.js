@@ -1,1 +1,0 @@
-import{B as i,eb as o,fb as n,y as a,zb as s}from"./chunk-F4VAWNME.js";var p=class t{constructor(r){this.http=r}baseUrl=s.places.list;getPlaces(r="en"){let e=new o().set("lang",r);return this.http.get(this.baseUrl,{params:e})}static \u0275fac=function(e){return new(e||t)(i(n))};static \u0275prov=a({token:t,factory:t.\u0275fac,providedIn:"root"})};export{p as a};
