@@ -26,11 +26,11 @@ import { TranslateModule } from '@ngx-translate/core';
           <div class="flex flex-col gap-[16px]">
             <!-- Heading with highlighted middle part -->
             <h3 class="text-[32px] xxl:text-[40px]">
-              {{ 'WELCOME.TITLE_PART1' | translate }}
+              {{ 'home_page.welcome_sector.title_part_1' | translate }}
               <span class="text-[var(--color-primary)]">
-                {{ 'WELCOME.TITLE_PART2' | translate }}
+                {{ 'home_page.welcome_sector.title_part_2' | translate }}
               </span>
-              {{ 'WELCOME.TITLE_PART3' | translate }}
+              {{ 'home_page.welcome_sector.title_part_3' | translate }}
             </h3>
 
             <!-- Description text, color adapts to theme -->
@@ -41,7 +41,7 @@ import { TranslateModule } from '@ngx-translate/core';
                   (currentTheme$ | async) === 'dark',
               }"
             >
-              {{ 'WELCOME.DESCRIPTION' | translate }}
+              {{ 'home_page.welcome_sector.description' | translate }}
             </span>
           </div>
 
@@ -55,7 +55,7 @@ import { TranslateModule } from '@ngx-translate/core';
             >
               <h5>80%</h5>
               <span class="body-font-1">{{
-                'WELCOME.STATS.DEEP_WORK' | translate
+                'home_page.welcome_sector.statistics.deep_work' | translate
               }}</span>
             </div>
 
@@ -64,7 +64,7 @@ import { TranslateModule } from '@ngx-translate/core';
             >
               <h5>65%</h5>
               <span class="body-font-1">{{
-                'WELCOME.STATS.VIBE' | translate
+                'home_page.welcome_sector.statistics.vibe' | translate
               }}</span>
             </div>
 
@@ -73,7 +73,7 @@ import { TranslateModule } from '@ngx-translate/core';
             >
               <h5>30%</h5>
               <span class="body-font-1">{{
-                'WELCOME.STATS.RETURN' | translate
+                'home_page.welcome_sector.statistics.return' | translate
               }}</span>
             </div>
           </div>
@@ -82,7 +82,7 @@ import { TranslateModule } from '@ngx-translate/core';
         <!-- Navigation Button to Catalog -->
         <a [routerLink]="['/catalog']" class="w-full lg:w-auto">
           <button class="button-bg-blue button-font flex h-[48px] w-full px-8">
-            {{ 'WELCOME.BUTTON' | translate }}
+            {{ 'button.welcome_sector' | translate }}
           </button>
         </a>
       </div>

@@ -16,6 +16,7 @@ import { AuthUser } from '../../../core/models/user.model';
 import { ICONS } from '../../../core/constants/icons.constant';
 import { CityDropdownComponent } from '../../../layout/Header/components/city-dropdown.component';
 import { LanguageDropdownComponent } from '../../../layout/Header/components/language-dropdown.component';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-mobile-menu',
@@ -23,6 +24,7 @@ import { LanguageDropdownComponent } from '../../../layout/Header/components/lan
   imports: [
     CommonModule,
     RouterModule,
+    TranslateModule,
     SearchSectionComponent,
     ClickOutsideDirective,
     IconComponent,
@@ -69,13 +71,13 @@ import { LanguageDropdownComponent } from '../../../layout/Header/components/lan
       <div class="mt-[48px] flex flex-1 flex-col overflow-y-auto px-[20px]">
         <!-- Search -->
         <div class="mb-[48px] mt-[40px] px-[4px]">
-          <app-search-section></app-search-section>
+          <app-search-section [closeDropdowns]="closeMenu.emit.bind(closeMenu)"></app-search-section>
         </div>
 
         <!-- Nav and dropdowns -->
         <nav class="menu-text-font flex flex-col gap-6">
           <a routerLink="/catalog" (click)="closeMenu.emit()">
-            <h5>Catalog</h5>
+            <h5>{{ 'header.nav.catalog' | translate }}</h5>
           </a>
 
           <!-- City -->
@@ -102,7 +104,7 @@ import { LanguageDropdownComponent } from '../../../layout/Header/components/lan
               class="text-left text-[var(--color-gray-100)]"
               aria-label="Logout"
             >
-              <h5>Logout</h5>
+              <h5>{{ 'header.users_menu.logout' | translate }}</h5>
             </button>
           </ng-container>
           <ng-template #loginTemplate>
@@ -111,7 +113,7 @@ import { LanguageDropdownComponent } from '../../../layout/Header/components/lan
               class="text-left"
               aria-label="Log in"
             >
-              <h5>Log in</h5>
+              <h5>{{ 'catalog_page.login_modal.login_button' | translate }}</h5>
             </button>
           </ng-template>
         </div>
@@ -157,5 +159,6 @@ export class MobileMenuComponent {
   selectCity(key: string): void {
     this.activeDropdown = null;
     this.cityChange.emit(key);
+     this.closeMenu.emit();
   }
 }

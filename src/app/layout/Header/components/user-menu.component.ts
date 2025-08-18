@@ -20,9 +20,8 @@ import { Observable } from 'rxjs';
   animations: [slideDownAnimation],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <!-- Если у пользователя есть бейдж, показываем его вместе с аватаром -->
+    <!-- User avatar container -->
     <div
-      *ngIf="hasBadge && userPhoto; else avatarOnly"
       class="relative"
       [style.width.px]="avatarSize"
       [style.height.px]="avatarSize"
@@ -35,69 +34,69 @@ import { Observable } from 'rxjs';
       (keydown.enter)="onToggle($event)"
       (keydown.space)="onToggle($event)"
     >
+      <!-- User avatar image -->
       <img
         [src]="userPhoto"
         alt="User avatar"
-        class="cursor-pointer z-10 object-cover transition hover:opacity-80"
+        class="cursor-pointer object-cover transition hover:opacity-80"
         loading="eager"
         [style.width.px]="avatarSize"
         [style.height.px]="avatarSize"
         style="display: block; object-fit: cover;"
         aria-hidden="true"
       />
-    </div>
 
-    <!-- Если бейджа нет, показываем только аватар -->
-    <ng-template #avatarOnly>
-      <div
-        class="relative"
-        [style.width.px]="badgeSize"
-        [style.height.px]="badgeSize"
-        style="border-radius: 50%; overflow: hidden;"
-        tabindex="0"
-        role="button"
-        aria-haspopup="true"
-        [attr.aria-expanded]="opened"
-        (click)="onToggle($event)"
-        (keydown.enter)="onToggle($event)"
-        (keydown.space)="onToggle($event)"
-      >
-        <img
-          [src]="userPhoto"
-          alt="User avatar"
-          class="cursor-pointer object-cover transition hover:opacity-80"
-          loading="eager"
+      <!-- Optional badge overlay -->
+      <ng-container *ngIf="hasBadge">
+        <div
+          class="pointer-events-none absolute left-1/2 top-1/2"
           [style.width.px]="badgeSize"
           [style.height.px]="badgeSize"
-          style="display: block;"
-          aria-hidden="true"
-        />
-      </div>
-    </ng-template>
+          style="transform: translate(-50%, -50%);"
+        >
+          <!-- Badge image should be provided by parent component -->
+        </div>
+      </ng-container>
+    </div>
   `,
 })
 export class UserMenuComponent {
   readonly ICONS = ICONS;
 
+  /** URL of user avatar */
   @Input() userPhoto: string | null = null;
+
+  /** Dropdown open state */
   @Input() opened = false;
 
-  @Output() toggle = new EventEmitter<MouseEvent | KeyboardEvent>();
-  @Output() logout = new EventEmitter<void>();
-  @Output() close = new EventEmitter<void>();
+  /** Avatar and badge sizes */
+  @Input() avatarSize: number = 64;
+  @Input() badgeSize: number = 64;
+
+  /** Whether user has a badge */
   @Input() hasBadge: boolean = false;
 
+  /** Event emitted when avatar is clicked or toggled via keyboard */
+  @Output() toggle = new EventEmitter<MouseEvent | KeyboardEvent>();
+
+  /** Event emitted when user triggers logout (if needed in parent) */
+  @Output() logout = new EventEmitter<void>();
+
+  /** Event emitted to close the menu from parent */
+  @Output() close = new EventEmitter<void>();
+
+  /** Observable for current theme */
   readonly currentTheme$: Observable<Theme>;
 
   constructor(private themeService: ThemeService) {
     this.currentTheme$ = this.themeService.theme$;
   }
 
-  @Input() avatarSize: number = 64;
-  @Input() badgeSize: number = 64;
-
+  /**
+   * Emit toggle event for parent component
+   * @param event Mouse or Keyboard event
+   */
   onToggle(event: Event) {
-    // Приводим Event к MouseEvent | KeyboardEvent для совместимости
     this.toggle.emit(event as MouseEvent | KeyboardEvent);
   }
 }

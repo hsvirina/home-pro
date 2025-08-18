@@ -27,9 +27,9 @@ export const FILTER_CATEGORIES_UK: FilterCategory[] = [
     ],
   },
   {
-    title: 'Мета візиту',
+    title: 'Мета',
     key: 'purpose',
-    description: 'Навіщо ти тут?',
+    description: 'Ціль візиту',
     options: [
       {
         id: 3,
@@ -81,7 +81,7 @@ export const FILTER_CATEGORIES_UK: FilterCategory[] = [
   {
     title: 'Зручності',
     key: 'amenities',
-    description: 'Додатковий комфорт',
+    description: 'Бонусний затишок',
     options: [
       {
         id: 47,
@@ -131,9 +131,9 @@ export const FILTER_CATEGORIES_UK: FilterCategory[] = [
     ],
   },
   {
-    title: 'Атмосфера та стиль',
+    title: 'Стиль / Вайб',
     key: 'vibe',
-    description: 'Яке враження?',
+    description: 'Відчуй дизайн',
     options: [
       {
         id: 10,

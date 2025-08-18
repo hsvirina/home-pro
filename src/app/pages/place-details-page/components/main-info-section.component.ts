@@ -27,65 +27,33 @@ export type FlexibleIcon =
   standalone: true,
   imports: [CommonModule, IconComponent, TranslateModule, ThemedIconPipe],
   template: `
-    <div
-      [ngClass]="{
-        'text-[var(--color-gray-20)]': (currentTheme$ | async) === 'dark',
-        'text-[var(--color-gray-75)]': (currentTheme$ | async) === 'light',
-      }"
-      class="flex flex-col gap-6"
-    >
+    <div [ngClass]="themeTextClass" class="flex flex-col gap-6">
+      <!-- Place Name -->
       <h3>{{ place.name }}</h3>
 
-      <div
-        class="body-font-1 flex flex-col justify-between gap-[32px] lg:flex-row"
-      >
-        <!-- Rating and Reviews -->
-        <div
-          class="flex flex-1 flex-col gap-2"
-          [ngClass]="{
-            'text-[var(--color-gray-75)]': (currentTheme$ | async) === 'light',
-            'text-[var(--color-gray-20)]': (currentTheme$ | async) === 'dark',
-          }"
-        >
-          <div class="flex gap-2">
-            <div class="flex items-center gap-2">
-              <app-icon [icon]="ICONS.Star" />
-              <span>{{ place.rating }}</span>
-            </div>
+      <!-- Rating / Reviews / Address -->
+      <div class="body-font-1 flex flex-col justify-between gap-[32px] lg:flex-row">
+        <div [ngClass]="themeTextClass" class="flex flex-1 flex-col gap-2">
+          <div class="flex gap-2 items-center">
+            <app-icon [icon]="ICONS.Star" />
+            <span>{{ place.rating }}</span>
             <span>({{ place.reviewCount }})</span>
           </div>
-
-          <!-- Address with link to Google Maps -->
           <div class="flex items-center gap-2">
             <app-icon [icon]="ICONS.Location" />
-            <a
-              [href]="googleMapsUrl"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="underline"
-            >
+            <a [href]="googleMapsUrl" target="_blank" rel="noopener noreferrer" class="underline">
               {{ place.address }}
             </a>
           </div>
         </div>
 
-        <!-- Working hours -->
+        <!-- Working Hours -->
         <div class="flex-1" *ngIf="place?.workingHours">
           <div class="gap-[20px]">
-            <div
-              class="flex items-center justify-center gap-3 rounded-[40px] px-6 py-2"
-              [ngClass]="{
-                'bg-[var(--color-bg-2)] text-[var(--color-gray-100)]':
-                  (currentTheme$ | async) === 'light',
-                'bg-[var(--color-bg-card)] text-[var(--color-gray-20)]':
-                  (currentTheme$ | async) === 'dark',
-              }"
-            >
+            <div [ngClass]="workingHoursClass" class="flex items-center justify-center gap-3 rounded-[40px] px-6 py-2">
               <app-icon [icon]="'Clock' | themedIcon"></app-icon>
               <div class="flex flex-col justify-center gap-1 text-center">
-                <span class="menu-text-font">{{
-                  'mainInfo.openingHours' | translate
-                }}</span>
+                <span class="menu-text-font">{{ 'place_details_page.main_info.opening_hours' | translate }}</span>
                 <span class="body-font-1">{{ place.workingHours }}</span>
               </div>
             </div>
@@ -93,22 +61,14 @@ export type FlexibleIcon =
         </div>
       </div>
 
-      <!-- About section -->
+      <!-- About / Description -->
       <div class="flex flex-col gap-4">
-        <h5>{{ 'mainInfo.aboutCafe' | translate }}</h5>
+        <h5>{{ 'place_details_page.main_info.about_cafe' | translate }}</h5>
         <span class="body-font-1">{{ place.longDescription }}</span>
 
-        <!-- Tags with icons -->
+        <!-- Tags -->
         <div class="flex flex-wrap gap-2" *ngIf="place?.tags?.length">
-          <div
-            *ngFor="let tag of place.tags"
-            class="tag-item flex items-center justify-center gap-2 rounded-[40px] px-4 py-2"
-            [ngClass]="{
-              'bg-[var(--color-secondary)]':
-                (currentTheme$ | async) === 'light',
-              'bg-[var(--color-bg-card)]': (currentTheme$ | async) === 'dark',
-            }"
-          >
+          <div *ngFor="let tag of place.tags" class="tag-item flex items-center justify-center gap-2 rounded-[40px] px-4 py-2" [ngClass]="tagClass">
             <ng-container *ngIf="TAG_ICON_MAP[tag.id.toString()] as icon">
               <ng-container *ngIf="isIconData(icon); else customIcon">
                 <app-icon [icon]="icon"></app-icon>
@@ -122,41 +82,31 @@ export type FlexibleIcon =
         </div>
       </div>
 
-      <!-- Check-in button -->
-      <button
-        class="w-full gap-2 px-4 py-3 disabled:cursor-not-allowed lg:w-1/2"
-        (click)="onCheckInClick($event)"
-        [disabled]="isCheckedIn"
-        [title]="checkInTitle"
-        [ngClass]="isCheckedIn ? 'button-bg-transparent' : 'button-bg-blue'"
-      >
+      <!-- Check-in Button -->
+      <button type="button" class="w-full gap-2 px-4 py-3 lg:w-1/2" (click)="onCheckInClick($event)"
+        [disabled]="isCheckedIn" [title]="checkInTitle | translate" [ngClass]="checkInButtonClass">
         <ng-container *ngIf="isAuthenticated; else notAuth">
-          <app-icon
-            [icon]="isCheckedIn ? ICONS.CheckCircle : ICONS.AddCircle"
-          ></app-icon>
-          {{
-            isCheckedIn
-              ? ('mainInfo.checkedIn' | translate)
-              : ('mainInfo.checkIn' | translate)
-          }}
+          <app-icon [icon]="isCheckedIn ? ICONS.CheckCircle : ICONS.AddCircle"></app-icon>
+          {{ isCheckedIn ? ('button.check_in.checked_in' | translate) : ('button.check_in.check_in' | translate) }}
         </ng-container>
         <ng-template #notAuth>
           <app-icon [icon]="ICONS.AddCircle"></app-icon>
-          {{ 'mainInfo.logInToCheckIn' | translate }}
+          {{ 'place_details_page.main_info.log_in_to_check_in' | translate }}
         </ng-template>
       </button>
     </div>
   `,
 })
 export class MainInfoSectionComponent implements OnInit {
+  // ================== Inputs ==================
   @Input() place!: Place;
 
+  // ================== Observables & Constants ==================
   currentTheme$: Observable<Theme>;
-
   ICONS = ICONS;
-
   TAG_ICON_MAP: Record<string, FlexibleIcon> = {};
 
+  // ================== State ==================
   isCheckedIn = false;
 
   constructor(
@@ -171,7 +121,47 @@ export class MainInfoSectionComponent implements OnInit {
     this.initializeTagIconMap();
   }
 
-  /** Initialize tag to icon mapping based on filter config */
+  ngOnInit(): void {
+    this.updateCheckInStatus();
+  }
+
+  // ================== Getters ==================
+  get isAuthenticated(): boolean {
+    return !!this.storageService.getUser();
+  }
+
+  get googleMapsUrl(): string {
+    const query = encodeURIComponent(`${this.place.address}, ${this.place.city}`);
+    return `https://www.google.com/maps/search/?api=1&query=${query}`;
+  }
+
+  get checkInTitle(): string {
+    if (this.isCheckedIn) return 'button.check_in.already_checked_in';
+    if (this.isAuthenticated) return 'button.check_in.check_in';
+    return 'place_details_page.main_info.please_login_to_check_in';
+  }
+
+  get themeTextClass(): string {
+    return this.themeService.currentTheme === 'dark' ? 'text-[var(--color-gray-20)]' : 'text-[var(--color-gray-75)]';
+  }
+
+  get workingHoursClass(): string {
+    return this.themeService.currentTheme === 'dark'
+      ? 'bg-[var(--color-bg-card)] text-[var(--color-gray-20)]'
+      : 'bg-[var(--color-bg-2)] text-[var(--color-gray-100)]';
+  }
+
+  get tagClass(): string {
+    return this.themeService.currentTheme === 'dark' ? 'bg-[var(--color-bg-card)]' : 'bg-[var(--color-secondary)]';
+  }
+
+  get checkInButtonClass(): string {
+    if (!this.isAuthenticated) return 'button-bg-blue';
+    return this.isCheckedIn ? 'button-bg-transparent' : 'button-bg-blue';
+  }
+
+  // ================== Private Methods ==================
+  /** Initialize mapping of tag IDs to icons */
   private initializeTagIconMap(): void {
     FILTER_CATEGORIES.forEach((category) => {
       category.options.forEach((option) => {
@@ -184,45 +174,15 @@ export class MainInfoSectionComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.updateCheckInStatus();
-  }
-
-  /** Returns whether the user is authenticated */
-  get isAuthenticated(): boolean {
-    return !!this.storageService.getUser();
-  }
-
-  /** Returns Google Maps search URL for place's address */
-  get googleMapsUrl(): string {
-    const query = encodeURIComponent(
-      `${this.place.address}, ${this.place.city}`,
-    );
-    return `https://www.google.com/maps/search/?api=1&query=${query}`;
-  }
-
-  /** Returns translated tooltip/title for check-in button */
-  get checkInTitle(): string {
-    if (this.isCheckedIn) {
-      return 'mainInfo.alreadyCheckedIn';
-    }
-    if (this.isAuthenticated) {
-      return 'mainInfo.checkIn';
-    }
-    return 'mainInfo.pleaseLoginToCheckIn';
-  }
-
-  /** Type guard to check if icon is IconData */
+  /** Type guard to distinguish between IconData and FlexibleIcon */
   isIconData(icon: FlexibleIcon): icon is IconData {
     return 'viewBox' in icon;
   }
 
-  /** Get icon URL depending on current theme */
+  /** Get proper icon URL based on current theme */
   getIconURL(icon: FlexibleIcon): string {
     if (this.isIconData(icon)) return '';
-    return this.themeService.currentTheme === 'dark' && icon.iconURLDarkTheme
-      ? icon.iconURLDarkTheme
-      : icon.iconURL;
+    return this.themeService.currentTheme === 'dark' && icon.iconURLDarkTheme ? icon.iconURLDarkTheme : icon.iconURL;
   }
 
   /** Get label for custom icon */
@@ -231,24 +191,18 @@ export class MainInfoSectionComponent implements OnInit {
     return icon.label;
   }
 
-  /** Update check-in status from stored user profile */
+  /** Update local check-in status from user profile */
   private updateCheckInStatus(): void {
     if (!this.place) return;
-
     const publicProfile = this.storageService.getPublicUserProfile();
-    this.isCheckedIn =
-      publicProfile?.checkInCafes?.some((cafe) => cafe.id === this.place.id) ??
-      false;
-
+    this.isCheckedIn = publicProfile?.checkInCafes?.some((cafe) => cafe.id === this.place.id) ?? false;
     this.cdr.detectChanges();
   }
 
-  /**
-   * Handles user clicking on the Check-in button.
-   * Redirects to login if unauthenticated,
-   * or performs check-in if allowed.
-   */
+  /** Handle click on check-in button */
   onCheckInClick(event: MouseEvent): void {
+    event.stopPropagation();
+
     if (!this.isAuthenticated) {
       this.router.navigate(['/auth']);
       return;
@@ -256,33 +210,24 @@ export class MainInfoSectionComponent implements OnInit {
 
     if (this.isCheckedIn) return;
 
-    event.preventDefault();
-    event.stopPropagation();
     this.performCheckIn();
   }
 
-  /**
-   * Perform check-in via service, update user profile and UI state,
-   * notify other components about check-in update.
-   */
+  /** Perform check-in and update user profile */
   private performCheckIn(): void {
     this.checkInsService.checkInToCafe(this.place.id).subscribe({
       next: () => {
-        this.userService
-          .getPublicUserProfile(this.storageService.getUser()?.userId || 0)
-          .subscribe({
-            next: (profile) => {
-              this.storageService.setPublicUserProfile(profile);
-              this.isCheckedIn = true;
-
-              // Notify subscribers that check-ins have been updated
-              this.checkInsService['checkInsUpdatedSource'].next();
-
-              this.cdr.detectChanges();
-              this.router.navigate(['/catalog', this.place.id]);
-            },
-            error: (err) => console.error('Error updating user profile:', err),
-          });
+        const userId = this.storageService.getUser()?.userId || 0;
+        this.userService.getPublicUserProfile(userId).subscribe({
+          next: (profile) => {
+            this.storageService.setPublicUserProfile(profile);
+            this.isCheckedIn = true;
+            this.checkInsService['checkInsUpdatedSource'].next();
+            this.cdr.detectChanges();
+            this.router.navigate(['/catalog', this.place.id]);
+          },
+          error: (err) => console.error('Error updating user profile:', err),
+        });
       },
       error: (err) => console.error('Error performing check-in:', err),
     });

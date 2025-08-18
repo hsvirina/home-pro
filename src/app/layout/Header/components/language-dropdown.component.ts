@@ -49,7 +49,7 @@ import { ClickOutsideDirective } from '../../../shared/directives/click-outside.
       <div
         *ngIf="opened"
         @slideDownAnimation
-        class="absolute left-0 top-full z-50 mt-2 flex w-full origin-top flex-col gap-3 rounded-lg p-2 border"
+        class="absolute left-0 top-full z-50 mt-2 flex w-auto origin-top flex-col gap-3 rounded-lg p-2 border"
         [ngClass]="{
           'bg-[var(--color-white)] border-[var(--color-white)]': (currentTheme$ | async) === 'light',
           'bg-[var(--color-bg-card)] border-[var(--color-white)]': (currentTheme$ | async) === 'dark'

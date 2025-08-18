@@ -11,28 +11,19 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import {
-  fadeInBackdrop,
-  slideDownAnimation,
-  slideUpModal,
-} from '../../../../styles/animations/animations';
-import { UiStateService } from '../../../state/ui/ui-state.service';
-import { IconComponent } from '../../../shared/components/icon.component';
-import { ICONS } from '../../../core/constants/icons.constant';
-import { ThemeService } from '../../../core/services/theme.service';
-import { Observable, Subscription } from 'rxjs';
-import { Theme } from '../../../core/models/theme.type';
-import { FilterService } from '../../../core/services/filter.service';
-import { FilterCategory } from '../../../core/models/catalog-filter.model';
-import { LanguageService } from '../../../core/services/language.service';
 import { TranslateModule } from '@ngx-translate/core';
-import {
-  animate,
-  state,
-  style,
-  transition,
-  trigger,
-} from '@angular/animations';
+import { animate, state, style, transition, trigger } from '@angular/animations';
+
+import { ICONS } from '../../../core/constants/icons.constant';
+import { IconComponent } from '../../../shared/components/icon.component';
+import { ThemeService } from '../../../core/services/theme.service';
+import { FilterService } from '../../../core/services/filter.service';
+import { LanguageService } from '../../../core/services/language.service';
+import { UiStateService } from '../../../state/ui/ui-state.service';
+import { FilterCategory } from '../../../core/models/catalog-filter.model';
+import { Theme } from '../../../core/models/theme.type';
+import { fadeInBackdrop, slideDownAnimation, slideUpModal } from '../../../../styles/animations/animations';
+import { Observable, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-filter-bar',
@@ -274,54 +265,53 @@ import {
     </div>
   `,
 
-  styles: [
-    `
-      /* Scrollable container for mobile dropdown options */
-      .mobile-filter-modal {
-        max-width: 100vw;
-        overflow-x: hidden;
-        box-sizing: border-box;
-        height: 100vh;
-        box-sizing: border-box; /* чтобы padding учитывался внутри */
-        display: flex;
-        flex-direction: column;
-      }
-
-      .category-filter-block {
-        max-width: 100%;
-        overflow-x: hidden;
-        word-break: break-word;
-        overflow-wrap: break-word;
-      }
-
-      .dropdown-mobile-options {
-        max-width: 100%;
-        overflow-x: hidden;
-        word-break: break-word;
-        overflow-wrap: break-word;
-      }
-    `,
-  ],
+  styles: [`
+    .mobile-filter-modal {
+      max-width: 100vw;
+      overflow-x: hidden;
+      box-sizing: border-box;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .category-filter-block, .dropdown-mobile-options {
+      max-width: 100%;
+      overflow-x: hidden;
+      word-break: break-word;
+      overflow-wrap: break-word;
+    }
+  `],
 })
 export class FilterBarComponent implements OnDestroy, AfterViewInit {
-  @ViewChild('mobileFilterModal', { static: false })
-  mobileFilterModal?: ElementRef;
+  // ViewChild and ViewChildren for modal and dropdown tracking
+  @ViewChild('mobileFilterModal', { static: false }) mobileFilterModal?: ElementRef;
   @ViewChildren('dropdownOptions') dropdownOptions!: QueryList<ElementRef>;
 
+  // Constants
   ICONS = ICONS;
-  private langSub?: Subscription;
 
+  // Observables
+  readonly currentTheme$: Observable<Theme>;
+
+  // Selected filter options
   selectedOptions: Record<string, string> = {};
 
+  // Mobile UI state
   isMobileFilterOpen = false;
   mobileOpenedIndex: number | null = null;
   mobileMouseControlEnabled = false;
+
+  // Desktop dropdown state
   openedDropdownIndex: number | null = null;
+
+  // Filter categories (from service)
   filterCategories: FilterCategory[] = [];
 
-  private globalClickUnlistener: () => void;
+  // Subscriptions
+  private langSub?: Subscription;
 
-  readonly currentTheme$: Observable<Theme>;
+  // Document click unlistener
+  private globalClickUnlistener: () => void;
 
   constructor(
     private router: Router,
@@ -333,15 +323,14 @@ export class FilterBarComponent implements OnDestroy, AfterViewInit {
     private filterService: FilterService,
     private languageService: LanguageService,
   ) {
-    this.currentTheme$ = this.themeService.theme$;
-
+     this.currentTheme$ = this.themeService.theme$;
     // Update filter categories on language change
     this.langSub = this.languageService.lang$.subscribe(() => {
       this.filterCategories = this.filterService.categories;
       this.cdr.markForCheck();
     });
 
-    // Listen for document clicks to handle closing dropdowns and modals
+    // Listen to global document clicks to handle dropdown/modal closure
     this.globalClickUnlistener = this.renderer.listen(
       'document',
       'click',
@@ -349,51 +338,53 @@ export class FilterBarComponent implements OnDestroy, AfterViewInit {
     );
   }
 
+  ngAfterViewInit(): void {
+    // Optional debug: log dropdown sizes whenever they change
+    this.dropdownOptions.changes.subscribe(() => this.logDropdownSizes());
+  }
+
   ngOnDestroy(): void {
-    // Clean up subscriptions and listeners
-    this.globalClickUnlistener?.();
+    // Clean up subscriptions and global listeners
     this.langSub?.unsubscribe();
+    this.globalClickUnlistener?.();
     this.enableBodyScroll();
   }
 
-  ngAfterViewInit(): void {
-    // Debug dropdown sizes on options changes (optional)
-    this.dropdownOptions.changes.subscribe(() => {
-      this.logDropdownSizes();
-    });
-  }
-
+  /** Returns true if mobile filter category is open */
   isMobileFilterOpenAt(index: number): boolean {
     return this.mobileOpenedIndex === index;
   }
 
-  /** Toggle mobile filter modal visibility */
+  /** Toggle mobile filter modal */
   toggleMobileFilter(): void {
     this.isMobileFilterOpen = !this.isMobileFilterOpen;
-
-    if (this.isMobileFilterOpen) {
-      this.disableBodyScroll();
-      this.mobileOpenedIndex = null;
-      this.mobileMouseControlEnabled = false;
-    } else {
-      this.enableBodyScroll();
-      this.mobileOpenedIndex = null;
-      this.mobileMouseControlEnabled = false;
-      this.openedDropdownIndex = null;
-    }
+    this.isMobileFilterOpen ? this.disableBodyScroll() : this.enableBodyScroll();
+    this.mobileOpenedIndex = null;
+    this.mobileMouseControlEnabled = false;
+    if (!this.isMobileFilterOpen) this.openedDropdownIndex = null;
   }
 
-  /** Toggle mobile category dropdown */
+  /** Toggle a mobile category dropdown */
   toggleMobileFilterCategory(index: number): void {
-    if (this.mobileOpenedIndex === index) {
-      this.mobileOpenedIndex = null;
-    } else {
-      this.mobileOpenedIndex = index;
-      this.mobileMouseControlEnabled = true;
+    this.mobileOpenedIndex = this.mobileOpenedIndex === index ? null : index;
+    this.cdr.detectChanges();
+  }
+
+  /** Toggle a desktop dropdown */
+  toggleDropdown(index: number): void {
+    this.openedDropdownIndex = this.openedDropdownIndex === index ? null : index;
+    this.cdr.detectChanges();
+  }
+
+  /** Handle hover for desktop dropdown */
+  handleMouseEnter(index: number): void {
+    if (this.openedDropdownIndex !== null && this.openedDropdownIndex !== index) {
+      this.openedDropdownIndex = index;
+      this.cdr.detectChanges();
     }
   }
 
-  /** Select an option from category */
+  /** Select an option from any category */
   selectOption(categoryKey: string, label: string, event?: MouseEvent): void {
     event?.stopPropagation();
     this.selectedOptions[categoryKey] = label;
@@ -402,135 +393,83 @@ export class FilterBarComponent implements OnDestroy, AfterViewInit {
     this.openedDropdownIndex = null;
   }
 
-  /** Log dropdown sizes (for debugging) */
-  logDropdownSizes(): void {
-    this.dropdownOptions.forEach((el, idx) => {
-      const native = el.nativeElement as HTMLElement;
-      // console.log(`Dropdown ${idx} height: ${native.offsetHeight}px`);
-    });
-  }
-
-  /** Handle search button click */
-  onSearchClick(): void {
-    if (window.innerWidth < 1024) {
-      // On mobile: close filters and open mobile menu
-      this.isMobileFilterOpen = false;
-      this.enableBodyScroll();
-      this.cdr.detectChanges();
-      this.uiState.openMobileMenu();
-    } else {
-      // On desktop: apply filters immediately
-      this.applyFilters();
-    }
-  }
-
-  /** Handle click outside mobile modal to close category dropdown */
-  onMobileModalClick(event: MouseEvent): void {
-    const target = event.target as HTMLElement;
-    const clickedInsideCategory = target.closest('.category-filter-block');
-
-    if (!clickedInsideCategory && this.mobileOpenedIndex !== null) {
-      this.mobileOpenedIndex = null;
-      this.mobileMouseControlEnabled = false;
-      this.cdr.detectChanges();
-    }
-  }
-
-  /** Toggle desktop dropdown open/close */
-  toggleDropdown(index: number): void {
-    this.openedDropdownIndex =
-      this.openedDropdownIndex === index ? null : index;
-  }
-
-  /** Handle mouse enter for desktop dropdown hover */
-  handleMouseEnter(index: number): void {
-    if (
-      this.openedDropdownIndex !== null &&
-      this.openedDropdownIndex !== index
-    ) {
-      this.openedDropdownIndex = index;
-    }
-  }
-
-  /** Apply selected filters by navigating to catalog with query params */
+  /** Apply filters by navigating to catalog with query parameters */
   applyFilters(): void {
     const queryParams: Record<string, string> = {};
-
     for (const category of this.filterCategories) {
       const key = category.key;
       const selectedLabel = this.selectedOptions[key];
-
       if (selectedLabel) {
-        const matched = category.options.find(
-          (opt) => opt.label === selectedLabel,
-        );
-        if (matched) {
-          queryParams[key] = matched.key;
-        }
+        const matched = category.options.find(opt => opt.label === selectedLabel);
+        if (matched) queryParams[key] = matched.key;
       }
     }
-
     this.enableBodyScroll();
     this.router.navigate(['/catalog'], { queryParams });
-  }
-
-  /** Document click handler to close dropdowns/modals when clicking outside */
-  private onDocumentClick(event: MouseEvent): void {
-    const path = event.composedPath ? event.composedPath() : [];
-
-    const clickedInsideModal = this.mobileFilterModal?.nativeElement
-      ? path.includes(this.mobileFilterModal.nativeElement)
-      : false;
-
-    const clickedInsideComponent = path.includes(this.elementRef.nativeElement);
-
-    // Close mobile filter modal if clicked outside
-    if (
-      !clickedInsideModal &&
-      !clickedInsideComponent &&
-      this.isMobileFilterOpen
-    ) {
-      this.isMobileFilterOpen = false;
-      this.enableBodyScroll();
-      this.mobileOpenedIndex = null;
-      this.mobileMouseControlEnabled = false;
-      this.openedDropdownIndex = null;
-    }
-
-    // Close desktop dropdown if clicked outside
-    if (
-      !clickedInsideComponent &&
-      this.openedDropdownIndex !== null &&
-      !this.isMobileFilterOpen
-    ) {
-      this.openedDropdownIndex = null;
-      this.cdr.detectChanges();
-    }
-  }
-
-  /** Handle hover on mobile category dropdown (for mouse users) */
-  onMobileCategoryHover(index: number): void {
-    if (!this.mobileMouseControlEnabled) {
-      return;
-    }
-    if (this.mobileOpenedIndex !== index) {
-      this.mobileOpenedIndex = index;
-      this.cdr.detectChanges();
-    }
-  }
-
-  /** Enable body scroll (used when modal is closed) */
-  private enableBodyScroll(): void {
-    document.body.style.overflow = '';
-  }
-
-  /** Disable body scroll (used when modal is open) */
-  private disableBodyScroll(): void {
-    document.body.style.overflow = 'hidden';
   }
 
   /** Clear all selected filters */
   clearAllFilters(): void {
     this.selectedOptions = {};
+  }
+
+  /** Handle search button click */
+  onSearchClick(): void {
+    if (window.innerWidth < 1024) {
+      this.isMobileFilterOpen = false;
+      this.enableBodyScroll();
+      this.cdr.detectChanges();
+      this.uiState.openMobileMenu();
+    } else {
+      this.applyFilters();
+    }
+  }
+
+  /** Log dropdown sizes (debugging purpose) */
+  private logDropdownSizes(): void {
+    this.dropdownOptions.forEach((el) => {
+      const native = el.nativeElement as HTMLElement;
+    });
+  }
+
+  /** Document click handler to close dropdowns/modals when clicking outside */
+  private onDocumentClick(event: MouseEvent): void {
+    const path = event.composedPath ? event.composedPath() : [];
+    const clickedInsideModal = this.mobileFilterModal?.nativeElement
+      ? path.includes(this.mobileFilterModal.nativeElement)
+      : false;
+    const clickedInsideComponent = path.includes(this.elementRef.nativeElement);
+
+    if (!clickedInsideModal && !clickedInsideComponent && this.isMobileFilterOpen) {
+      this.isMobileFilterOpen = false;
+      this.enableBodyScroll();
+      this.mobileOpenedIndex = null;
+      this.mobileMouseControlEnabled = false;
+      this.openedDropdownIndex = null;
+    }
+
+    if (!clickedInsideComponent && !this.isMobileFilterOpen) {
+      this.openedDropdownIndex = null;
+      this.cdr.detectChanges();
+    }
+  }
+
+  /** Enable scrolling on body */
+  private enableBodyScroll(): void {
+    document.body.style.overflow = '';
+  }
+
+  /** Disable scrolling on body */
+  private disableBodyScroll(): void {
+    document.body.style.overflow = 'hidden';
+  }
+
+  /** Handle hover on mobile category dropdown (mouse users) */
+  onMobileCategoryHover(index: number): void {
+    if (!this.mobileMouseControlEnabled) return;
+    if (this.mobileOpenedIndex !== index) {
+      this.mobileOpenedIndex = index;
+      this.cdr.detectChanges();
+    }
   }
 }

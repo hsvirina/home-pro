@@ -6,10 +6,31 @@
     "log_in": "Log in",
     "close": "Close",
     "send": "Send",
-    "learn_more": "Learn more"
+    "learn_more": "Learn more",
+    "check_in": {
+      "check_in": "Check in",
+      "checked_in": "Checked in",
+      "already_checked_in": "Already checked in"
+    },
+    "welcome_sector": "Find your next favorite spot"
   },
-  "nav": {
-    "catalog": "Catalog"
+  "theme": {
+    "light": "Switch to light theme",
+    "dark": "Switch to dark theme"
+  },
+  "header": {
+    "users_menu": {
+      "profile": "Profile",
+      "logout": "Logout"
+    },
+    "nav": {
+      "catalog": "Catalog"
+    },
+    "search_section": {
+      "placeholder": "Search cafés or areas…",
+      "aria_label": "Search cafés or areas",
+      "no_results": "No results found for \"{{term}}\""
+    }
   },
   "home_page": {
     "title": "Your next favorite café is just a",
@@ -19,9 +40,44 @@
     "slider": {
       "for_you": "Specially for you",
       "popular": "Most Popular"
+    },
+    "welcome_sector": {
+      "title_part_1": "Explore",
+      "title_part_2": "the best",
+      "title_part_3": "cafés in your area",
+      "description": "Find your perfect café with just a few clicks. Browse through our curated list and discover your new favorite spot.",
+      "statistics": {
+        "deep_work": "Say it’s perfect for deep work",
+        "vibe": "Picked it for the vibe",
+        "return": "Would come back again"
+      }
     }
   },
-
+  "catalog_page": {
+    "title": "Best Places to",
+    "highlight": "Sip & Chill",
+    "filters_button": "Filters",
+    "show_label": "Show:",
+    "no_cafes_found_title": "No cafés found",
+    "no_cafes_found_title_desc": "Sorry, there are no cafés matching your selected filters. Try adjusting or clearing your filters to see more results.",
+    "items_per_page": {
+      "6": "6",
+      "12": "12",
+      "all": "All"
+    },
+    "filters": {
+      "header": "Filters",
+      "clear_all": "Clear All",
+      "clear_all_aria": "Clear all filters",
+      "apply": "Apply Filters"
+    },
+    "login_modal": {
+      "title": "Please log in",
+      "description": "You need to be logged in to add cafes to your favorites.",
+      "login_button": "Login",
+      "close_button": "Close"
+    }
+  },
   "footer": {
     "subscribe_title": "Subscribe",
     "subscribe_description": "Join our newsletter to stay updated on features and releases.",
@@ -45,7 +101,6 @@
       "community": "Community"
     }
   },
-
   "MODAL": {
     "LOGIN_TITLE": "Please log in",
     "LOGIN_TEXT": "You must be logged in to add cafés to your favorites.",
@@ -53,11 +108,6 @@
     "WELCOME_TEXT": "You've successfully logged in. Time to discover some cafés!",
     "MODAL_TITLE": "Thank you for subscribing!",
     "MODAL_TEXT": "You have successfully joined our newsletter. Stay tuned for updates and exciting features!"
-  },
-
-  "THEME": {
-    "LIGHT": "Switch to light theme",
-    "DARK": "Switch to dark theme"
   },
   "LOCATION": {
     "CITY": "City",
@@ -70,59 +120,10 @@
     "EN": "EN",
     "UK": "UA"
   },
-  "CHECK_IN": {
-    "CHECK_IN": "Check in",
-    "CHECKED_IN": "Checked in",
-    "ALREADY_CHECKED_IN": "Already checked in"
-  },
   "ERROR": {
     "UPDATE_FAVORITES": "An error occurred while updating favorites.",
     "LOGIN_FAILED": "Login failed.",
     "LOAD_PROFILE_FAILED": "Failed to load profile."
-  },
-  "SEARCH_SECTION": {
-    "PLACEHOLDER": "Search cafés or areas…",
-    "ARIA_LABEL": "Search cafés or areas",
-    "NO_RESULTS": "No results found for \"{{term}}\""
-  },
-  "CATALOG": {
-    "TITLE": "Best Places to",
-    "HIGHLIGHT": "Sip & Chill",
-    "FILTERS_BUTTON": "Filters",
-    "SHOW_LABEL": "Show:",
-    "NO_CAFES_FOUND_TITLE": "No cafés found",
-    "NO_CAFES_FOUND_DESC": "Sorry, there are no cafés matching your selected filters. Try adjusting or clearing your filters to see more results.",
-    "ITEMS_PER_PAGE": {
-      "6": "6",
-      "12": "12",
-      "ALL": "All"
-    },
-    "FILTERS": {
-      "HEADER": "Filters",
-      "CLEAR_ALL": "Clear All",
-      "CLEAR_ALL_ARIA": "Clear all filters",
-      "APPLY": "Apply Filters"
-    },
-    "FILTERS_CATEGORIES": {
-      "categoryKey1": "Category Title 1",
-      "categoryKey2": "Category Title 2"
-    },
-    "FILTERS_OPTIONS": {
-      "optionKey1": "Option Label 1",
-      "optionKey2": "Option Label 2"
-    }
-  },
-  "WELCOME": {
-    "TITLE_PART1": "Explore",
-    "TITLE_PART2": "the best",
-    "TITLE_PART3": "cafés in your area",
-    "DESCRIPTION": "Find your perfect café with just a few clicks. Browse through our curated list and discover your new favorite spot.",
-    "STATS": {
-      "DEEP_WORK": "Say it’s perfect for deep work",
-      "VIBE": "Picked it for the vibe",
-      "RETURN": "Would come back again"
-    },
-    "BUTTON": "Find your next favorite spot"
   },
   "SOCIAL_LOGIN": {
     "OR_SIGN_IN_WITH": "Or sign in with",
@@ -141,7 +142,7 @@
     "PASSWORD_PLACEHOLDER": "Enter password",
     "CONFIRM_PASSWORD_LABEL": "Confirm Password",
     "CONFIRM_PASSWORD_PLACEHOLDER": "Enter the password again",
-    "PASSWORD_TOO_WEAK": "Password too weak",
+    "PASSWORD_TOO_WEAK": "Password too weak (minimum 6 characters)",
     "PASSWORD_MISMATCH": "Confirm password mismatch",
     "FIRST_NAME_LABEL": "First Name",
     "FIRST_NAME_PLACEHOLDER": "Enter your first name",
@@ -157,7 +158,6 @@
     "EMAIL_PROMPT_1": "Enter your email",
     "PASSWORD_PROMPT": "Enter your password"
   },
-
   "WELCOME_MODAL": {
     "TITLE": "Welcome to Beanly!",
     "DESCRIPTION": "From cozy corners perfect for reading to stylish spots for your next coffee date — explore places that feel just right for you.",
@@ -185,18 +185,19 @@
     "catalog": "Catalog",
     "details": "Details"
   },
-  "carousel": {
-    "addToFavorites": "Add to favorites",
-    "shareThisPlace": "Share this place"
-  },
-  "mainInfo": {
-    "openingHours": "Opening Hours",
-    "aboutCafe": "About the cafe",
-    "alreadyCheckedIn": "Already checked in",
-    "checkIn": "Check in",
-    "pleaseLoginToCheckIn": "Please log in to check in",
-    "checkedIn": "Checked in",
-    "logInToCheckIn": "Log in to check in"
+  "place_details_page": {
+    "carousel": {
+      "addToFavorites": "Add to favorites",
+      "shareThisPlace": "Share this place"
+    },
+    "main_info": {
+      "opening_hours": "Opening Hours",
+      "about_cafe": "About the cafe",
+
+      "please_login_to_check_in": "Please log in to check in",
+
+      "log_in_to_check_in": "Log in to check in"
+    }
   },
   "reviews": {
     "title": "Rating & Reviews",

@@ -1,46 +1,43 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
+
 import { LogoComponent } from '../shared/components/logo.component';
 import { ModalComponent } from '../shared/components/modal.component';
 import { ClickOutsideDirective } from '../shared/directives/click-outside.directive';
+import { ThemeService } from '../core/services/theme.service';
 import { Theme } from '../core/models/theme.type';
 import { Observable } from 'rxjs';
-import { ThemeService } from '../core/services/theme.service';
-import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-footer',
   standalone: true,
   imports: [
-    RouterModule,
-    FormsModule,
     CommonModule,
+    FormsModule,
+    RouterModule,
+    TranslateModule,
     LogoComponent,
     ModalComponent,
     ClickOutsideDirective,
-    TranslateModule,
   ],
   template: `
-    <!-- Обёртка всего футера -->
+    <!-- Footer wrapper -->
     <footer
       class="flex flex-col gap-10 px-5 py-12 lg:flex-row lg:gap-0 lg:px-[40px] lg:py-[60px] xxl:px-0"
       [ngClass]="{
         'text-[var(--color-gray-75)]': (currentTheme$ | async) === 'light',
-        'text-[var(--color-gray-20)]': (currentTheme$ | async) === 'dark',
+        'text-[var(--color-gray-20)]': (currentTheme$ | async) === 'dark'
       }"
     >
-      <!-- Левая часть: логотип + навигация -->
-      <div
-        class="flex flex-col gap-10 lg:w-full lg:flex-row lg:justify-between lg:gap-0"
-      >
-        <!-- Логотип -->
+      <!-- Left section: Logo + Navigation -->
+      <div class="flex flex-col gap-10 lg:w-full lg:flex-row lg:justify-between lg:gap-0">
         <app-logo [sizeXxl]="true"></app-logo>
 
-        <!-- Контейнер для обоих секций -->
         <div class="flex flex-row gap-4 lg:gap-[80px] xxl:gap-[192px]">
-          <!-- Каждая секция -->
+          <!-- Loop through footer navigation sections -->
           <div
             class="body-font-2 flex w-1/2 flex-col gap-1"
             *ngFor="let section of navigationLinks"
@@ -48,12 +45,14 @@ import { TranslateModule } from '@ngx-translate/core';
             <a
               *ngFor="let link of section.links"
               [routerLink]="link.route"
-              class="relative inline-block w-max whitespace-nowrap py-2 leading-none after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-full after:origin-left after:scale-x-0 after:bg-[var(--color-primary)] after:transition-transform after:duration-300 after:ease-in-out after:content-[''] hover:after:scale-x-100"
+              class="relative inline-block w-max whitespace-nowrap py-2 leading-none
+                     after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-full
+                     after:origin-left after:scale-x-0 after:bg-[var(--color-primary)]
+                     after:transition-transform after:duration-300 after:ease-in-out
+                     after:content-[''] hover:after:scale-x-100"
               [ngClass]="{
-                'hover:text-[var(--color-gray-100)]':
-                  (currentTheme$ | async) === 'light',
-                'hover:text-[var(--color-white)]':
-                  (currentTheme$ | async) === 'dark',
+                'hover:text-[var(--color-gray-100)]': (currentTheme$ | async) === 'light',
+                'hover:text-[var(--color-white)]': (currentTheme$ | async) === 'dark'
               }"
             >
               {{ link.label | translate }}
@@ -62,20 +61,18 @@ import { TranslateModule } from '@ngx-translate/core';
         </div>
       </div>
 
-      <!-- Правая часть: форма подписки -->
+      <!-- Right section: Subscription form -->
       <div
         class="flex w-full flex-col gap-[16px] lg:ml-[80px] xxl:ml-[192px] lg:w-[400px] lg:shrink-0"
-        (appClickOutside)="showError = false"
         appClickOutside
+        (appClickOutside)="showError = false"
       >
-        <!-- Заголовок и описание -->
+        <!-- Section header -->
         <div class="flex flex-col gap-2">
-          <h5
-            [ngClass]="{
-              'text-[var(--color-gray-100)]':
-                (currentTheme$ | async) === 'light',
-              'text-[var(--color-white)]': (currentTheme$ | async) === 'dark',
-            }"
+          <h5 [ngClass]="{
+                'text-[var(--color-gray-100)]': (currentTheme$ | async) === 'light',
+                'text-[var(--color-white)]': (currentTheme$ | async) === 'dark'
+              }"
           >
             {{ 'footer.subscribe_title' | translate }}
           </h5>
@@ -84,7 +81,7 @@ import { TranslateModule } from '@ngx-translate/core';
           </span>
         </div>
 
-        <!-- Поле ввода email -->
+        <!-- Email input -->
         <input
           [(ngModel)]="email"
           name="email"
@@ -95,20 +92,18 @@ import { TranslateModule } from '@ngx-translate/core';
           #emailInput="ngModel"
           (blur)="onBlur()"
           [ngClass]="{
-            'border-[var(--color-gray-20)] bg-[var(--color-secondary)] focus:text-[var(--color-gray-100)]':
-              (currentTheme$ | async) === 'light',
-            'border-[var(--color-gray-100)] bg-transparent focus:text-[var(--color-white)]':
-              (currentTheme$ | async) === 'dark',
+            'border-[var(--color-gray-20)] bg-[var(--color-secondary)] focus:text-[var(--color-gray-100)]': (currentTheme$ | async) === 'light',
+            'border-[var(--color-gray-100)] bg-transparent focus:text-[var(--color-white)]': (currentTheme$ | async) === 'dark'
           }"
           class="body-font-1 rounded-[40px] border px-6 py-3 focus:outline-none lg:w-auto lg:flex-1"
         />
 
-        <!-- Ошибка валидации email -->
+        <!-- Validation error message -->
         <div *ngIf="showError" class="body-font-2 text-[var(--color-primary)]">
           {{ 'footer.email_error' | translate }}
         </div>
 
-        <!-- Кнопка отправки и подпись -->
+        <!-- Submit button and privacy notice -->
         <div class="flex flex-col gap-3">
           <button
             type="submit"
@@ -118,23 +113,19 @@ import { TranslateModule } from '@ngx-translate/core';
             {{ 'button.send' | translate }}
           </button>
 
-          <span class="body-font-2">
-            {{ 'footer.privace_notice' | translate }}
-          </span>
+          <span class="body-font-2">{{ 'footer.privace_notice' | translate }}</span>
         </div>
       </div>
     </footer>
 
-    <!-- Модалка успешной подписки -->
+    <!-- Subscription success modal -->
     <app-modal [isOpen]="showModal" (close)="closeModal()" width="650px">
       <div
         class="flex w-full flex-col items-center justify-between gap-[32px] text-center text-[var(--color-gray-100)]"
       >
         <div class="flex flex-col gap-[20px]">
           <h4>{{ 'MODAL.MODAL_TITLE' | translate }}</h4>
-          <p class="body-font-1">
-            {{ 'MODAL.MODAL_TEXT' | translate }}
-          </p>
+          <p class="body-font-1">{{ 'MODAL.MODAL_TEXT' | translate }}</p>
         </div>
         <button
           (click)="closeModal()"
@@ -147,19 +138,19 @@ import { TranslateModule } from '@ngx-translate/core';
   `,
 })
 export class FooterComponent {
-  /** Email, введённый пользователем */
+  /** User email input */
   email = '';
 
-  /** Отображение модалки успешной подписки */
+  /** Display subscription success modal */
   showModal = false;
 
-  /** Ошибка валидации email */
+  /** Email validation error flag */
   showError = false;
 
-  /** Текущая тема оформления (светлая / тёмная) */
+  /** Current theme (light/dark) observable */
   currentTheme$: Observable<Theme>;
 
-  /** Навигационные ссылки в футере */
+  /** Footer navigation links */
   navigationLinks = [
     {
       title: 'footer.links.title_company',
@@ -187,29 +178,28 @@ export class FooterComponent {
     this.currentTheme$ = this.themeService.theme$;
   }
 
-  /** Обработка клика по кнопке Send */
+  /** Handle send button click */
   onSubmit(): void {
     if (!this.validateEmail(this.email)) {
       this.showError = true;
       return;
     }
-
     this.showModal = true;
     this.email = '';
     this.showError = false;
   }
 
-  /** Проверка email при потере фокуса */
+  /** Validate email on blur */
   onBlur(): void {
     this.showError = !!this.email && !this.validateEmail(this.email);
   }
 
-  /** Закрытие модального окна */
+  /** Close the subscription modal */
   closeModal(): void {
     this.showModal = false;
   }
 
-  /** Простая валидация email через regex */
+  /** Simple regex email validation */
   validateEmail(email: string): boolean {
     const re = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
     return re.test(email.toLowerCase());

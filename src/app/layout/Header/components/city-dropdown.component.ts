@@ -57,7 +57,7 @@ const DEFAULT_LABEL = 'City';
       <div
         *ngIf="opened"
         @slideDownAnimation
-        class="absolute left-0 top-full z-50 mt-2 flex w-full origin-top flex-col gap-3 rounded-lg border p-2"
+        class="absolute left-0 top-full z-50 mt-2 flex w-auto origin-top flex-col gap-3 rounded-lg border p-2"
         [ngClass]="{
           'border-[var(--color-white)] bg-[var(--color-white)]': (currentTheme$ | async) === 'light',
           'border-[var(--color-white)] bg-[var(--color-bg-card)]': (currentTheme$ | async) === 'dark'

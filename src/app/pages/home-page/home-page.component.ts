@@ -13,6 +13,10 @@ import { Theme } from '../../core/models/theme.type';
 import { Observable } from 'rxjs';
 import { ThemeService } from '../../core/services/theme.service';
 import { TranslateModule } from '@ngx-translate/core';
+import {
+  LangCode,
+  LanguageService,
+} from '../../core/services/language.service';
 
 @Component({
   selector: 'app-home-page',
@@ -40,12 +44,16 @@ import { TranslateModule } from '@ngx-translate/core';
           *ngIf="currentTheme$ | async as theme"
           [ngClass]="{ 'text-[var(--color-white)]': theme === 'dark' }"
         >
-          <h2 class="max-w-[1172px] text-[36px] lg:text-[64px] xxl:text-[80px]">
+          <h2 class="max-w-[1200px] text-[36px] lg:text-[64px] xxl:text-[80px]">
             {{ 'home_page.title' | translate }}
             <span class="text-[var(--color-primary)]">{{
               'home_page.click' | translate
             }}</span>
-            {{ 'home_page.away' | translate }}
+            <ng-container *ngIf="lang$ | async as lang">
+              <ng-container *ngIf="lang === 'en'">
+                {{ 'home_page.away' | translate }}
+              </ng-container>
+            </ng-container>
           </h2>
           <span class="body-font-1">{{
             'home_page.subtitle' | translate
@@ -118,16 +126,20 @@ export class HomePageComponent implements OnInit {
   places$: Observable<Place[]>;
   popularPlaces$: Observable<Place[]>;
   currentTheme$: Observable<Theme>;
+  lang$: Observable<LangCode>;
+
   showLoginModal = false;
 
   constructor(
     private placesStore: PlacesStoreService,
     private router: Router,
     private themeService: ThemeService,
+    private languageService: LanguageService,
   ) {
     this.places$ = this.placesStore.places$;
     this.popularPlaces$ = this.placesStore.popularPlaces$;
     this.currentTheme$ = this.themeService.theme$;
+    this.lang$ = this.languageService.lang$;
   }
 
   /** Load places data on component initialization */

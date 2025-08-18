@@ -33,8 +33,8 @@ import { TranslateModule } from '@ngx-translate/core';
       ]"
     >
       <!-- Top section: user avatar, name, status -->
-      <div class="lg:flex lg:justify-between lg:p-6">
-        <div class="flex items-start gap-[20px] lg:flex-row">
+      <div class="lg:flex lg:w-full lg:p-6">
+        <div class="flex items-start gap-[20px] lg:flex-1 lg:flex-row">
           <div
             class="relative h-[58px] w-[58px] flex-shrink-0 lg:h-[120px] lg:w-[120px]"
           >
@@ -77,7 +77,7 @@ import { TranslateModule } from '@ngx-translate/core';
 
           <!-- User name and status -->
           <div
-            class="flex flex-col gap-3"
+            class="flex w-full flex-col gap-3"
             [ngClass]="{
               'text-[var(--color-white)]': (currentTheme$ | async) === 'dark',
             }"
@@ -87,7 +87,7 @@ import { TranslateModule } from '@ngx-translate/core';
               <span>{{ editableUser.lastName }}</span>
             </h3>
 
-            <div class="flex w-full">
+            <div class="flex w-full min-w-0 flex-1">
               <span
                 class="body-font-1 rounded-[40px] border border-[var(--color-gray-20)] p-3"
                 *ngIf="!isEditing; else statusEdit"
@@ -101,7 +101,7 @@ import { TranslateModule } from '@ngx-translate/core';
                   (ngModelChange)="
                     fieldChange.emit({ field: 'status', value: $event })
                   "
-                  class="input-field editable h-[100px] w-full max-w-[600px] resize-none"
+                  class="input-field editable w-full flex-1 resize-none"
                 ></textarea>
               </ng-template>
             </div>
@@ -124,7 +124,7 @@ import { TranslateModule } from '@ngx-translate/core';
       </div>
 
       <!-- Editable user info fields (hidden in public mode) -->
-      <div *ngIf="!public" class="flex flex-col lg:px-6 gap-[20px] lg:flex-row">
+      <div *ngIf="!public" class="flex flex-col gap-[20px] lg:flex-row lg:px-6">
         <!-- Full Name block -->
         <div
           class="flex flex-1 gap-3 rounded-[40px] border p-2"
@@ -201,10 +201,9 @@ import { TranslateModule } from '@ngx-translate/core';
 
           <div class="flex w-full flex-col gap-1">
             <p class="body-font-1">{{ 'infoSector.location' | translate }}</p>
-              <p class="menu-text-font">
-                {{ editableUser.defaultCity }}, Ukraine
-              </p>
-
+            <p class="menu-text-font">
+              {{ editableUser.defaultCity }}, Ukraine
+            </p>
           </div>
         </div>
 
@@ -285,7 +284,6 @@ import { TranslateModule } from '@ngx-translate/core';
         background: transparent;
         outline: none;
         font-size: 1rem;
-        max-width: 140px;
         transition:
           border-color 0.2s,
           background-color 0.2s;

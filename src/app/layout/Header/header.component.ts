@@ -1,4 +1,10 @@
-import { Component, OnInit, OnDestroy, ElementRef, HostListener } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  ElementRef,
+  HostListener,
+} from '@angular/core';
 import {
   Router,
   ActivatedRoute,
@@ -7,7 +13,7 @@ import {
 } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, take } from 'rxjs';
 
 import { FILTER_CATEGORIES } from '../../core/constants/catalog-filter.config';
 import { slideDownAnimation } from '../../../styles/animations/animations';
@@ -18,7 +24,6 @@ import { AuthStateService } from '../../state/auth/auth-state.service';
 import { SearchSectionComponent } from './components/search-section.component';
 import { CityDropdownComponent } from './components/city-dropdown.component';
 import { LanguageDropdownComponent } from './components/language-dropdown.component';
-import { UserMenuComponent } from './components/user-menu.component';
 import { MobileMenuComponent } from './components/mobile-menu.component';
 
 import { IconComponent } from '../../shared/components/icon.component';
@@ -38,6 +43,8 @@ import { AuthUser } from '../../core/models/user.model';
 import { BadgeType, calculateBadgeType } from '../../core/utils/badge-utils';
 import { getUnlockedAchievements } from '../../core/utils/achievement.utils';
 import { ACHIEVEMENTS } from '../../core/constants/achievements';
+import { ThemeToggleComponent } from './components/theme-toggle.component';
+import { UserDropdownComponent } from './components/user-dropdown.component';
 
 @Component({
   selector: 'app-header',
@@ -51,50 +58,37 @@ import { ACHIEVEMENTS } from '../../core/constants/achievements';
     SearchSectionComponent,
     CityDropdownComponent,
     LanguageDropdownComponent,
-    UserMenuComponent,
     MobileMenuComponent,
     IconComponent,
     LogoComponent,
-    ThemedIconPipe,
-    BadgeImagePipe,
+    ThemeToggleComponent,
+    UserDropdownComponent,
   ],
-
   template: `
-    <!--
-  HEADER COMPONENT
-  Description: Main header bar containing navigation, theme switcher, user menu, and search (for large screens).
-  Responsive: Adapts for mobile and desktop.
--->
-
     <header
       class="relative z-50 flex h-[48px] items-center justify-between bg-[var(--color-bg)] px-[20px] lg:h-[72px] xxl:h-[80px] xxl:px-0"
     >
-      <!-- Left section: Logo and mobile menu toggle -->
+      <!-- Left: logo + mobile menu -->
       <div class="flex items-center gap-[8px]">
-        <!-- Mobile menu button (visible on small screens) -->
         <button class="lg:hidden" (click)="uiState.toggleMobileMenu()">
           <app-icon [icon]="ICONS.Menu" />
         </button>
-
-        <!-- App logo component -->
         <app-logo></app-logo>
       </div>
 
-      <!-- Center section: Search bar (visible only on large screens) -->
+      <!-- Center: search for large screens -->
       <div class="hidden flex-1 justify-center lg:flex">
         <app-search-section></app-search-section>
       </div>
 
-      <!-- Right section: Nav, theme, user menu -->
+      <!-- Right: nav, theme, user menu -->
       <div class="flex items-center gap-[24px] lg:gap-[20px] xxl:gap-[24px]">
-        <!-- Desktop nav links and dropdowns -->
+        <!-- Desktop nav -->
         <div class="hidden items-center lg:flex">
           <nav
             class="menu-text-font flex items-center gap-[24px] lg:gap-[20px] xxl:gap-[24px]"
           >
-            <a routerLink="/catalog">{{ 'nav.catalog' | translate }}</a>
-
-            <!-- City selection dropdown -->
+            <a routerLink="/catalog">{{ 'header.nav.catalog' | translate }}</a>
             <app-city-dropdown
               [selectedKey]="cityKey"
               [selectedLabel]="cityLabel"
@@ -102,8 +96,6 @@ import { ACHIEVEMENTS } from '../../core/constants/achievements';
               (toggle)="toggleDropdown('city')"
               (cityChange)="setCity($event)"
             ></app-city-dropdown>
-
-            <!-- Language selection dropdown -->
             <app-language-dropdown
               [opened]="activeDropdown === 'lang'"
               (toggle)="toggleDropdown('lang')"
@@ -111,197 +103,30 @@ import { ACHIEVEMENTS } from '../../core/constants/achievements';
           </nav>
         </div>
 
-        <!-- Theme toggle: Light & Dark mode -->
-        <div class="flex gap-1 p-1">
-          <!-- Light theme button -->
-          <button
-            class="flex h-10 w-10 items-center justify-center rounded-full"
-            [ngClass]="[
-              (currentTheme$ | async) === 'light'
-                ? 'bg-[var(--color-secondary)]'
-                : 'hover:bg-[var(--color-gray-20)]',
-            ]"
-            (click)="setTheme('light')"
-            (mouseenter)="isSunHovered = true"
-            (mouseleave)="isSunHovered = false"
-            [attr.aria-label]="'THEME.LIGHT' | translate"
-          >
-            <app-icon
-              [icon]="
-                (currentTheme$ | async) === 'dark'
-                  ? isSunHovered
-                    ? ICONS.Sun
-                    : ICONS.SunDarkTheme
-                  : ('Sun' | themedIcon)
-              "
-            />
-          </button>
+        <!-- Theme toggle -->
+        <app-theme-toggle></app-theme-toggle>
 
-          <!-- Dark theme button -->
-          <button
-            class="flex h-10 w-10 items-center justify-center rounded-full hover:bg-[var(--color-gray-20)]"
-            [ngClass]="{
-              'bg-[var(--color-gray-20)]': (currentTheme$ | async) === 'dark',
-            }"
-            (click)="setTheme('dark')"
-            [attr.aria-label]="'THEME.DARK' | translate"
-          >
-            <app-icon [icon]="ICONS.Moon" />
-          </button>
-        </div>
-
-        <!-- Mobile user menu or login -->
-        <ng-container *ngIf="screenIsMobile && activeDropdown !== 'menu'">
-          <ng-container *ngIf="user; else mobileLogin">
-            <div
-              class="relative flex items-center justify-center"
-              style="width: 38px; height: 38px;"
-              (click)="toggleDropdown('userMenu')"
-              (keydown.enter)="toggleDropdown('userMenu')"
-              (keydown.space)="toggleDropdown('userMenu')"
-              tabindex="0"
-              role="button"
-              aria-haspopup="true"
-              [attr.aria-expanded]="activeDropdown === 'userMenu'"
-            >
-              <!-- Badge overlay -->
-              <img
-                *ngIf="userBadge | badgeImage as badgeImg"
-                [src]="badgeImg"
-                alt="badge"
-                class="absolute left-1/2 top-1/2 z-0"
-                style="width: 38px; height: 38px; transform: translate(-50%, -50%); object-fit: contain;"
-              />
-
-              <!-- Mobile user avatar -->
-              <app-user-menu
-                [userPhoto]="user.photoUrl"
-                [opened]="activeDropdown === 'userMenu'"
-                [avatarSize]="32"
-                [badgeSize]="38"
-                [hasBadge]="!!userBadge"
-
-                (logout)="handleLogout()"
-                class="relative z-10"
-              ></app-user-menu>
-
-              <!-- Добавляем выпадающее меню для мобилки -->
-              <div
-                *ngIf="activeDropdown === 'userMenu'"
-                @slideDownAnimation
-                class="absolute right-0 top-full z-[999] mt-2 w-auto origin-top rounded-[16px] border p-2"
-                [ngClass]="{
-                  'border-[var(--color-white)] bg-[var(--color-white)]':
-                    (currentTheme$ | async) === 'light',
-                  'border-[var(--color-white)] bg-[var(--color-bg-card)]':
-                    (currentTheme$ | async) === 'dark',
-                }"
-                role="menu"
-                aria-label="User menu"
-                (click)="$event.stopPropagation()"
-              >
-                <a
-                  routerLink="/profile"
-                  class="block cursor-pointer rounded-[12px] px-4 py-2 transition-colors hover:bg-[var(--color-bg)]"
-                  (click)="activeDropdown = null"
-                  role="menuitem"
-                  >Profile</a
-                >
-                <button
-                  class="w-full cursor-pointer rounded-[12px] px-4 py-2 transition-colors hover:bg-[var(--color-bg)]"
-                  (click)="handleLogout()"
-                  role="menuitem"
-                >
-                  Logout
-                </button>
-              </div>
-            </div>
-          </ng-container>
-
-          <!-- Mobile login button -->
-          <ng-template #mobileLogin>
-            <button
-              (click)="navigateToAuth()"
-              class="flex items-center lg:hidden"
-            >
-              <app-icon [icon]="ICONS.UserProfile" />
-            </button>
-          </ng-template>
+        <!-- User dropdown or login -->
+        <ng-container *ngIf="user; else showLogin">
+          <app-user-dropdown
+            [user]="user"
+            [userBadge]="userBadge"
+            [avatarSize]="screenIsMobile ? 38 : 64"
+            [badgeSize]="screenIsMobile ? 38 : 64"
+            [opened]="activeDropdown === 'userMenu'"
+            (openedChange)="activeDropdown = $event ? 'userMenu' : null"
+            [theme]="(currentTheme$ | async) ?? 'light'"
+            (logout)="handleLogout()"
+          ></app-user-dropdown>
         </ng-container>
-
-        <!-- Desktop user menu or login -->
-        <div class="hidden items-center gap-[30px] lg:flex">
-          <ng-container *ngIf="user; else showLogin">
-            <div
-              class="relative h-[64px] w-[64px] overflow-visible"
-            >
-              <!-- Badge overlay -->
-              <img
-                *ngIf="userBadge | badgeImage as badgeImg"
-                [src]="badgeImg"
-                alt="badge"
-                class="absolute left-1/2 top-1/2"
-                style="width: 64px; height: 64px; transform: translate(-50%, -50%); object-fit: contain;"
-              />
-
-              <!-- Desktop user avatar -->
-              <app-user-menu
-                [userPhoto]="user.photoUrl"
-                [opened]="activeDropdown === 'userMenu'"
-                [avatarSize]="50"
-                [badgeSize]="64"
-                [hasBadge]="!!userBadge"
-                (toggle)="toggleDropdown('userMenu')"
-                (logout)="handleLogout()"
-                [ngClass]="'absolute left-1/2 top-1/2'"
-                style="transform: translate(-50%, -50%);"
-              ></app-user-menu>
-
-              <!-- Desktop dropdown menu -->
-              <div
-                *ngIf="activeDropdown === 'userMenu'"
-                @slideDownAnimation
-                class="absolute right-0 top-full z-[999] mt-2 w-auto origin-top rounded-[16px] border p-2"
-                [ngClass]="{
-                  'border-[var(--color-white)] bg-[var(--color-white)]':
-                    (currentTheme$ | async) === 'light',
-                  'border-[var(--color-white)] bg-[var(--color-bg-card)]':
-                    (currentTheme$ | async) === 'dark',
-                }"
-                role="menu"
-                aria-label="User menu"
-
-                (click)="$event.stopPropagation()"
-              >
-                <a
-                  routerLink="/profile"
-                  class="block cursor-pointer rounded-[12px] px-4 py-2 transition-colors hover:bg-[var(--color-bg)]"
-                  (click)="activeDropdown = null"
-                  role="menuitem"
-                >
-                  Profile
-                </a>
-                <button
-                  class="w-full cursor-pointer rounded-[12px] px-4 py-2 transition-colors hover:bg-[var(--color-bg)]"
-                  (click)="handleLogout()"
-                  role="menuitem"
-                >
-                  Logout
-                </button>
-              </div>
-            </div>
-          </ng-container>
-
-          <!-- Desktop login button -->
-          <ng-template #showLogin>
-            <button class="flex items-center gap-1" (click)="navigateToAuth()">
-              <span class="hidden lg:inline">{{
-                'button.log_in' | translate
-              }}</span>
-              <app-icon [icon]="ICONS.UserProfile" />
-            </button>
-          </ng-template>
-        </div>
+        <ng-template #showLogin>
+          <button class="flex items-center gap-1" (click)="navigateToAuth()">
+            <span class="hidden lg:inline">{{
+              'button.log_in' | translate
+            }}</span>
+            <app-icon [icon]="ICONS.UserProfile" />
+          </button>
+        </ng-template>
       </div>
     </header>
 
@@ -317,34 +142,27 @@ import { ACHIEVEMENTS } from '../../core/constants/achievements';
       (navigateToAuth)="navigateToAuth()"
       (logout)="handleLogout()"
       (cityChange)="setCity($event)"
-      (toggle)="toggleDropdown('userMenu')"
     ></app-mobile-menu>
   `,
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   readonly ICONS = ICONS;
 
-  // State
-  cityKey: string | null = null;
-  cityLabel = 'City';
-  language: 'EN' | 'UK' = 'EN';
+  // UI state
   activeDropdown: 'city' | 'lang' | 'menu' | 'userMenu' | null = null;
+  screenIsMobile = false;
+
+  // User data
   user: AuthUser | null = null;
   userBadge: BadgeType | null = null;
+  language: 'EN' | 'UK' = 'EN';
+  cityKey: string | null = null;
+  cityLabel = 'City';
 
-  // Theme
   readonly currentTheme$: Observable<Theme>;
-  isSunHovered = false;
 
-  // UI
-  screenIsMobile = false;
-  avatarSize = 64;
-  badgeSize = 64;
-
-  // Subscriptions
   private subscriptions: Subscription[] = [];
   private readonly resizeListener = () => this.checkScreenWidth();
-
   private readonly locationOptions =
     FILTER_CATEGORIES.find((c) => c.key === 'location')?.options || [];
 
@@ -353,33 +171,33 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     public uiState: UiStateService,
     private authService: AuthStateService,
+    private authApiService: AuthApiService,
     private themeService: ThemeService,
     public languageService: LanguageService,
-    private authApiService: AuthApiService,
-    private elementRef: ElementRef
+    private elementRef: ElementRef,
   ) {
     this.currentTheme$ = this.themeService.theme$;
   }
 
-  /** Lifecycle: Init */
+  /** Lifecycle hook: initialize component */
   ngOnInit(): void {
-    this.setupUserSubscription();
-    this.setupRouterEvents();
+    this.subscribeToUser();
+    this.subscribeToRouterEvents();
     this.checkScreenWidth();
     window.addEventListener('resize', this.resizeListener);
   }
 
-  /** Lifecycle: Cleanup */
+  /** Lifecycle hook: clean up subscriptions and listeners */
   ngOnDestroy(): void {
-    this.subscriptions.forEach((sub) => sub.unsubscribe());
+    this.subscriptions.forEach((s) => s.unsubscribe());
     window.removeEventListener('resize', this.resizeListener);
   }
 
-  /** Subscribe to auth state and set user info */
-  private setupUserSubscription(): void {
+  /** Subscribe to user changes and load user-related data */
+  private subscribeToUser(): void {
     const sub = this.authService.user$.subscribe((user) => {
       this.user = user;
-      this.initializeCityFromUserOrQuery(user);
+      this.initializeCity(user);
 
       if (user) {
         this.authApiService.getPublicUserProfile(user.userId).subscribe({
@@ -387,39 +205,31 @@ export class HeaderComponent implements OnInit, OnDestroy {
             const unlocked = getUnlockedAchievements(profile);
             this.userBadge = calculateBadgeType(unlocked, ACHIEVEMENTS);
           },
-          error: (err) => {
-            console.error('Failed to fetch profile for badge', err);
-            this.userBadge = null;
-          },
+          error: () => (this.userBadge = null),
         });
       } else {
         this.userBadge = null;
       }
     });
-
     this.subscriptions.push(sub);
   }
 
-  /** Close dropdowns on route change */
-  private setupRouterEvents(): void {
+  /** Close all dropdowns on route change */
+  private subscribeToRouterEvents(): void {
     const sub = this.router.events.subscribe((event) => {
-      if (event instanceof NavigationStart) {
-        this.activeDropdown = null;
-      }
+      if (event instanceof NavigationStart) this.activeDropdown = null;
     });
     this.subscriptions.push(sub);
   }
 
-  /** Toggle dropdown open/close */
-  // toggleDropdown(name: typeof this.activeDropdown): void {
-  //   this.activeDropdown = this.activeDropdown === name ? null : name;
-  // }
+  /** Toggle a dropdown open/close */
   toggleDropdown(name: typeof this.activeDropdown): void {
     this.activeDropdown = this.activeDropdown === name ? null : name;
   }
-  /** Set selected city and update URL */
+
+  /** Set city and update query params */
   setCity(key: string): void {
-    const found = this.locationOptions.find((opt) => opt.key === key);
+    const found = this.locationOptions.find((o) => o.key === key);
     if (!found) return;
 
     this.cityKey = found.key;
@@ -433,7 +243,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       .then(() => (this.activeDropdown = null));
   }
 
-  /** Set language preference (user or guest) */
+  /** Set language preference for user or session */
   setLanguage(lang: 'EN' | 'UK'): void {
     if (this.user) {
       this.authService.updateUserLanguage(lang).subscribe({
@@ -453,28 +263,28 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.themeService.setTheme(theme);
   }
 
-  /** Close all dropdowns */
+  /** Close all active dropdowns */
   closeDropdowns(): void {
     this.activeDropdown = null;
   }
 
-  /** Navigate to auth page */
+  /** Navigate to authentication page */
   navigateToAuth(): void {
     this.router.navigate(['/auth']);
   }
 
-  /** Handle user logout */
+  /** Log out user and reset state */
   handleLogout(): void {
     this.authService.logout();
     this.activeDropdown = null;
     this.router.navigate(['/']);
   }
 
-  /** Determine city from user default or URL */
-  private initializeCityFromUserOrQuery(user: AuthUser | null): void {
+  /** Initialize city from user default or query params */
+  private initializeCity(user: AuthUser | null): void {
     if (user?.defaultCity) {
       const found = this.locationOptions.find(
-        (opt) => opt.key.toLowerCase() === user.defaultCity.toLowerCase(),
+        (o) => o.key.toLowerCase() === user.defaultCity.toLowerCase(),
       );
       if (found) {
         this.cityKey = found.key;
@@ -483,36 +293,28 @@ export class HeaderComponent implements OnInit, OnDestroy {
       }
     }
 
-    const sub = this.route.queryParams.subscribe((params) => {
+    const sub = this.route.queryParams.pipe(take(1)).subscribe((params) => {
       const loc = params['location'];
-      const found = this.locationOptions.find((opt) => opt.key === loc);
+      const found = this.locationOptions.find((o) => o.key === loc);
       this.cityKey = found?.key ?? null;
       this.cityLabel = found?.label ?? 'City';
     });
-
     this.subscriptions.push(sub);
   }
 
-  /** Adjust layout and avatar size based on screen width */
-  checkScreenWidth(): void {
+  /** Check screen width and update mobile layout flag */
+  private checkScreenWidth(): void {
     this.screenIsMobile = window.innerWidth < 1024;
-    this.avatarSize = this.screenIsMobile ? 50 : 64;
-    this.badgeSize = this.screenIsMobile ? 50 : 64;
   }
 
-  /** Triggered on search */
-  onSearch(): void {
-    this.closeDropdowns();
-  }
-
+  /** Close user menu dropdown when clicking outside */
   @HostListener('document:click', ['$event'])
-onDocumentClick(event: MouseEvent): void {
-  // Проверяем, что dropdown открыт и клик был вне компонента
-  if (
-    this.activeDropdown === 'userMenu' &&
-    !this.elementRef.nativeElement.contains(event.target)
-  ) {
-    this.activeDropdown = null;
+  onDocumentClick(event: MouseEvent): void {
+    if (
+      this.activeDropdown === 'userMenu' &&
+      !this.elementRef.nativeElement.contains(event.target)
+    ) {
+      this.activeDropdown = null;
+    }
   }
-}
 }

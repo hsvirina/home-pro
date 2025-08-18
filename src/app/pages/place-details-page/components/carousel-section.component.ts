@@ -55,7 +55,7 @@ import { TranslateModule } from '@ngx-translate/core';
             (click)="onToggleFavorite.emit()"
             class="relative flex h-[44px] w-[44px] items-center justify-center rounded-full p-[10px] backdrop-blur transition"
             [ngClass]="getButtonBgClass()"
-            [title]="'carousel.addToFavorites' | translate"
+            [title]="'place_details_page.carousel.addToFavorites' | translate"
             aria-label="Toggle favorite"
           >
             <app-icon
@@ -69,7 +69,7 @@ import { TranslateModule } from '@ngx-translate/core';
             (click)="handleShare()"
             class="flex h-[44px] w-[44px] items-center justify-center rounded-full p-[10px] backdrop-blur transition"
             [ngClass]="getButtonBgClass()"
-            [title]="'carousel.shareThisPlace' | translate"
+            [title]="'place_details_page.carousel.shareThisPlace' | translate"
             aria-label="Share this place"
           >
             <app-icon [icon]="'Share' | themedIcon" />

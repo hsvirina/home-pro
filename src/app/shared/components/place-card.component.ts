@@ -10,7 +10,7 @@ import {
   NgZone,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { NgIf, NgForOf, NgClass, AsyncPipe, CommonModule } from '@angular/common';
+import { NgClass, AsyncPipe, CommonModule } from '@angular/common';
 import { Place } from '../../core/models/place.model';
 import { PlaceCardType } from '../../core/constants/place-card-type.enum';
 import { IconComponent } from './icon.component';
@@ -29,7 +29,7 @@ import { TranslateModule } from '@ngx-translate/core';
   selector: 'app-place-card',
   standalone: true,
   imports: [
-     CommonModule,
+    CommonModule,
     NgClass,
     IconComponent,
     AsyncPipe,
@@ -42,9 +42,8 @@ import { TranslateModule } from '@ngx-translate/core';
       (mouseleave)="isHovered = false"
       class="box-border w-full cursor-pointer overflow-hidden rounded-[40px] transition-colors duration-300"
       [ngClass]="{
-        'h-[570px]': cardType === PlaceCardType.Full,
+        'h-[510px]': cardType === PlaceCardType.Full,
         'h-[334px]': cardType === PlaceCardType.Favourites,
-        'h-[510px]': cardType === PlaceCardType.Catalog,
         'bg-[var(--color-white)] hover:bg-[var(--color-gray-10)]':
           (currentTheme$ | async) === 'light',
         'bg-[var(--color-bg-card)] hover:bg-[var(--color-gray-100)]':
@@ -125,28 +124,22 @@ import { TranslateModule } from '@ngx-translate/core';
             (click)="$event.stopPropagation()"
           >
             <app-icon [icon]="ICONS.Location" />
-            <span class="body-font-1 relative underline">{{
-              place.address
-            }}</span>
+            <span class="body-font-1 relative underline">
+              {{ 'infoSector.cityCountry' | translate:{ city: place.city } }}
+            </span>
           </a>
 
-          <!-- Short description (visible in Full and Catalog card types) -->
+          <!-- Short description (visible in Full card type) -->
           <p
-            *ngIf="
-              cardType === PlaceCardType.Full ||
-              cardType === PlaceCardType.Catalog
-            "
+            *ngIf="cardType === PlaceCardType.Full"
             class="body-font-1 line-clamp-3 h-[72px] overflow-hidden"
           >
             {{ place.shortDescription }}
           </p>
 
-          <!-- Tags container (visible in Full and Catalog card types) -->
+          <!-- Tags container (visible in Full card type) -->
           <div
-            *ngIf="
-              cardType === PlaceCardType.Full ||
-              cardType === PlaceCardType.Catalog
-            "
+            *ngIf="cardType === PlaceCardType.Full"
             #tagsContainer
             class="flex h-[80px] flex-wrap gap-2 overflow-hidden"
           >
@@ -181,33 +174,6 @@ import { TranslateModule } from '@ngx-translate/core';
               </span>
             </ng-container>
           </div>
-
-          <!-- Check-in button, only visible in Full card type -->
-          <button
-            *ngIf="cardType === PlaceCardType.Full"
-            class="button-bg-transparent gap-2 py-3"
-            (click)="onCheckInClick($event)"
-            [disabled]="isCheckedIn"
-            [title]="
-              isCheckedIn
-                ? ('CHECK_IN.ALREADY_CHECKED_IN' | translate)
-                : ('CHECK_IN.CHECK_IN' | translate)
-            "
-          >
-            <ng-container *ngIf="isAuthenticated; else learnMore">
-              <app-icon
-                [icon]="isCheckedIn ? ICONS.CheckCircle : ICONS.AddCircle"
-              ></app-icon>
-              {{
-                isCheckedIn
-                  ? ('CHECK_IN.CHECKED_IN' | translate)
-                  : ('CHECK_IN.CHECK_IN' | translate)
-              }}
-            </ng-container>
-            <ng-template #learnMore>
-              {{ 'button.learn_more' | translate }}
-            </ng-template>
-          </button>
         </div>
       </div>
     </div>
@@ -217,7 +183,7 @@ export class PlaceCardComponent implements AfterViewInit {
   /** Place data to display */
   @Input() place!: Place;
 
-  /** Type of card: Full, Favourites, or Catalog */
+  /** Type of card: Full or Favourites */
   @Input() cardType: PlaceCardType = PlaceCardType.Full;
 
   /** Event emitted when user clicks favorite toggle but is unauthorized */
@@ -285,56 +251,48 @@ export class PlaceCardComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     if (this.cardType !== PlaceCardType.Full) return;
 
+    // Дублируем теги для безопасного редактирования
     this.displayTags = [...this.place.tags];
     this.updateCheckInStatus();
 
-    // Run layout calculation outside Angular zone for performance
     this.ngZone.runOutsideAngular(() => {
       requestAnimationFrame(() => {
-        this.displayTags = [...this.place.tags];
-        this.cdr.detectChanges();
+        const container = this.tagsContainer.nativeElement;
 
-        setTimeout(() => {
-          const container = this.tagsContainer.nativeElement;
-          const maxWidth = container.clientWidth;
+        const style = getComputedStyle(container);
+        const gap = parseFloat(style.gap) || 0;
+        const maxWidth = container.clientWidth;
+        const maxLines = 2;
 
-          const style = getComputedStyle(container);
-          const gap = parseFloat(style.gap) || 0;
+        const children = Array.from(
+          container.querySelectorAll('span'),
+        ) as HTMLElement[];
+        let fitted: { id: number; name: string }[] = [];
+        let currentLineWidth = 0;
+        let lineCount = 1;
 
-          const maxLines = 2;
-          const children = Array.from(
-            container.querySelectorAll('span'),
-          ) as HTMLElement[];
+        for (let i = 0; i < this.place.tags.length; i++) {
+          const childWidth = children[i]?.offsetWidth || 0;
 
-          let currentLineWidth = 0;
-          let lineCount = 1;
-          const fitted: { id: number; name: string }[] = [];
-
-          for (let i = 0; i < children.length; i++) {
-            const childWidth = children[i].offsetWidth;
-
-            if (currentLineWidth + childWidth <= maxWidth) {
-              currentLineWidth += childWidth + gap;
-            } else {
-              lineCount++;
-              if (lineCount > maxLines) break;
-              currentLineWidth = childWidth + gap;
+          if (currentLineWidth + childWidth <= maxWidth) {
+            fitted.push(this.place.tags[i]);
+            currentLineWidth += childWidth + gap;
+          } else {
+            lineCount++;
+            if (lineCount > maxLines) {
+              this.showEllipsis = true;
+              break;
             }
-
-            fitted.push(this.displayTags[i]);
+            // начинаем новую линию
+            fitted.push(this.place.tags[i]);
+            currentLineWidth = childWidth + gap;
           }
+        }
 
-          if (fitted.length < this.displayTags.length && fitted.length > 0) {
-            fitted.pop();
-            this.showEllipsis = true;
-          }
-
-          // Apply changes inside Angular zone
-          this.ngZone.run(() => {
-            this.displayTags = fitted;
-            this.cdr.detectChanges();
-          });
-        }, 0);
+        this.ngZone.run(() => {
+          this.displayTags = fitted;
+          this.cdr.detectChanges();
+        });
       });
     });
   }
@@ -376,7 +334,6 @@ export class PlaceCardComponent implements AfterViewInit {
           placeId: this.place.id,
           isFavorite: newFavoriteStatus,
         });
-
       },
       error: (err) => {
         if (err.message === 'NOT_AUTHENTICATED') {

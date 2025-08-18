@@ -24,7 +24,7 @@ import { TranslateModule } from '@ngx-translate/core';
     TranslateModule,
   ],
   template: `
-    <div class="flex flex-col gap-12 px-5 lg:px-10 xxl:px-0">
+    <div class="flex flex-col gap-12 lg:px-10 xxl:px-0">
       <!-- Favorite Cafés Section -->
       <section class="flex flex-col">
         <!-- Mobile header & description - only when no favorites -->

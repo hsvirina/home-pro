@@ -29,7 +29,7 @@ export interface AchievementSection {
   standalone: true,
   imports: [CommonModule, TranslateModule],
   template: `
-    <div class="flex min-w-[335px] lg:px-0 flex-col gap-6">
+    <div class="flex min-w-[335px] flex-col gap-6 lg:px-0">
       <!-- Header Section -->
       <div class="flex flex-col gap-2">
         <h4>{{ 'achievements.title' | translate }}</h4>
@@ -101,12 +101,13 @@ export interface AchievementSection {
                 <!-- Locked Achievement Placeholder -->
                 <ng-template #locked>
                   <div
-                    class="h-[60px] w-[60px] lg:h-[100px] lg:w-[100px] rounded-full border border-[var(--color-gray-20)] "
+                    class="h-[60px] w-[60px] rounded-full border border-[var(--color-gray-20)] lg:h-[100px] lg:w-[100px]"
                     [ngClass]="{
-                  'bg-[var(--color-bg-2)]': (currentTheme$ | async) === 'light',
-                  'bg-[var(--color-gray-75)]':
-                    (currentTheme$ | async) === 'dark',
-                }"
+                      'bg-[var(--color-bg-2)]':
+                        (currentTheme$ | async) === 'light',
+                      'bg-[var(--color-gray-75)]':
+                        (currentTheme$ | async) === 'dark',
+                    }"
                   ></div>
                 </ng-template>
               </div>

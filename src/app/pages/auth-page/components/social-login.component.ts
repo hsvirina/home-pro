@@ -7,6 +7,7 @@ import { Theme } from '../../../core/models/theme.type';
 import { Observable } from 'rxjs';
 import { ThemeService } from '../../../core/services/theme.service';
 import { TranslateModule } from '@ngx-translate/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-social-login',
@@ -15,7 +16,9 @@ import { TranslateModule } from '@ngx-translate/core';
   template: `
     <div class="flex flex-col gap-[20px] text-center">
       <!-- Section title -->
-      <span class="body-font-1">{{ 'SOCIAL_LOGIN.OR_SIGN_IN_WITH' | translate }}</span>
+      <span class="body-font-1">{{
+        'SOCIAL_LOGIN.OR_SIGN_IN_WITH' | translate
+      }}</span>
 
       <!-- Social login buttons -->
       <div class="flex flex-col gap-[10px] lg:flex-row">
@@ -27,7 +30,9 @@ import { TranslateModule } from '@ngx-translate/core';
           aria-label="Sign in with Google"
         >
           <app-icon [icon]="ICONS.Google" />
-          <span class="button-font text-[var(--color-button-green)]">{{ 'SOCIAL_LOGIN.GOOGLE' | translate }}</span>
+          <span class="button-font text-[var(--color-button-green)]">{{
+            'SOCIAL_LOGIN.GOOGLE' | translate
+          }}</span>
         </button>
 
         <!-- Facebook login button -->
@@ -38,7 +43,9 @@ import { TranslateModule } from '@ngx-translate/core';
           aria-label="Sign in with Facebook"
         >
           <app-icon [icon]="ICONS.Facebook" />
-          <span class="button-font text-[var(--color-button-blue)]">{{ 'SOCIAL_LOGIN.FACEBOOK' | translate }}</span>
+          <span class="button-font text-[var(--color-button-blue)]">{{
+            'SOCIAL_LOGIN.FACEBOOK' | translate
+          }}</span>
         </button>
 
         <!-- Apple login button -->
@@ -46,31 +53,49 @@ import { TranslateModule } from '@ngx-translate/core';
           (click)="showTemporaryMessage()"
           class="flex flex-1 items-center justify-center gap-[8px] rounded-[40px] border px-[24px] py-[12px]"
           [ngClass]="{
-            'border-[var(--color-gray-100)]': (currentTheme$ | async) === 'light',
-            'border-[var(--color-gray-20)]': (currentTheme$ | async) === 'dark'
+            'border-[var(--color-gray-100)]':
+              (currentTheme$ | async) === 'light',
+            'border-[var(--color-gray-20)]': (currentTheme$ | async) === 'dark',
           }"
           type="button"
           aria-label="Sign in with Apple"
         >
           <app-icon [icon]="'Apple' | themedIcon" />
-          <span class="button-font">{{ 'SOCIAL_LOGIN.APPLE' | translate }}</span>
+          <span class="button-font">{{
+            'SOCIAL_LOGIN.APPLE' | translate
+          }}</span>
         </button>
       </div>
 
       <!-- Terms and privacy links -->
       <span class="body-font-1">
         {{ 'SOCIAL_LOGIN.BY_REGISTERING' | translate }}
-        <a (click)="goHome()" class="cursor-pointer underline" role="link" tabindex="0">
+        <a
+          (click)="goHome()"
+          class="cursor-pointer underline"
+          role="link"
+          tabindex="0"
+        >
           {{ 'SOCIAL_LOGIN.TERMS_OF_USE' | translate }}
         </a>
         {{ 'SOCIAL_LOGIN.AND' | translate }}
-        <a (click)="goHome()" class="cursor-pointer underline" role="link" tabindex="0">
+        <a
+          (click)="goHome()"
+          class="cursor-pointer underline"
+          role="link"
+          tabindex="0"
+        >
           {{ 'SOCIAL_LOGIN.PRIVACY_POLICY' | translate }}
         </a>
       </span>
 
       <!-- Temporary informational message -->
-      <div *ngIf="showMessage" class="mt-4 text-[var(--color-primary)]" role="alert" aria-live="polite">
+      <div
+        *ngIf="showMessage"
+        class="mt-4 text-[var(--color-primary)]"
+        role="alert"
+        aria-live="polite"
+      >
         {{ 'SOCIAL_LOGIN.PLEASE_USE_EMAIL' | translate }}
       </div>
     </div>
@@ -88,7 +113,10 @@ export class SocialLoginPlaceholderComponent {
   /** Observable providing current app theme ('light' | 'dark') */
   readonly currentTheme$: Observable<Theme>;
 
-  constructor(private themeService: ThemeService) {
+  constructor(
+    private themeService: ThemeService,
+    private router: Router,
+  ) {
     this.currentTheme$ = this.themeService.theme$;
   }
 
@@ -105,9 +133,8 @@ export class SocialLoginPlaceholderComponent {
 
   /**
    * Handler for clicking on Terms of Use or Privacy Policy links.
-   * Replace console.log with actual navigation logic as needed.
    */
   goHome(): void {
-    console.log('Navigate to home or relevant page');
+    this.router.navigate(['/']);
   }
 }

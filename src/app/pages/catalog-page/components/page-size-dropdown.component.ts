@@ -9,7 +9,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
   template: `
     <div class="custom-dropdown relative flex items-center gap-2">
       <!-- Label for dropdown -->
-      <span>{{ 'CATALOG.SHOW_LABEL' | translate }}</span>
+      <span>{{ 'catalog_page.show_label' | translate }}</span>
 
       <!-- Dropdown toggle button -->
       <div
@@ -42,8 +42,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
         >
           <!-- Translate option label -->
           {{
-            'CATALOG.ITEMS_PER_PAGE.' +
-              (option.label === 'All' ? 'ALL' : option.label) | translate
+            'catalog_page.items_per_page.' +
+              (option.label === 'all' ? 'all' : option.label) | translate
           }}
         </div>
       </div>
@@ -64,7 +64,7 @@ export class PageSizeDropdownComponent {
   sizeOptions = [
     { label: '6', value: 6 },
     { label: '12', value: 12 },
-    { label: 'All', value: -1 },
+    { label: 'all', value: -1 },
   ];
 
   constructor(private translate: TranslateService) {}
@@ -91,12 +91,12 @@ export class PageSizeDropdownComponent {
     const selected = this.sizeOptions.find((opt) => opt.value === this.selectedValue);
     if (!selected) return 'Select';
     switch (selected.label) {
-      case 'All':
-        return this.translate.instant('CATALOG.ITEMS_PER_PAGE.ALL');
+      case 'all':
+        return this.translate.instant('catalog_page.items_per_page.all');
       case '6':
-        return this.translate.instant('CATALOG.ITEMS_PER_PAGE.6');
+        return this.translate.instant('catalog_page.items_per_page.6');
       case '12':
-        return this.translate.instant('CATALOG.ITEMS_PER_PAGE.12');
+        return this.translate.instant('catalog_page.items_per_page.12');
       default:
         return selected.label;
     }

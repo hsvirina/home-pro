@@ -13,7 +13,13 @@ import { ThemedIconPipe } from '../../../core/pipes/themed-icon.pipe';
 @Component({
   selector: 'app-auth-password-step',
   standalone: true,
-  imports: [CommonModule, FormsModule, IconComponent, ThemedIconPipe, TranslateModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    IconComponent,
+    ThemedIconPipe,
+    TranslateModule,
+  ],
   template: `
     <div class="flex flex-col gap-8">
       <!-- Header with back button and title -->
@@ -21,7 +27,6 @@ import { ThemedIconPipe } from '../../../core/pipes/themed-icon.pipe';
         <div
           class="flex cursor-pointer select-none items-center"
           (click)="goBack.emit()"
-          style="user-select: none;"
           [attr.aria-label]="'AUTH.BACK_BUTTON_LABEL' | translate"
           role="button"
           tabindex="0"
@@ -43,8 +48,12 @@ import { ThemedIconPipe } from '../../../core/pipes/themed-icon.pipe';
       </div>
 
       <!-- Password form -->
-      <form autocomplete="off" class="flex flex-col gap-[12px]" (ngSubmit)="submitPassword()">
-        <!-- Password input with toggle visibility -->
+      <form
+        autocomplete="off"
+        class="flex flex-col gap-[12px]"
+        (ngSubmit)="submitPassword()"
+      >
+        <!-- Password input -->
         <div class="relative flex flex-col gap-[4px]">
           <span
             class="body-font-2"
@@ -69,7 +78,7 @@ import { ThemedIconPipe } from '../../../core/pipes/themed-icon.pipe';
                   ? 'border-[var(--color-gray-20)] placeholder-[var(--color-gray-75)]'
                   : 'border-[var(--color-gray-100)] placeholder-[var(--color-gray-55)]'
               ]"
-              class="body-font-1 w-full rounded-[40px] border bg-[var(--color-bg)] px-6 py-3 placeholder-[var(--color-gray-75)] outline-none"
+              class="body-font-1 w-full rounded-[40px] border bg-[var(--color-bg)] px-6 py-3 outline-none"
               autocomplete="new-password"
               [attr.aria-invalid]="passwordTooWeak"
             />
@@ -87,10 +96,8 @@ import { ThemedIconPipe } from '../../../core/pipes/themed-icon.pipe';
               ></app-icon>
             </button>
           </div>
-
-          <!-- Password strength validation message -->
           <div
-            *ngIf="passwordTooWeak"
+            *ngIf="isPasswordTooWeak"
             class="body-font-2 mt-1 flex select-none items-center gap-[4px] text-[var(--color-button-error)]"
             role="alert"
           >
@@ -99,7 +106,7 @@ import { ThemedIconPipe } from '../../../core/pipes/themed-icon.pipe';
           </div>
         </div>
 
-        <!-- Confirm password input with toggle visibility -->
+        <!-- Confirm password input -->
         <div class="relative flex flex-col gap-[4px]">
           <span
             class="body-font-2"
@@ -144,10 +151,8 @@ import { ThemedIconPipe } from '../../../core/pipes/themed-icon.pipe';
               />
             </button>
           </div>
-
-          <!-- Password mismatch validation message -->
           <div
-            *ngIf="passwordMismatch"
+            *ngIf="isPasswordMismatch"
             id="passwordMismatchMessage"
             class="body-font-2 flex select-none items-center gap-[4px] text-[var(--color-button-error)]"
             role="alert"
@@ -157,7 +162,7 @@ import { ThemedIconPipe } from '../../../core/pipes/themed-icon.pipe';
           </div>
         </div>
 
-        <!-- First name input -->
+        <!-- First Name input -->
         <div class="flex flex-col gap-[4px]">
           <span
             class="body-font-2"
@@ -180,12 +185,12 @@ import { ThemedIconPipe } from '../../../core/pipes/themed-icon.pipe';
                 ? 'border-[var(--color-gray-20)] placeholder-[var(--color-gray-75)]'
                 : 'border-[var(--color-gray-100)] placeholder-[var(--color-gray-55)]'
             ]"
-            class="body-font-1 w-full rounded-[40px] border bg-[var(--color-bg)] px-6 py-3 placeholder-[var(--color-gray-75)] outline-none"
+            class="body-font-1 w-full rounded-[40px] border bg-[var(--color-bg)] px-6 py-3 outline-none"
             required
           />
         </div>
 
-        <!-- Last name input -->
+        <!-- Last Name input -->
         <div class="flex flex-col gap-[4px]">
           <span
             class="body-font-2"
@@ -208,7 +213,7 @@ import { ThemedIconPipe } from '../../../core/pipes/themed-icon.pipe';
                 ? 'border-[var(--color-gray-20)] placeholder-[var(--color-gray-75)]'
                 : 'border-[var(--color-gray-100)] placeholder-[var(--color-gray-55)]'
             ]"
-            class="body-font-1 w-full rounded-[40px] border bg-[var(--color-bg)] px-6 py-3 placeholder-[var(--color-gray-75)] outline-none"
+            class="body-font-1 w-full rounded-[40px] border bg-[var(--color-bg)] px-6 py-3 outline-none"
             required
           />
         </div>
@@ -225,9 +230,10 @@ import { ThemedIconPipe } from '../../../core/pipes/themed-icon.pipe';
   `,
 })
 export class AuthPasswordStepComponent {
+  // ================== Constants ==================
   ICONS = ICONS;
 
-  // Input properties for form data and validation flags
+  // ================== Inputs ==================
   @Input() email = '';
   @Input() password = '';
   @Input() repeatPassword = '';
@@ -238,7 +244,7 @@ export class AuthPasswordStepComponent {
   @Input() firstName = '';
   @Input() lastName = '';
 
-  // Output events to notify parent component about changes and actions
+  // ================== Outputs ==================
   @Output() firstNameChange = new EventEmitter<string>();
   @Output() lastNameChange = new EventEmitter<string>();
   @Output() passwordChange = new EventEmitter<string>();
@@ -246,30 +252,38 @@ export class AuthPasswordStepComponent {
   @Output() passwordSubmit = new EventEmitter<void>();
   @Output() goBack = new EventEmitter<void>();
 
+  // ================== State ==================
   readonly currentTheme$: Observable<Theme>;
 
+  // ================== Constructor ==================
   constructor(private themeService: ThemeService) {
     this.currentTheme$ = this.themeService.theme$;
   }
 
-  /**
-   * Toggle visibility of password input field
-   */
+  // ================== Actions ==================
+  /** Toggle password visibility */
   toggleShowPassword() {
     this.showPassword = !this.showPassword;
   }
 
-  /**
-   * Toggle visibility of repeat password input field
-   */
+  /** Toggle repeat password visibility */
   toggleShowRepeatPassword() {
     this.showRepeatPassword = !this.showRepeatPassword;
   }
 
-  /**
-   * Emit event to submit the password form
-   */
+  /** Emit password submit event */
   submitPassword() {
     this.passwordSubmit.emit();
+  }
+
+  // ================== Getters ==================
+  /** Check if password is too weak */
+  get isPasswordTooWeak(): boolean {
+    return this.password.length > 0 && this.password.length < 6;
+  }
+
+  /** Check if password and repeat password mismatch */
+  get isPasswordMismatch(): boolean {
+    return this.repeatPassword.length > 0 && this.password !== this.repeatPassword;
   }
 }

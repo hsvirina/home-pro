@@ -31,6 +31,7 @@ import { SocialLoginPlaceholderComponent } from './components/social-login.compo
   template: `
     <!-- Main authentication container -->
     <div class="mx-auto flex max-w-[1320px] flex-col gap-[32px] px-5 lg:px-10 xxl:px-0">
+
       <!-- Step components: Email, Password/Registration, Login -->
       <div class="grid grid-cols-8">
         <div class="col-span-8 lg:col-span-6 lg:col-start-2 xxl:col-span-4 xxl:col-start-3">
@@ -98,7 +99,7 @@ import { SocialLoginPlaceholderComponent } from './components/social-login.compo
   `,
 })
 export class AuthPageComponent {
-  /** Icon constants used in child components */
+  /** Icon constants for child components */
   readonly ICONS = ICONS;
 
   /** Current step in the authentication flow */
@@ -111,7 +112,7 @@ export class AuthPageComponent {
   firstName = '';
   lastName = '';
 
-  /** Flags for UI behavior and validation */
+  /** UI state flags */
   showPassword = false;
   showRepeatPassword = false;
   passwordTooWeak = false;
@@ -125,18 +126,19 @@ export class AuthPageComponent {
     private router: Router,
     private authService: AuthStateService,
     private storageService: StorageService,
-    private userApi: AuthApiService
+    private userApi: AuthApiService,
   ) {}
 
-  /**
-   * Called when email is submitted successfully from the email step.
-   * Initializes password fields and moves to step 2.
-   */
+  // =========================
+  // STEP NAVIGATION METHODS
+  // =========================
+
+  /** Called when email is submitted. Moves to password step. */
   onEmailSubmit(email: string): void {
     this.email = email;
     this.step = 2;
 
-    // Reset password-related fields and states
+    // Reset password fields and validation
     this.password = '';
     this.repeatPassword = '';
     this.passwordTooWeak = false;
@@ -145,10 +147,23 @@ export class AuthPageComponent {
     this.showRepeatPassword = false;
   }
 
-  /**
-   * Handles registration logic on password form submission.
-   * Validates password and confirms, then proceeds with registration and auto-login.
-   */
+  /** Toggle between email (step 1) and login (step 3) forms */
+  toggleForm(): void {
+    this.step = this.step === 1 ? 3 : 1;
+  }
+
+  /** Returns to the email entry step */
+  goBackToEmail(): void {
+    this.step = 1;
+    this.password = '';
+    this.repeatPassword = '';
+  }
+
+  // =========================
+  // PASSWORD / REGISTRATION
+  // =========================
+
+  /** Handles registration with password validation */
   onSubmitPassword(): void {
     this.passwordTooWeak = false;
     this.passwordMismatch = false;
@@ -166,47 +181,47 @@ export class AuthPageComponent {
     this.authService
       .register(this.email, this.password, this.firstName.trim(), this.lastName.trim())
       .subscribe({
-        next: () => {
-          this.authService.login(this.email, this.password).subscribe({
-            next: () => {
-              const userId = this.storageService.getUser()?.userId;
-
-              if (userId) {
-                this.userApi.getPublicUserProfile(userId).subscribe({
-                  next: (profile) => {
-                    this.storageService.setPublicUserProfile(profile);
-                    this.isNewUser = true;
-                    this.showWelcomeModal = true;
-                  },
-                  error: (err) => {
-                    alert('Failed to load profile: ' + err.message);
-                    this.showWelcomeModal = true;
-                  },
-                });
-              }
-            },
-            error: (err) => {
-              alert('Login error after registration: ' + (err.message || err.statusText));
-            },
-          });
-        },
-        error: (err) => {
-          if (
-            err.status === 400 &&
-            err.error?.message?.includes('Email is already taken')
-          ) {
-            alert('This email is already registered. Please use another or login.');
-            this.step = 3; // Redirect to login step
-          } else {
-            alert('Registration error: ' + (err.message || err.statusText));
-          }
-        },
+        next: () => this.loginAfterRegistration(),
+        error: (err) => this.handleRegistrationError(err),
       });
   }
 
-  /**
-   * Handles login form submission and profile loading.
-   */
+  /** Performs login immediately after successful registration */
+  private loginAfterRegistration(): void {
+    this.authService.login(this.email, this.password).subscribe({
+      next: () => this.loadUserProfile(true),
+      error: (err) => alert('Login error after registration: ' + (err.message || err.statusText)),
+    });
+  }
+
+  /** Handles registration errors */
+  private handleRegistrationError(err: any): void {
+    if (err.status === 400 && err.error?.message?.includes('Email is already taken')) {
+      alert('This email is already registered. Please login.');
+      this.step = 3;
+    } else {
+      alert('Registration error: ' + (err.message || err.statusText));
+    }
+  }
+
+  /** Handles password input change */
+  onPasswordChange(password: string): void {
+    this.password = password;
+    this.passwordTooWeak = this.password.length > 0 && this.password.length < 6;
+    this.passwordMismatch = false;
+  }
+
+  /** Handles confirm password input change */
+  onRepeatPasswordChange(repeatPassword: string): void {
+    this.repeatPassword = repeatPassword;
+    this.passwordMismatch = false;
+  }
+
+  // =========================
+  // LOGIN
+  // =========================
+
+  /** Handles login form submission */
   onSubmitLogin(): void {
     this.loginError = false;
 
@@ -216,73 +231,41 @@ export class AuthPageComponent {
     }
 
     this.authService.login(this.email, this.password).subscribe({
-      next: () => {
-        const userId = this.storageService.getUser()?.userId;
+      next: () => this.loadUserProfile(false),
+      error: (err) => alert('Login error: ' + err.message),
+    });
+  }
 
-        if (userId) {
-          this.userApi.getPublicUserProfile(userId).subscribe({
-            next: (profile) => {
-              this.storageService.setPublicUserProfile(profile);
-              this.isNewUser = false;
-              this.showWelcomeModal = true;
-            },
-            error: (err) => {
-              alert('Failed to load profile: ' + err.message);
-              this.showWelcomeModal = true;
-            },
-          });
-        }
+  /** Loads public user profile and shows welcome modal */
+  private loadUserProfile(isNewUser: boolean): void {
+    const userId = this.storageService.getUser()?.userId;
+
+    if (!userId) return;
+
+    this.userApi.getPublicUserProfile(userId).subscribe({
+      next: (profile) => {
+        this.storageService.setPublicUserProfile(profile);
+        this.isNewUser = isNewUser;
+        this.showWelcomeModal = true;
       },
       error: (err) => {
-        alert('Login error: ' + err.message);
+        alert('Failed to load profile: ' + err.message);
+        this.showWelcomeModal = true;
       },
     });
   }
 
-  /**
-   * Toggles between email and login forms (step 1 ↔ step 3).
-   */
-  toggleForm(): void {
-    this.step = this.step === 1 ? 3 : 1;
-  }
+  // =========================
+  // UI HELPERS
+  // =========================
 
-  /**
-   * Returns the user to the email entry step, clearing password inputs.
-   */
-  goBackToEmail(): void {
-    this.step = 1;
-    this.password = '';
-    this.repeatPassword = '';
-  }
-
-  /**
-   * Handles password change and clears previous validation errors.
-   */
-  onPasswordChange(password: string): void {
-    this.password = password;
-    this.passwordTooWeak = false;
-    this.passwordMismatch = false;
-  }
-
-  /**
-   * Handles confirm password change and clears mismatch validation error.
-   */
-  onRepeatPasswordChange(repeatPassword: string): void {
-    this.repeatPassword = repeatPassword;
-    this.passwordMismatch = false;
-  }
-
-  /**
-   * Displays a temporary message (e.g., for social login).
-   */
+  /** Displays a temporary message (e.g., for social login) */
   showTemporaryMessage(): void {
     this.showMessage = true;
     setTimeout(() => (this.showMessage = false), 3000);
   }
 
-  /**
-   * Closes the welcome modal and redirects to the intended URL or homepage.
-   */
+  /** Closes the welcome modal and navigates to the intended route */
   closeWelcomeModal(): void {
     this.showWelcomeModal = false;
 
@@ -291,9 +274,7 @@ export class AuthPageComponent {
     this.router.navigateByUrl(returnUrl);
   }
 
-  /**
-   * Navigates directly to the homepage.
-   */
+  /** Navigate to homepage directly */
   goHome(): void {
     this.router.navigate(['/']);
   }

@@ -66,7 +66,6 @@ export class LanguageService {
    * @param lang LangCode to set
    */
 setLang(lang: LangCode): void {
-  console.log('LanguageService.setLang called with', lang);
   if (!this.allowedLangs.includes(lang)) {
     throw new Error(`Unsupported language code: ${lang}`);
   }

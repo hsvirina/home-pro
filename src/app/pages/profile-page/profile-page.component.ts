@@ -145,14 +145,19 @@ import { BadgeType, calculateBadgeType } from '../../core/utils/badge-utils';
             <p
               class="rounded-2xl border border-[var(--color-gray-20)] bg-[var(--color-white)] p-4"
             >
-              {{ newAchievementToShow }}
+              {{
+                'achievements.list.' + newAchievementToShow + '.title'
+                  | translate
+              }}
             </p>
           </div>
 
           <img
             *ngIf="newAchievementData?.iconPath"
             [src]="newAchievementData?.iconPath"
-            [alt]="newAchievementToShow"
+            [alt]="
+              'achievements.list.' + newAchievementToShow + '.title' | translate
+            "
             class="mx-auto mb-6 h-40 object-contain"
           />
 
@@ -195,7 +200,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     private placesService: PlacesService,
     private loaderService: LoaderService,
     private themeService: ThemeService,
-    private authApiService: AuthApiService
+    private authApiService: AuthApiService,
   ) {}
 
   /** Lifecycle hook - Initialize component data */
@@ -219,7 +224,9 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
   get newAchievementData() {
     if (!this.newAchievementToShow) return null;
     for (const section of this.achievements) {
-      const achievement = section.achievements.find(a => a.key === this.newAchievementToShow);
+      const achievement = section.achievements.find(
+        (a) => a.key === this.newAchievementToShow,
+      );
       if (achievement) return achievement;
     }
     return null;
@@ -264,14 +271,14 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     };
 
     this.authService.updateUserProfile(payload).subscribe({
-      next: updatedUser => {
+      next: (updatedUser) => {
         this.user = updatedUser;
         this.editedUser = { ...updatedUser };
         this.isEditing = false;
         this.hasPendingChanges = false;
         this.showModal = true;
       },
-      error: err => console.error('❌ Failed to update profile:', err),
+      error: (err) => console.error('❌ Failed to update profile:', err),
     });
   }
 
@@ -298,12 +305,12 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
   /** Loads all places from backend */
   private loadPlaces(): void {
     this.placesService.getPlaces().subscribe({
-      next: places => {
+      next: (places) => {
         this.allPlaces = places;
         this.updateFavoritesAndVisited();
         this.loaderService.hide();
       },
-      error: err => {
+      error: (err) => {
         console.error('❌ Failed to load places:', err);
         this.loaderService.hide();
       },
@@ -313,17 +320,19 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
   /** Subscribes to authentication state changes */
   private subscribeToAuthUser(): void {
     this.subs.add(
-      this.authService.user$.subscribe(user => {
+      this.authService.user$.subscribe((user) => {
         this.user = user;
         this.editedUser = user ? { ...user } : null;
 
         if (user) {
-          this.themeService.setTheme((user.theme ?? 'light').toLowerCase() as Theme);
+          this.themeService.setTheme(
+            (user.theme ?? 'light').toLowerCase() as Theme,
+          );
           this.loadPublicUserProfile(user.userId);
         } else {
           this.resetProfileData();
         }
-      })
+      }),
     );
   }
 
@@ -331,14 +340,14 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
   private loadPublicUserProfile(userId: number): void {
     this.subs.add(
       this.authApiService.getPublicUserProfile(userId).subscribe({
-        next: profile => {
+        next: (profile) => {
           this.publicProfile = profile;
           this.updateUnlockedAchievements(profile);
           this.updateFavoritesAndVisited();
           this.calculateUserBadge(profile);
         },
-        error: err => console.error('❌ Failed to load profile:', err),
-      })
+        error: (err) => console.error('❌ Failed to load profile:', err),
+      }),
     );
   }
 
@@ -351,25 +360,37 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     }
 
     const favoritePlaceIds = new Set(this.user.favoriteCafeIds);
-    const visitedPlaceIds = new Set(this.publicProfile?.checkInCafes.map(c => c.id) || []);
+    const visitedPlaceIds = new Set(
+      this.publicProfile?.checkInCafes.map((c) => c.id) || [],
+    );
 
-    this.favorites = this.allPlaces.filter(place => favoritePlaceIds.has(place.id));
-    this.visited = this.allPlaces.filter(place => visitedPlaceIds.has(place.id));
+    this.favorites = this.allPlaces.filter((place) =>
+      favoritePlaceIds.has(place.id),
+    );
+    this.visited = this.allPlaces.filter((place) =>
+      visitedPlaceIds.has(place.id),
+    );
   }
 
   /** Updates unlocked achievements and detects new ones */
   private updateUnlockedAchievements(profile: PublicUserProfile): void {
     const unlocked = getUnlockedAchievements(profile);
-    const current = new Set(unlocked.flatMap(s => s.achievements.map(a => a.key)));
+
+    const current = new Set(
+      unlocked.flatMap((s) => s.achievements.map((a) => a.key)),
+    );
 
     const prev = localStorage.getItem('unlockedAchievements');
     const prevSet = prev ? new Set(JSON.parse(prev)) : null;
 
     const newAchievements = prevSet
-      ? Array.from(current).filter(key => !prevSet.has(key))
+      ? Array.from(current).filter((key) => !prevSet.has(key))
       : [];
 
-    localStorage.setItem('unlockedAchievements', JSON.stringify(Array.from(current)));
+    localStorage.setItem(
+      'unlockedAchievements',
+      JSON.stringify(Array.from(current)),
+    );
     this.unlockedAchievementTitles = current;
     this.achievements = ACHIEVEMENTS;
 

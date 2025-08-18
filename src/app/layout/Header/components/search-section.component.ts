@@ -56,13 +56,13 @@ import { ClickOutsideDirective } from '../../../shared/directives/click-outside.
       <!-- Search input -->
       <input
         type="text"
-        placeholder="{{ 'SEARCH_SECTION.PLACEHOLDER' | translate }}"
+        placeholder="{{ 'header.search_section.placeholder' | translate }}"
         class="body-font-1 w-full border-none bg-transparent focus:outline-none"
         [(ngModel)]="searchTerm"
         (click)="$event.stopPropagation()"
         (input)="onSearchChange()"
         autocomplete="off"
-        [attr.aria-label]="'SEARCH_SECTION.ARIA_LABEL' | translate"
+        [attr.aria-label]="'header.search_section.aria_label' | translate"
       />
 
       <!-- Suggestions dropdown -->
@@ -106,7 +106,9 @@ import { ClickOutsideDirective } from '../../../shared/directives/click-outside.
           class="p-4 text-gray-500"
           role="alert"
         >
-          {{ 'SEARCH_SECTION.NO_RESULTS' | translate: { term: searchTerm } }}
+          {{
+            'header.search_section.no_results' | translate: { term: searchTerm }
+          }}
         </li>
       </ul>
     </div>
@@ -115,22 +117,23 @@ import { ClickOutsideDirective } from '../../../shared/directives/click-outside.
 export class SearchSectionComponent implements OnDestroy {
   readonly ICONS = ICONS;
 
+  /** Callback to close parent dropdowns */
   @Input() closeDropdowns!: () => void;
 
-  /** Текущий ввод в поиске */
+  /** Current search input value (ngModel) */
+  searchTerm = '';
+
+  /** Reactive search term stream */
   private searchTerm$ = new BehaviorSubject<string>('');
 
-  /** Observable с текущей темой */
+  /** Observable with the current theme */
   readonly currentTheme$: Observable<Theme>;
 
-  /** Observable с отфильтрованными местами */
+  /** Observable with filtered places according to search term and current language */
   readonly filteredPlaces$: Observable<Place[]>;
 
-  /** Для отписки от всех потоков */
+  /** Subject for cleanup on destroy */
   private destroy$ = new Subject<void>();
-
-  /** Используется в input через ngModel */
-  searchTerm = '';
 
   constructor(
     private placesService: PlacesService,
@@ -140,11 +143,12 @@ export class SearchSectionComponent implements OnDestroy {
   ) {
     this.currentTheme$ = this.themeService.theme$;
 
+    // Combine search term and language changes to filter places reactively
     this.filteredPlaces$ = combineLatest([
       this.searchTerm$,
       this.translateService.onLangChange.pipe(
         map((event) => event.lang),
-        startWith(this.translateService.currentLang), // начальное значение
+        startWith(this.translateService.currentLang),
       ),
     ]).pipe(
       switchMap(([term, lang]) =>
@@ -155,48 +159,54 @@ export class SearchSectionComponent implements OnDestroy {
     );
   }
 
-  /**
-   * Обновляем строку поиска и реактивно фильтруем
-   */
+  /** Update search term and trigger filtering */
   onSearchChange(): void {
     this.searchTerm$.next(this.searchTerm.trim());
   }
 
   /**
-   * Обработка выбора места
+   * Handle selection of a place from the dropdown
+   * @param place Selected place
    */
   selectPlace(place: Place): void {
     this.resetSearch();
     this.router.navigate(['/catalog', place.id]).catch(console.error);
+    this.closeDropdowns?.();
   }
 
-  /**
-   * Обработка клика вне компонента
-   */
+  /** Reset search when clicking outside the component */
   onClickOutside(): void {
     this.resetSearch();
   }
 
+  /** Clear search input and reactive search term */
   private resetSearch(): void {
     this.searchTerm = '';
     this.searchTerm$.next('');
   }
 
+  /**
+   * Filter places based on search term
+   * @param places List of places
+   * @param term Search term
+   * @returns Filtered list (max 5 items)
+   */
   private filterPlaces(places: Place[], term: string): Place[] {
     const lowerTerm = term.toLowerCase();
 
-    return !lowerTerm
-      ? []
-      : places
-          .filter(
-            (place) =>
-              place.name.toLowerCase().includes(lowerTerm) ||
-              place.city?.toLowerCase().includes(lowerTerm) ||
-              place.address?.toLowerCase().includes(lowerTerm),
-          )
-          .slice(0, 5);
+    if (!lowerTerm) return [];
+
+    return places
+      .filter(
+        (place) =>
+          place.name.toLowerCase().includes(lowerTerm) ||
+          place.city?.toLowerCase().includes(lowerTerm) ||
+          place.address?.toLowerCase().includes(lowerTerm),
+      )
+      .slice(0, 5);
   }
 
+  /** Cleanup subscriptions on destroy */
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();

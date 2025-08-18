@@ -43,6 +43,7 @@ import { PageSizeDropdownComponent } from './components/page-size-dropdown.compo
 
 import { paginate } from '../../core/utils/pagination.util';
 import { ModalComponent } from '../../shared/components/modal.component';
+import { LangCode, LanguageService } from '../../core/services/language.service';
 
 @Component({
   selector: 'app-catalog-page',
@@ -75,13 +76,16 @@ import { ModalComponent } from '../../shared/components/modal.component';
 
       <!-- Page title with translation keys and highlighted part -->
       <h2
-        class="col-span-4 mb-[60px] text-center text-[32px] xxl:col-span-8 xxl:text-[64px]"
-      >
-        {{ 'CATALOG.TITLE' | translate }}
-        <span class="text-[var(--color-primary)]">{{
-          'CATALOG.HIGHLIGHT' | translate
-        }}</span>
-      </h2>
+  class="col-span-4 mb-[60px] text-center text-[32px] xxl:col-span-8 xxl:text-[64px]"
+>
+  {{ 'catalog_page.title' | translate }}
+
+  <ng-container *ngIf="lang$ | async as lang">
+    <span class="text-[var(--color-primary)]" [innerHTML]="
+      lang !== 'en' ? '<br>' + ('catalog_page.highlight' | translate) : ('catalog_page.highlight' | translate)
+    "></span>
+  </ng-container>
+</h2>
 
       <!-- Mobile filter toggle button: visible only on smaller screens -->
       <div
@@ -92,7 +96,7 @@ import { ModalComponent } from '../../shared/components/modal.component';
           (click)="toggleFilters()"
           aria-label="Toggle filters"
         >
-          {{ 'CATALOG.FILTERS_BUTTON' | translate }}
+          {{ 'catalog_page.filters_button' | translate }}
         </button>
       </div>
 
@@ -150,6 +154,7 @@ import { ModalComponent } from '../../shared/components/modal.component';
             [filters]="filters"
             [filterCategories]="filterCategories"
             (filtersChange)="onFiltersChange($event)"
+            (applyFiltersClicked)="toggleFilters()"
           ></app-catalog-filters>
         </div>
       </div>
@@ -160,7 +165,7 @@ import { ModalComponent } from '../../shared/components/modal.component';
           <app-place-card
             *ngFor="let place of paginatedPlaces"
             [place]="place"
-            [cardType]="PlaceCardType.Catalog"
+            [cardType]="PlaceCardType.Full"
             (unauthorizedFavoriteClick)="showLoginModal()"
           ></app-place-card>
 
@@ -171,9 +176,9 @@ import { ModalComponent } from '../../shared/components/modal.component';
             role="alert"
             aria-live="assertive"
           >
-            <h3>{{ 'CATALOG.NO_CAFES_FOUND_TITLE' | translate }}</h3>
+            <h3>{{ 'catalog_page.no_cafes_found_title' | translate }}</h3>
             <p class="max-w-sm">
-              {{ 'CATALOG.NO_CAFES_FOUND_DESC' | translate }}
+              {{ 'catalog_page.no_cafes_found_title_desc' | translate }}
             </p>
           </div>
         </div>
@@ -203,10 +208,10 @@ import { ModalComponent } from '../../shared/components/modal.component';
       >
         <div class="flex flex-col items-center gap-3">
           <h2 id="login-modal-title" class="mb-4 text-xl font-semibold">
-            Please log in
+            {{ 'catalog_page.login_modal.title' | translate }}
           </h2>
           <p class="mb-6">
-            You need to be logged in to add cafes to your favorites.
+            {{ 'catalog_page.login_modal.description' | translate }}
           </p>
           <div class="flex flex-wrap justify-end gap-4">
             <button
@@ -214,14 +219,14 @@ import { ModalComponent } from '../../shared/components/modal.component';
               (click)="onLoginClick()"
               aria-label="Login"
             >
-              Login
+              {{ 'catalog_page.login_modal.login_button' | translate }}
             </button>
             <button
               class="button-bg-transparent px-6 py-3"
               (click)="isLoginModalVisible = false"
               aria-label="Close"
             >
-              Close
+              {{ 'catalog_page.login_modal.login_button' | translate }}
             </button>
           </div>
         </div>
@@ -251,6 +256,7 @@ export class CatalogPageComponent implements OnInit, OnDestroy {
 
   // Observables
   currentTheme$: Observable<Theme>;
+  lang$: Observable<LangCode>;
 
   // Internal helpers
   private destroy$ = new Subject<void>();
@@ -261,12 +267,14 @@ export class CatalogPageComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     public loaderService: LoaderService,
     private themeService: ThemeService,
+    private languageService: LanguageService,
     private translate: TranslateService,
     private placesStore: PlacesStoreService,
     private catalogFilterService: CatalogFilterService,
     private ngZone: NgZone,
   ) {
     this.currentTheme$ = this.themeService.theme$;
+    this.lang$ = this.languageService.lang$;
   }
 
   ngOnInit(): void {
@@ -362,9 +370,6 @@ export class CatalogPageComponent implements OnInit, OnDestroy {
       queryParamsHandling: '',
     });
     // Loader hide will be handled by queryParams subscription
-      if (this.showFilters) {
-    this.toggleFilters();
-  }
   }
 
   /**
