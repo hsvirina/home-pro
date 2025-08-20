@@ -1,59 +1,72 @@
-# AngTail
+# beanly
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.15.
+A modern, user-friendly web service to help people discover cafes based on vibes, amenities, or purpose — whether for work, relaxation, or grabbing coffee on the go. Designed for a young urban audience with a clean, visual interface.
 
-## Development server
+![Coffee](https://img.icons8.com/emoji/48/000000/hot-beverage-emoji.png) Платформа для любителей кофе: поиск кофеен, чекины, отзывы, избранное и ачивки!  
+![Achievement](https://img.icons8.com/emoji/48/000000/trophy-emoji.png) Собирай ачивки и открывай рамки профиля: Bronze, Silver, Gold  
+![Check-in](https://img.icons8.com/emoji/48/000000/check-mark-emoji.png) Чекины в любимых кафе, лайки и популярные отзывы  
 
-To start a local development server, run:
 
-```bash
-ng serve
-```
+---
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## ✨ Features
 
-## Code scaffolding
+- Search and filter cafes by vibe, amenities, or purpose (work, relax, coffee on the go)  
+- Add cafes to favourites for easy access  
+- Responsive design for desktop and mobile  
+- Visual, modern interface tailored for young urban users  
+- Persistent data using `localStorage` for favourites  
+- **Доступность:** ARIA-метки для ачивок и рамок профиля  
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+---
 
-```bash
-ng generate component component-name
-```
+## 🚀 Функционал
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+- Просмотр кофеен с рейтингом, фотографиями, адресом и описанием  
+- Добавление кофейни в избранное  
+- Чекины и отзывы зарегистрированных пользователей  
+- Лайки для отзывов, сортировка по популярности  
+- Система ачивок и рамок профиля: Bronze, Silver, Gold  
+- Фильтры по категориям и тегам (мультиязычные названия)  
+- 
+## 🛠️ Tech Stack
 
-```bash
-ng generate --help
-```
+- **Frontend:** Angular 20, TypeScript    
+- **Styling:** SCSS, TailwindCSS, PostCSS, Stylelint    
+- **Routing & Animations:** @angular/router, @angular/animations    
+- **Internationalization:** @ngx-translate/core, @ngx-translate/http-loader    
+- **State / Reactive:** RxJS    
+- **PDF Generation:** jsPDF, jsPDF-AutoTable    
+- **Testing:** Jasmine, Karma    
+- **Deployment:** angular-cli-ghpages    
+- **Code Formatting:** Prettier + Prettier Plugin TailwindCSS
 
-## Building
 
-To build the project run:
 
-```bash
-ng build
-```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## Project Structure
 
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+src/
+├─ app/                  # Main application code
+│  ├─ environments/      # Environment configurations (API endpoints)
+│  │  └─ api-endpoints.ts
+│  ├─ layout/            # Common UI elements (Header, Footer)
+│  │  ├─ Header/
+│  │  │  ├─ components/  # Header sub-components (dropdowns, menu, theme toggle, search)
+│  │  │  └─ header.component.ts
+│  │  └─ footer.component.ts
+│  ├─ pages/             # Application pages
+│  │  ├─ auth-page/      # Authentication page
+│  │  ├─ catalog-page/   # Catalog page
+│  │  ├─ home-page/      # Home page
+│  │  ├─ place-details-page/ # Place details page
+│  │  ├─ profile-page/   # User profile page
+│  │  └─ public-user-profile/ # Public user profile
+│  ├─ shared/            # Reusable components, services, utilities, models, constants
+│  ├─ app.component.ts
+│  └─ app-routing.routes.ts
+├─ assets/               # Static assets: images, icons, translations, collages
+├─ styles/               # SCSS & Tailwind styles, variables, animations
+├─ index.html
+├─ main.ts
+└─ polyfills.ts
