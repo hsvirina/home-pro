@@ -48,26 +48,26 @@ A modern, user-friendly web service to help people discover cafes based on vibes
 
 ```text
 src/
-├─ app/                  
-│  ├─ environments/      
+├─ app/                 [Main application code]
+│  ├─ environments/     [Environment configs]
 │  │  └─ api-endpoints.ts
-│  ├─ layout/            
+│  ├─ layout/           [UI elements: Header, Footer]
 │  │  ├─ Header/
-│  │  │  ├─ components/  
+│  │  │  ├─ components/ [Header sub-components]
 │  │  │  └─ header.component.ts
 │  │  └─ footer.component.ts
-│  ├─ pages/             
-│  │  ├─ auth-page/      
-│  │  ├─ catalog-page/   
-│  │  ├─ home-page/      
-│  │  ├─ place-details-page/ 
-│  │  ├─ profile-page/   
-│  │  └─ public-user-profile/ 
-│  ├─ shared/            
+│  ├─ pages/            [App pages]
+│  │  ├─ auth-page/
+│  │  ├─ catalog-page/
+│  │  ├─ home-page/
+│  │  ├─ place-details-page/
+│  │  ├─ profile-page/
+│  │  └─ public-user-profile/
+│  ├─ shared/           [Reusable components, services, models]
 │  ├─ app.component.ts
 │  └─ app-routing.routes.ts
-├─ assets/               
-├─ styles/               
+├─ assets/              [Images, icons, translations]
+├─ styles/              [SCSS & Tailwind styles]
 ├─ index.html
 ├─ main.ts
 └─ polyfills.ts
