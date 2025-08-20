@@ -6,7 +6,6 @@ A modern, user-friendly web service to help people discover cafes based on vibes
 ![Achievement](https://img.icons8.com/emoji/48/000000/trophy-emoji.png) Собирай ачивки и открывай рамки профиля: Bronze, Silver, Gold  
 ![Check-in](https://img.icons8.com/emoji/48/000000/check-mark-emoji.png) Чекины в любимых кафе, лайки и популярные отзывы  
 
-
 ---
 
 ## ✨ Features
@@ -28,7 +27,9 @@ A modern, user-friendly web service to help people discover cafes based on vibes
 - Лайки для отзывов, сортировка по популярности  
 - Система ачивок и рамок профиля: Bronze, Silver, Gold  
 - Фильтры по категориям и тегам (мультиязычные названия)  
-- 
+
+---
+
 ## 🛠️ Tech Stack
 
 - **Frontend:** Angular 20, TypeScript    
@@ -41,32 +42,32 @@ A modern, user-friendly web service to help people discover cafes based on vibes
 - **Deployment:** angular-cli-ghpages    
 - **Code Formatting:** Prettier + Prettier Plugin TailwindCSS
 
+---
 
+## 📁 Project Structure
 
-
-## Project Structure
-
+```text
 src/
-├─ app/                  # Main application code
-│  ├─ environments/      # Environment configurations (API endpoints)
+├─ app/                  
+│  ├─ environments/      
 │  │  └─ api-endpoints.ts
-│  ├─ layout/            # Common UI elements (Header, Footer)
+│  ├─ layout/            
 │  │  ├─ Header/
-│  │  │  ├─ components/  # Header sub-components (dropdowns, menu, theme toggle, search)
+│  │  │  ├─ components/  
 │  │  │  └─ header.component.ts
 │  │  └─ footer.component.ts
-│  ├─ pages/             # Application pages
-│  │  ├─ auth-page/      # Authentication page
-│  │  ├─ catalog-page/   # Catalog page
-│  │  ├─ home-page/      # Home page
-│  │  ├─ place-details-page/ # Place details page
-│  │  ├─ profile-page/   # User profile page
-│  │  └─ public-user-profile/ # Public user profile
-│  ├─ shared/            # Reusable components, services, utilities, models, constants
+│  ├─ pages/             
+│  │  ├─ auth-page/      
+│  │  ├─ catalog-page/   
+│  │  ├─ home-page/      
+│  │  ├─ place-details-page/ 
+│  │  ├─ profile-page/   
+│  │  └─ public-user-profile/ 
+│  ├─ shared/            
 │  ├─ app.component.ts
 │  └─ app-routing.routes.ts
-├─ assets/               # Static assets: images, icons, translations, collages
-├─ styles/               # SCSS & Tailwind styles, variables, animations
+├─ assets/               
+├─ styles/               
 ├─ index.html
 ├─ main.ts
 └─ polyfills.ts
