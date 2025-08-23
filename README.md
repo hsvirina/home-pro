@@ -31,13 +31,13 @@ A modern, user-friendly web service to help people discover cafes based on vibes
 ---
 
 ## 🛠️ Tech Stack
+[![My Skills](https://skillicons.dev/icons?i=angular,tailwind,ts,html,css,sass,vscode,github,figma)](https://skillicons.dev)
 
 - **Frontend:** Angular 20, TypeScript    
 - **Styling:** SCSS, TailwindCSS, PostCSS, Stylelint    
 - **Routing & Animations:** @angular/router, @angular/animations    
 - **Internationalization:** @ngx-translate/core, @ngx-translate/http-loader    
 - **State / Reactive:** RxJS    
-- **PDF Generation:** jsPDF, jsPDF-AutoTable    
 - **Testing:** Jasmine, Karma    
 - **Deployment:** angular-cli-ghpages    
 - **Code Formatting:** Prettier + Prettier Plugin TailwindCSS
@@ -71,3 +71,4 @@ src/
 ├─ index.html
 ├─ main.ts
 └─ polyfills.ts
+
